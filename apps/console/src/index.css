@@ -1,0 +1,49 @@
+:root {
+  --ink: #12343b;
+  --lake: #167e86;
+  --bg: #ffffff;
+
+  color-scheme: light dark;
+  color: var(--ink);
+  background: var(--bg);
+  font:
+    16px/1.5 system-ui,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #e8f1f2;
+    --bg: #0b1a1d;
+  }
+}
+
+body {
+  margin: 0;
+}
+
+.demo-banner {
+  margin: 0;
+  padding: 0.5rem 1rem;
+  background: #12343b;
+  color: #ffffff;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.placeholder {
+  display: grid;
+  place-items: center;
+  gap: 1rem;
+  min-height: 80vh;
+  padding: 2rem;
+  text-align: center;
+}
+
+.placeholder h1 {
+  margin: 0;
+  font-size: 2rem;
+}

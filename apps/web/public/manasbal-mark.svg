@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="8 14 92 92" role="img" aria-labelledby="title">
+  <title id="title">Manasbal</title>
+  <g transform="translate(4 4)">
+    <path d="M50 68C34 70 18 64 10 54C26 52 40 56 50 68Z" fill="#F4A3BE"/>
+    <path d="M50 68C66 70 82 64 90 54C74 52 60 56 50 68Z" fill="#F4A3BE"/>
+    <path d="M50 66C36 62 24 50 22 36C34 38 46 48 50 66Z" fill="#EE7AA0"/>
+    <path d="M50 66C64 62 76 50 78 36C66 38 54 48 50 66Z" fill="#EE7AA0"/>
+    <path d="M50 16C62 32 62 52 50 66C38 52 38 32 50 16Z" fill="#D9406F"/>
+    <path d="M18 82Q34 75 50 82T82 82" fill="none" stroke="#167E86" stroke-width="5" stroke-linecap="round"/>
+    <path d="M30 94Q40 89 50 94T70 94" fill="none" stroke="#167E86" stroke-width="5" stroke-linecap="round" opacity="0.55"/>
+  </g>
+</svg>

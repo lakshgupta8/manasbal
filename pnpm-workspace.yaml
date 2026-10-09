@@ -1,0 +1,12 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+# typescript-eslint and the Nest CLI don't support TypeScript 7 yet (checked Oct 2026).
+overrides:
+  typescript: ~6.0.3
+
+# Native helpers that ship prebuilt binaries; their install scripts aren't needed.
+ignoredBuiltDependencies:
+  - sharp
+  - unrs-resolver
