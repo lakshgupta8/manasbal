@@ -1,0 +1,12 @@
+**/node_modules
+**/dist
+**/.next
+**/.turbo
+**/coverage
+.lighthouseci
+.git
+.env*
+*.log
+ROADMAP.md
+docs
+brand
