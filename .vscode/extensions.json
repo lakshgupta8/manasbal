@@ -1,0 +1,19 @@
+{
+  "recommendations": [
+    "anthropic.claude-code",
+    "continue.continue",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "editorconfig.editorconfig",
+    "bradlc.vscode-tailwindcss",
+    "prisma.prisma",
+    "vitest.explorer",
+    "ms-playwright.playwright",
+    "ms-azuretools.vscode-docker",
+    "eamodio.gitlens",
+    "usernamehw.errorlens",
+    "bierner.markdown-mermaid",
+    "sonarsource.sonarlint-vscode"
+  ],
+  "unwantedRecommendations": ["ms-vscode.vscode-typescript-next"]
+}

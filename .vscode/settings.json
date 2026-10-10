@@ -1,0 +1,32 @@
+{
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "prettier.requireConfig": true,
+
+  "eslint.workingDirectories": [{ "mode": "auto" }],
+
+  "tailwindCSS.experimental.configFile": "apps/web/src/app/globals.css",
+
+  "files.eol": "\n",
+  "files.exclude": {
+    "**/.turbo": true
+  },
+  "search.exclude": {
+    "**/dist": true,
+    "**/.next": true,
+    "**/.turbo": true,
+    "**/coverage": true,
+    "pnpm-lock.yaml": true
+  },
+  "files.watcherExclude": {
+    "**/dist/**": true,
+    "**/.next/**": true,
+    "**/.turbo/**": true
+  }
+}
