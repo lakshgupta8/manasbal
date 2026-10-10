@@ -1,0 +1,22 @@
+/* White on lake teal: 4.8:1 contrast (WCAG AA). */
+.mb-demo-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #167e86;
+  color: #fff;
+  font:
+    0.875rem/1.4 system-ui,
+    sans-serif;
+  text-align: center;
+}
+
+.mb-demo-banner p {
+  margin: 0;
+}
+
+.mb-demo-banner svg {
+  flex: none;
+}
