@@ -14,14 +14,22 @@
     "test": "turbo run test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test:e2e": "turbo run test:e2e",
+    "check:brands": "node scripts/check-brands.mjs",
+    "check:licenses": "node scripts/check-licenses.mjs",
+    "size": "size-limit",
+    "lighthouse": "pnpm dlx @lhci/cli@0.15.1 autorun"
   },
   "devDependencies": {
+    "@changesets/cli": "3.0.3",
     "@commitlint/cli": "^21.2.3",
     "@commitlint/config-conventional": "^21.2.3",
+    "@size-limit/file": "^14.2.0",
     "husky": "^9.1.7",
     "lint-staged": "^17.6.0",
     "prettier": "^3.9.9",
+    "size-limit": "^14.2.0",
     "turbo": "^2.11.7",
     "typescript": "~6.0.3"
   },

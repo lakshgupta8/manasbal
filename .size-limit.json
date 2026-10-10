@@ -1,0 +1,14 @@
+[
+  {
+    "name": "console: all JS",
+    "path": "apps/console/dist/assets/*.js",
+    "gzip": true,
+    "limit": "80 kB"
+  },
+  {
+    "name": "web: all client JS",
+    "path": "apps/web/.next/static/chunks/**/*.js",
+    "gzip": true,
+    "limit": "200 kB"
+  }
+]

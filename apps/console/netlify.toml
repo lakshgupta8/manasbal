@@ -1,0 +1,29 @@
+# Netlify (Free: 300 credits a month, 15 per production deploy).
+# Deploy previews build here for every PR. Production deploys come only from the release
+# workflow (Netlify CLI), never from a push to main.
+
+[build]
+  base = "apps/console"
+  command = "cd ../.. && pnpm turbo run build --filter=@manasbal/console"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "24"
+
+[context.production]
+  # "exit 0" tells Netlify to skip this build.
+  ignore = "exit 0"
+
+# Single-page app: every route serves index.html.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Robots-Tag = "noindex"
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"

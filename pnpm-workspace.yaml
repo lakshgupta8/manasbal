@@ -6,6 +6,13 @@ packages:
 overrides:
   typescript: ~6.0.3
 
+# @nestjs/platform-fastify imports rxjs without declaring it, so it only resolved through
+# pnpm's hidden hoisting. Declaring the peer makes the link explicit and stable.
+packageExtensions:
+  "@nestjs/platform-fastify":
+    peerDependencies:
+      rxjs: ^7.1.0
+
 # Native helpers that ship prebuilt binaries; their install scripts aren't needed.
 ignoredBuiltDependencies:
   - sharp

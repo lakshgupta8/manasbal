@@ -1,0 +1,164 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  TURBO_TELEMETRY_DISABLED: 1
+
+jobs:
+  verify:
+    name: Lint · typecheck · test · build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: ./.github/actions/setup
+
+      - name: Restore Turborepo cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .turbo/cache
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: turbo-${{ runner.os }}-
+
+      - name: Lint, typecheck, unit tests (coverage ≥ 60%), build
+        run: pnpm turbo run lint typecheck test build
+
+      - name: API end-to-end tests
+        run: pnpm test:e2e
+
+      - name: Legal guardrails (brands, licences)
+        run: |
+          pnpm check:brands
+          pnpm check:licenses
+
+      - name: Bundle budgets
+        run: pnpm size
+
+      - name: Keep coverage for SonarQube
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: coverage
+          path: apps/*/coverage/lcov.info
+          retention-days: 7
+
+      - name: Upload coverage to Codecov
+        if: env.CODECOV_TOKEN != ''
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          token: ${{ env.CODECOV_TOKEN }}
+          files: apps/api/coverage/lcov.info
+          flags: api
+          fail_ci_if_error: true
+
+  lighthouse:
+    name: Lighthouse
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: ./.github/actions/setup
+
+      - name: Restore the build from the verify job
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .turbo/cache
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+
+      - run: pnpm turbo run build --filter=@manasbal/web
+
+      - name: Performance, accessibility, best practices, SEO
+        run: pnpm lighthouse
+
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: lighthouse
+          path: .lighthouseci
+          retention-days: 7
+
+  security:
+    name: Secrets · vulnerabilities
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/actions/scanners
+
+      # Both scanners fail closed: a scan that read nothing proves nothing, so an empty
+      # scan fails the step instead of passing it.
+      - name: gitleaks (secrets and Indian ID numbers, full history)
+        run: |
+          set -o pipefail
+          gitleaks git --redact --no-banner . 2>&1 | tee "$RUNNER_TEMP/gitleaks.log"
+          scanned=$(grep -oE '[0-9]+ commits scanned' "$RUNNER_TEMP/gitleaks.log" | grep -oE '^[0-9]+' || echo 0)
+          echo "Commits scanned: $scanned of $(git rev-list --count HEAD)"
+          [ "$scanned" -gt 0 ] || { echo "::error::gitleaks scanned no commits"; exit 1; }
+
+      - name: Trivy (dependencies, secrets, misconfiguration)
+        run: |
+          report="$RUNNER_TEMP/trivy.json"
+          status=0
+          trivy fs --quiet --scanners vuln,secret,misconfig --severity HIGH,CRITICAL \
+            --ignore-unfixed --exit-code 1 --format json --output "$report" . || status=$?
+          trivy convert --format table "$report"
+          jq -e '[.Results[]?.Target] | index("pnpm-lock.yaml") != null' "$report" > /dev/null \
+            || { echo "::error::Trivy did not scan pnpm-lock.yaml"; exit 1; }
+          exit "$status"
+
+      - uses: ./.github/actions/setup
+        with:
+          install: "false"
+
+      - name: pnpm audit (production dependencies, blocking)
+        run: pnpm audit --prod --audit-level high
+
+      # Dev tooling never ships, and some advisories there have no fix at all. Reported,
+      # not blocking; Renovate and Dependabot alerts keep it visible.
+      - name: pnpm audit (everything, report only)
+        continue-on-error: true
+        run: pnpm audit --audit-level high
+
+  sonar:
+    name: SonarQube Cloud
+    needs: verify
+    # Forks don't get secrets, so the scan only runs for this repository's own branches.
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: coverage
+          path: apps
+
+      - name: Scan
+        if: env.SONAR_TOKEN != ''
+        uses: SonarSource/sonarqube-scan-action@d209202bc7d53ff1cc128f7f907dac145c9d6ae9 # v8.3.0
+
+      - if: env.SONAR_TOKEN == ''
+        run: echo "::notice::SONAR_TOKEN is not set yet; SonarQube Cloud scan skipped."

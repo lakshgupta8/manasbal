@@ -1,0 +1,82 @@
+name: Release
+
+# Changesets keeps a "chore: release" PR open with the pending version bumps and changelog.
+# Merging it tags each changed app and creates its GitHub Release; only then is that app
+# deployed to production. Deploys stay off until the repository variable DEPLOY_ENABLED is
+# "true" (set at go-live).
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: release
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      published: ${{ steps.changesets.outputs.published }}
+      packages: ${{ steps.changesets.outputs.published-packages }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: ./.github/actions/setup
+
+      - id: changesets
+        uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
+        # Input names checked against changesets/action v2.1.2's action.yml (renamed from v1).
+        with:
+          version-script: pnpm changeset version
+          # Changesets v3 writes each new tag to CHANGESETS_OUTPUT; the action reads it to
+          # push the tags and create the GitHub Releases.
+          publish-script: pnpm changeset git-tag
+          commit-message: "chore: release"
+          pr-title: "chore: release"
+          create-github-releases: true
+
+  deploy-api:
+    needs: release
+    if: >-
+      vars.DEPLOY_ENABLED == 'true' && needs.release.outputs.published == 'true' &&
+      contains(needs.release.outputs.packages, '"@manasbal/api"')
+    uses: ./.github/workflows/deploy.yml
+    with:
+      app: api
+    permissions:
+      contents: read
+      packages: write
+    secrets: inherit
+
+  deploy-web:
+    needs: release
+    if: >-
+      vars.DEPLOY_ENABLED == 'true' && needs.release.outputs.published == 'true' &&
+      contains(needs.release.outputs.packages, '"@manasbal/web"')
+    uses: ./.github/workflows/deploy.yml
+    with:
+      app: web
+    permissions:
+      contents: read
+      packages: write
+    secrets: inherit
+
+  deploy-console:
+    needs: release
+    if: >-
+      vars.DEPLOY_ENABLED == 'true' && needs.release.outputs.published == 'true' &&
+      contains(needs.release.outputs.packages, '"@manasbal/console"')
+    uses: ./.github/workflows/deploy.yml
+    with:
+      app: console
+    permissions:
+      contents: read
+      packages: write
+    secrets: inherit

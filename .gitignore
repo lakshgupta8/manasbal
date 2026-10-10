@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+.pnpm-store/
 
 # Build output
 dist/
@@ -38,3 +39,6 @@ Thumbs.db
 ROADMAP.md
 docs/legal/
 docs/adr/0001-clean-room-rewrite.md
+
+# Lighthouse CI reports
+.lighthouseci/

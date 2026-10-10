@@ -1,0 +1,203 @@
+name: Deploy
+
+# Production deploy for one app: deploy → smoke test → automatic rollback if the smoke
+# test fails. Called by the release workflow; can also be run by hand (Actions → Deploy).
+
+on:
+  workflow_call:
+    inputs:
+      app:
+        type: string
+        required: true
+  workflow_dispatch:
+    inputs:
+      app:
+        type: choice
+        options: [api, web, console]
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-${{ inputs.app }}
+
+jobs:
+  api:
+    name: API → Render
+    if: inputs.app == 'api'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      packages: write
+    environment:
+      name: production-api
+      url: ${{ vars.API_URL }}
+    env:
+      IMAGE: ghcr.io/${{ github.repository_owner }}/manasbal-api
+      API_URL: ${{ vars.API_URL }}
+      RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: Build the image (not pushed yet)
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: apps/api/Dockerfile
+          build-args: APP_VERSION=${{ github.sha }}
+          tags: ${{ env.IMAGE }}:${{ github.sha }}
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - uses: ./.github/actions/scanners
+
+      - name: Scan before publishing (Trivy)
+        run: trivy image --quiet --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 "$IMAGE:$GITHUB_SHA"
+
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish to GHCR
+        run: docker push "$IMAGE:$GITHUB_SHA"
+
+      # Prisma arrives in Phase 3; until then there is nothing to migrate.
+      - if: hashFiles('apps/api/prisma/schema.prisma') != ''
+        uses: ./.github/actions/setup
+
+      - name: Database migrations
+        if: hashFiles('apps/api/prisma/schema.prisma') != ''
+        env:
+          DATABASE_URL: ${{ secrets.DIRECT_URL }}
+        run: pnpm --filter @manasbal/api exec prisma migrate deploy
+
+      - name: Deploy the image to Render
+        id: deploy
+        run: |
+          img=$(jq -rn --arg v "$IMAGE:$GITHUB_SHA" '$v|@uri')
+          curl -fsS -X POST "$RENDER_DEPLOY_HOOK_URL&imgURL=$img" > /dev/null
+
+      - name: Smoke test (waits for this exact version; free instances cold-start slowly)
+        run: |
+          for _ in $(seq 1 60); do
+            version=$(curl -fsS --max-time 10 "$API_URL/health" | jq -r .version || true)
+            if [ "$version" = "$GITHUB_SHA" ]; then echo "Live: $version"; exit 0; fi
+            sleep 10
+          done
+          echo "::error::$API_URL/health never reported $GITHUB_SHA"; exit 1
+
+      - name: Mark this image as the last known good
+        run: docker buildx imagetools create -t "$IMAGE:stable" "$IMAGE:$GITHUB_SHA"
+
+      - name: Roll back to the last known good image
+        if: failure() && steps.deploy.outcome == 'success'
+        run: |
+          img=$(jq -rn --arg v "$IMAGE:stable" '$v|@uri')
+          curl -fsS -X POST "$RENDER_DEPLOY_HOOK_URL&imgURL=$img" > /dev/null
+          echo "::error::Smoke test failed; rolled back to $IMAGE:stable"
+
+  web:
+    name: Storefront → Vercel
+    if: inputs.app == 'web'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: production-web
+      url: ${{ vars.WEB_URL }}
+    env:
+      VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      WEB_URL: ${{ vars.WEB_URL }}
+      VERCEL: pnpm dlx vercel@63.1.2
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: ./.github/actions/setup
+
+      - name: Remember the current production deployment
+        id: previous
+        run: |
+          uid=$(curl -fsS -H "Authorization: Bearer $VERCEL_TOKEN" \
+            "https://api.vercel.com/v6/deployments?projectId=$VERCEL_PROJECT_ID&target=production&state=READY&limit=1" \
+            | jq -r '.deployments[0].uid // empty')
+          echo "uid=$uid" >> "$GITHUB_OUTPUT"
+
+      - name: Build and deploy
+        id: deploy
+        run: |
+          $VERCEL pull --yes --environment=production --token="$VERCEL_TOKEN"
+          $VERCEL build --prod --token="$VERCEL_TOKEN"
+          $VERCEL deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+
+      - name: Smoke test
+        run: |
+          for _ in $(seq 1 10); do
+            curl -fsS --max-time 15 "$WEB_URL" | grep -q "Manasbal" && { echo "Live"; exit 0; }
+            sleep 6
+          done
+          echo "::error::$WEB_URL did not serve the storefront"; exit 1
+
+      - name: Roll back to the previous deployment
+        if: failure() && steps.deploy.outcome == 'success' && steps.previous.outputs.uid != ''
+        env:
+          PREVIOUS: ${{ steps.previous.outputs.uid }}
+        run: |
+          $VERCEL rollback "$PREVIOUS" --yes --token="$VERCEL_TOKEN"
+          echo "::error::Smoke test failed; rolled back to $PREVIOUS"
+
+  console:
+    name: Console → Netlify
+    if: inputs.app == 'console'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: production-console
+      url: ${{ vars.CONSOLE_URL }}
+    env:
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      NETLIFY_SITE_ID: ${{ vars.NETLIFY_SITE_ID }}
+      CONSOLE_URL: ${{ vars.CONSOLE_URL }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: ./.github/actions/setup
+
+      - run: pnpm turbo run build --filter=@manasbal/console
+
+      - name: Remember the current production deploy
+        id: previous
+        run: |
+          id=$(curl -fsS -H "Authorization: Bearer $NETLIFY_AUTH_TOKEN" \
+            "https://api.netlify.com/api/v1/sites/$NETLIFY_SITE_ID" | jq -r '.published_deploy.id // empty')
+          echo "id=$id" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy (one production deploy = 15 Netlify credits)
+        id: deploy
+        run: >
+          pnpm dlx --package=netlify-cli@27.12.0 netlify deploy --prod --no-build
+          --dir apps/console/dist --site "$NETLIFY_SITE_ID" --message "release $GITHUB_SHA"
+
+      - name: Smoke test
+        run: |
+          for _ in $(seq 1 10); do
+            curl -fsS --max-time 15 "$CONSOLE_URL" | grep -q "Manasbal Console" && { echo "Live"; exit 0; }
+            sleep 6
+          done
+          echo "::error::$CONSOLE_URL did not serve the console"; exit 1
+
+      - name: Roll back to the previous deploy
+        if: failure() && steps.deploy.outcome == 'success' && steps.previous.outputs.id != ''
+        env:
+          PREVIOUS: ${{ steps.previous.outputs.id }}
+        run: |
+          curl -fsS -X POST -H "Authorization: Bearer $NETLIFY_AUTH_TOKEN" \
+            "https://api.netlify.com/api/v1/sites/$NETLIFY_SITE_ID/deploys/$PREVIOUS/restore" > /dev/null
+          echo "::error::Smoke test failed; rolled back to deploy $PREVIOUS"

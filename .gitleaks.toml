@@ -1,0 +1,34 @@
+# gitleaks: the standard secret rules plus Indian ID numbers, which must never enter the
+# repo (Aadhaar Act s.29, DPDP Act). Runs in the pre-commit hook and on every CI run.
+title = "Manasbal"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "The SonarQube project key is a public identifier (it's in the README badge), not a secret"
+targetRules = ["generic-api-key"]
+regexTarget = "line"
+# Not anchored with ^: in git mode gitleaks reads diff lines, which start with "+".
+regexes = ['''sonar\.projectKey=[a-z0-9_]+$''']
+
+[[rules]]
+id = "aadhaar-number"
+description = "Aadhaar number written in its usual 4-4-4 groups"
+regex = '''\b[2-9][0-9]{3}[ -][0-9]{4}[ -][0-9]{4}\b'''
+tags = ["pii", "india"]
+
+[[rules]]
+id = "aadhaar-number-plain"
+description = "12-digit Aadhaar number near an Aadhaar keyword"
+regex = '''(?i)(?:aadhaa?r|uidai)[^0-9\n]{0,30}\b([2-9][0-9]{11})\b'''
+keywords = ["aadhaar", "aadhar", "uidai"]
+tags = ["pii", "india"]
+
+[[rules]]
+id = "pan-number"
+description = "Permanent Account Number (PAN)"
+# 4th character is the holder type: P person, C company, H HUF, F firm, A AOP, T trust,
+# B BOI, L local authority, J artificial juridical person, G government.
+regex = '''\b[A-Z]{3}[PCHFATBLJG][A-Z][0-9]{4}[A-Z]\b'''
+tags = ["pii", "india"]
