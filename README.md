@@ -4,7 +4,10 @@
 
 **A demo multi-vendor marketplace, built and run like a real product, at zero cost.**
 
-![Status](https://img.shields.io/badge/status-early%20development-lightgrey)
+[![CI](https://github.com/lakshgupta8/manasbal/actions/workflows/ci.yml/badge.svg)](https://github.com/lakshgupta8/manasbal/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/lakshgupta8/manasbal/actions/workflows/codeql.yml/badge.svg)](https://github.com/lakshgupta8/manasbal/actions/workflows/codeql.yml)
+[![Quality gate](https://sonarcloud.io/api/project_badges/measure?project=lakshgupta8_manasbal&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=lakshgupta8_manasbal)
+[![Coverage](https://codecov.io/gh/lakshgupta8/manasbal/graph/badge.svg)](https://codecov.io/gh/lakshgupta8/manasbal)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 ![Node](https://img.shields.io/badge/node-%E2%89%A524-339933)
 ![pnpm](https://img.shields.io/badge/pnpm-10-F69220)

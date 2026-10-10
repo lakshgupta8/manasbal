@@ -10,13 +10,15 @@ Manasbal is a solo portfolio project, open source under the [Apache License 2.0]
 
 ## Workflow
 
-| Step        | Rule                                                                                                         |
-| ----------- | ------------------------------------------------------------------------------------------------------------ |
-| Branches    | Short-lived, named after the ticket: `MAN-123-short-name`                                                    |
-| Commits     | [Conventional Commits](https://www.conventionalcommits.org), enforced by commitlint: `feat: add cart drawer` |
-| Before a PR | `pnpm lint && pnpm typecheck && pnpm test && pnpm build`                                                     |
-| Merging     | Squash merge into `main`; `main` is always deployable                                                        |
-| Decisions   | Anything significant gets an ADR in [`docs/adr`](docs/adr)                                                   |
+| Step        | Rule                                                                                                                |
+| ----------- | ------------------------------------------------------------------------------------------------------------------- |
+| Branches    | Short-lived, named after the ticket: `MAN-123-short-name`                                                           |
+| Commits     | [Conventional Commits](https://www.conventionalcommits.org), enforced by commitlint: `feat: add cart drawer`        |
+| Before a PR | `pnpm lint && pnpm typecheck && pnpm test && pnpm build`                                                            |
+| Changesets  | `pnpm changeset` for any change users would notice; it becomes the changelog entry                                  |
+| Merging     | Squash merge into `main`; `main` is always deployable                                                               |
+| Releasing   | Merge the "chore: release" PR; only the apps it versions are deployed ([ADR 0006](docs/adr/0006-ci-cd-pipeline.md)) |
+| Decisions   | Anything significant gets an ADR in [`docs/adr`](docs/adr)                                                          |
 
 ## Rules that never bend
 
