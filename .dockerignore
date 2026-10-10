@@ -11,5 +11,6 @@
 .env*
 *.log
 ROADMAP.md
+team/
 docs
 brand
