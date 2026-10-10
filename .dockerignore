@@ -3,6 +3,9 @@
 **/.next
 **/.turbo
 **/coverage
+**/storybook-static
+**/playwright-report
+**/test-results
 .lighthouseci
 .git
 .env*

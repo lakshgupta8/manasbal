@@ -16,6 +16,7 @@
     "format:check": "prettier --check .",
     "prepare": "husky",
     "test:e2e": "turbo run test:e2e",
+    "test:visual": "pnpm --filter @manasbal/ui test:visual",
     "check:brands": "node scripts/check-brands.mjs",
     "check:licenses": "node scripts/check-licenses.mjs",
     "size": "size-limit",

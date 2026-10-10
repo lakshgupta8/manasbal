@@ -21,12 +21,13 @@ The name comes from [Manasbal Lake](https://en.wikipedia.org/wiki/Manasbal_Lake)
 
 ## Apps
 
-| App                                      | What it is                        | Stack                              |
-| ---------------------------------------- | --------------------------------- | ---------------------------------- |
-| [`apps/web`](apps/web)                   | Storefront                        | Next.js (App Router), Tailwind CSS |
-| [`apps/console`](apps/console)           | Seller and admin console          | Vite + React single-page app       |
-| [`apps/api`](apps/api)                   | REST API                          | NestJS on Fastify                  |
-| [`packages/tsconfig`](packages/tsconfig) | Shared strict TypeScript settings | —                                  |
+| App                                      | What it is                        | Stack                                    |
+| ---------------------------------------- | --------------------------------- | ---------------------------------------- |
+| [`apps/web`](apps/web)                   | Storefront                        | Next.js (App Router), Tailwind CSS       |
+| [`apps/console`](apps/console)           | Seller and admin console          | Vite + React single-page app             |
+| [`apps/api`](apps/api)                   | REST API                          | NestJS on Fastify                        |
+| [`packages/ui`](packages/ui)             | Design system                     | React components documented in Storybook |
+| [`packages/tsconfig`](packages/tsconfig) | Shared strict TypeScript settings | —                                        |
 
 ## Getting started
 
@@ -37,14 +38,16 @@ pnpm install
 pnpm dev          # all apps in parallel
 ```
 
-| Command          | Runs                     |
-| ---------------- | ------------------------ |
-| `pnpm dev`       | Every app in watch mode  |
-| `pnpm build`     | Production builds        |
-| `pnpm lint`      | ESLint in every app      |
-| `pnpm typecheck` | TypeScript in every app  |
-| `pnpm test`      | Unit tests               |
-| `pnpm format`    | Prettier across the repo |
+| Command            | Runs                                                          |
+| ------------------ | ------------------------------------------------------------- |
+| `pnpm dev`         | Every app in watch mode, plus Storybook                       |
+| `pnpm build`       | Production builds                                             |
+| `pnpm lint`        | ESLint in every app                                           |
+| `pnpm typecheck`   | TypeScript in every app                                       |
+| `pnpm test`        | Unit tests                                                    |
+| `pnpm test:e2e`    | API end-to-end tests                                          |
+| `pnpm test:visual` | Storybook screenshots and accessibility checks (needs Docker) |
+| `pnpm format`      | Prettier across the repo                                      |
 
 ## Documentation
 

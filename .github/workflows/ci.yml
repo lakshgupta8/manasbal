@@ -52,7 +52,9 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: coverage
-          path: apps/*/coverage/lcov.info
+          path: |
+            apps/*/coverage/lcov.info
+            packages/*/coverage/lcov.info
           retention-days: 7
 
       - name: Upload coverage to Codecov
@@ -60,8 +62,7 @@ jobs:
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
           token: ${{ env.CODECOV_TOKEN }}
-          files: apps/api/coverage/lcov.info
-          flags: api
+          files: apps/api/coverage/lcov.info,packages/ui/coverage/lcov.info
           fail_ci_if_error: true
 
   lighthouse:
@@ -90,6 +91,36 @@ jobs:
         with:
           name: lighthouse
           path: .lighthouseci
+          retention-days: 7
+
+  visual:
+    name: Visual regression
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: ./.github/actions/setup
+
+      - name: Restore the build from the verify job
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .turbo/cache
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+
+      - run: pnpm turbo run build --filter=@manasbal/ui
+
+      - name: Storybook screenshots and accessibility (Playwright in Docker)
+        run: pnpm test:visual
+
+      - if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: visual-diffs
+          path: |
+            packages/ui/playwright-report
+            packages/ui/test-results
           retention-days: 7
 
   security:
@@ -154,7 +185,8 @@ jobs:
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: coverage
-          path: apps
+          # The artifact keeps paths from the repo root (apps/…, packages/…).
+          path: .
 
       - name: Scan
         if: env.SONAR_TOKEN != ''
