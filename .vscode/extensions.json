@@ -1,7 +1,6 @@
 {
   "recommendations": [
     "anthropic.claude-code",
-    "continue.continue",
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
     "editorconfig.editorconfig",
