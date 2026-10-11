@@ -10,7 +10,8 @@ description = "The SonarQube project key is a public identifier (it's in the REA
 targetRules = ["generic-api-key"]
 regexTarget = "line"
 # Not anchored with ^: in git mode gitleaks reads diff lines, which start with "+".
-regexes = ['''sonar\.projectKey=[a-z0-9_]+$''']
+# Second pattern: the editor's SonarQube binding in .vscode/settings.json.
+regexes = ['''sonar\.projectKey=[a-z0-9_]+$''', '''"projectKey": "[a-z0-9_]+"$''']
 
 [[rules]]
 id = "aadhaar-number"
