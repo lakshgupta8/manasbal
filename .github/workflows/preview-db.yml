@@ -29,6 +29,8 @@ jobs:
           api_key: ${{ secrets.NEON_API_KEY }}
           branch_name: preview/pr-${{ github.event.number }}
           database: manasbal
+          # The project's owner role; the action otherwise assumes neondb_owner.
+          role: manasbal_owner
           # Legal guardrail: previews get the schema only, never a copy of the demo
           # database (it may hold real visitors' sign-ups). Seed data arrives in Phase 4.
           branch_type: schema-only
