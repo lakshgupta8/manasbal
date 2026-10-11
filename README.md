@@ -4,8 +4,8 @@
 
 **A demo multi-vendor marketplace, built and run like a real product, at zero cost.**
 
-[![CI](https://github.com/lakshgupta8/manasbal/actions/workflows/ci.yml/badge.svg)](https://github.com/lakshgupta8/manasbal/actions/workflows/ci.yml)
-[![CodeQL](https://github.com/lakshgupta8/manasbal/actions/workflows/codeql.yml/badge.svg)](https://github.com/lakshgupta8/manasbal/actions/workflows/codeql.yml)
+[![CI](https://github.com/lakshgupta8/manasbal/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/lakshgupta8/manasbal/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/lakshgupta8/manasbal/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/lakshgupta8/manasbal/actions/workflows/codeql.yml)
 [![Quality gate](https://sonarcloud.io/api/project_badges/measure?project=lakshgupta8_manasbal&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=lakshgupta8_manasbal)
 [![Coverage](https://codecov.io/gh/lakshgupta8/manasbal/graph/badge.svg)](https://codecov.io/gh/lakshgupta8/manasbal)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
@@ -53,6 +53,10 @@ pnpm dev          # all apps in parallel
 
 - [Architecture decisions](docs/adr)
 - [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
+
+## Contributors
+
+- [Lakshya Gupta](https://github.com/lakshgupta8): lead, backend
 
 ## License
 

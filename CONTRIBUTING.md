@@ -1,6 +1,6 @@
 # Contributing
 
-Manasbal is a solo portfolio project, open source under the [Apache License 2.0](LICENSE). Outside pull requests aren't being taken for now. This file documents how the project itself is worked on.
+Manasbal is a two-person portfolio project, open source under the [Apache License 2.0](LICENSE). Work comes from the project's collaborators; outside pull requests aren't being taken for now. This file documents how the project is worked on.
 
 ## Setup
 
@@ -10,15 +10,20 @@ Manasbal is a solo portfolio project, open source under the [Apache License 2.0]
 
 ## Workflow
 
-| Step        | Rule                                                                                                                |
-| ----------- | ------------------------------------------------------------------------------------------------------------------- |
-| Branches    | Short-lived, named after the ticket: `MAN-123-short-name`                                                           |
-| Commits     | [Conventional Commits](https://www.conventionalcommits.org), enforced by commitlint: `feat: add cart drawer`        |
-| Before a PR | `pnpm lint && pnpm typecheck && pnpm test && pnpm build`                                                            |
-| Changesets  | `pnpm changeset` for any change users would notice; it becomes the changelog entry                                  |
-| Merging     | Squash merge into `main`; `main` is always deployable                                                               |
-| Releasing   | Merge the "chore: release" PR; only the apps it versions are deployed ([ADR 0006](docs/adr/0006-ci-cd-pipeline.md)) |
-| Decisions   | Anything significant gets an ADR in [`docs/adr`](docs/adr)                                                          |
+| Step          | Rule                                                                                                                                                                                                                 |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Branches      | Short-lived, cut from `dev`, named after the ticket: `MAN-123-short-name`                                                                                                                                            |
+| Commits       | [Conventional Commits](https://www.conventionalcommits.org), signed off with `git commit -s`; commitlint enforces both: `feat: add cart drawer`                                                                      |
+| Before a PR   | `pnpm lint && pnpm typecheck && pnpm test && pnpm build`                                                                                                                                                             |
+| Pull requests | Into `dev`, one small task each. Checks must be green; a collaborator's PR also needs the owner's approval                                                                                                           |
+| Changesets    | `pnpm changeset` for any change users would notice; it becomes the changelog entry                                                                                                                                   |
+| Merging       | Squash merge into `dev`; `dev` must always work                                                                                                                                                                      |
+| Releasing     | Every Sunday: `pnpm changeset version` on `dev`, then `dev` → `main` with a merge commit. `main` holds released versions only; only the apps that changed are deployed ([ADR 0006](docs/adr/0006-ci-cd-pipeline.md)) |
+| Decisions     | Anything significant gets an ADR in [`docs/adr`](docs/adr)                                                                                                                                                           |
+
+## Licence and sign-off
+
+Contributions are accepted under the project's licence, Apache-2.0: you keep the copyright on what you write and share it under the same terms. Every commit carries a `Signed-off-by:` line (`git commit -s`), certifying the [Developer Certificate of Origin](https://developercertificate.org): you wrote the change, or otherwise have the right to submit it under this licence.
 
 ## Rules that never bend
 
