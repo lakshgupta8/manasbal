@@ -68,15 +68,16 @@ jobs:
       - name: Publish to GHCR
         run: docker push "$IMAGE:$GITHUB_SHA"
 
-      # Prisma arrives in Phase 3; until then there is nothing to migrate.
-      - if: hashFiles('apps/api/prisma/schema.prisma') != ''
+      # Prisma 8 keeps its contract in src/prisma/ and its migrations in apps/api/migrations/.
+      # Migrate only once the prod ref is committed; until then there is nothing to apply.
+      - if: hashFiles('apps/api/migrations/app/refs/prod.json') != ''
         uses: ./.github/actions/setup
 
       - name: Database migrations
-        if: hashFiles('apps/api/prisma/schema.prisma') != ''
+        if: hashFiles('apps/api/migrations/app/refs/prod.json') != ''
         env:
           DATABASE_URL: ${{ secrets.DIRECT_URL }}
-        run: pnpm --filter @manasbal/api exec prisma migrate deploy
+        run: pnpm --filter @manasbal/api exec prisma db migrate --to prod --db "$DATABASE_URL"
 
       - name: Deploy the image to Render
         id: deploy
