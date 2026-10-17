@@ -1,0 +1,595 @@
+[
+  {
+    "id": "table.inventory",
+    "label": "Create table \"inventory\"",
+    "summary": "Creates table \"inventory\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "inventory"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"inventory\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"inventory\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"inventory\"",
+        "sql": "CREATE TABLE \"public\".\"inventory\" (\n  \"id\" uuid NOT NULL,\n  \"location\" text NOT NULL,\n  \"quantity\" int4 DEFAULT 0 NOT NULL,\n  \"reserved\" int4 DEFAULT 0 NOT NULL,\n  \"variant_id\" uuid NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"inventory\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"inventory\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.sellers",
+    "label": "Create table \"sellers\"",
+    "summary": "Creates table \"sellers\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "sellers"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"sellers\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"sellers\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"sellers\"",
+        "sql": "CREATE TABLE \"public\".\"sellers\" (\n  \"id\" uuid NOT NULL,\n  \"is_sample\" bool DEFAULT false NOT NULL,\n  \"slug\" text NOT NULL,\n  \"status\" text DEFAULT 'pending' NOT NULL,\n  \"store_name\" text NOT NULL,\n  \"user_id\" uuid NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"sellers\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"sellers\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.variants",
+    "label": "Create table \"variants\"",
+    "summary": "Creates table \"variants\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "variants"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"variants\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"variants\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"variants\"",
+        "sql": "CREATE TABLE \"public\".\"variants\" (\n  \"colour\" text,\n  \"id\" uuid NOT NULL,\n  \"price_paise\" int4 NOT NULL,\n  \"product_id\" uuid NOT NULL,\n  \"size\" text,\n  \"sku\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"variants\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"variants\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.products.seller_id",
+    "label": "Add column seller_id to products",
+    "summary": "Adds column seller_id to table products",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "seller_id",
+        "table": "products"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"seller_id\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "products",
+          "seller_id"
+        ]
+      },
+      {
+        "description": "ensure table \"products\" is empty before adding NOT NULL column without default",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"public\".\"products\" LIMIT 1) AS \"result\"",
+        "params": [],
+        "meta": {
+          "requiredColumn": {
+            "table": "products",
+            "column": "seller_id",
+            "reason": "newField"
+          }
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"seller_id\"",
+        "sql": "ALTER TABLE \"public\".\"products\" ADD COLUMN \"seller_id\" uuid NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"seller_id\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "products",
+          "seller_id"
+        ]
+      },
+      {
+        "description": "verify column \"seller_id\" is NOT NULL",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "products",
+          "seller_id",
+          "NO"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.sellers.sellers_user_id_key",
+    "label": "Add unique constraint on \"sellers\" (user_id)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "sellers_user_id_key",
+        "table": "sellers"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"sellers_user_id_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "sellers_user_id_key",
+          "public",
+          "\"public\".\"sellers\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"sellers_user_id_key\"",
+        "sql": "ALTER TABLE \"public\".\"sellers\" ADD CONSTRAINT \"sellers_user_id_key\" UNIQUE (\"user_id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"sellers_user_id_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "sellers_user_id_key",
+          "public",
+          "\"public\".\"sellers\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.sellers.sellers_slug_key",
+    "label": "Add unique constraint on \"sellers\" (slug)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "sellers_slug_key",
+        "table": "sellers"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"sellers_slug_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "sellers_slug_key",
+          "public",
+          "\"public\".\"sellers\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"sellers_slug_key\"",
+        "sql": "ALTER TABLE \"public\".\"sellers\" ADD CONSTRAINT \"sellers_slug_key\" UNIQUE (\"slug\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"sellers_slug_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "sellers_slug_key",
+          "public",
+          "\"public\".\"sellers\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.variants.variants_sku_key",
+    "label": "Add unique constraint on \"variants\" (sku)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "variants_sku_key",
+        "table": "variants"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"variants_sku_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "variants_sku_key",
+          "public",
+          "\"public\".\"variants\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"variants_sku_key\"",
+        "sql": "ALTER TABLE \"public\".\"variants\" ADD CONSTRAINT \"variants_sku_key\" UNIQUE (\"sku\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"variants_sku_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "variants_sku_key",
+          "public",
+          "\"public\".\"variants\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.inventory.inventory_variant_id_idx_4a7fac73",
+    "label": "Create index \"inventory_variant_id_idx_4a7fac73\" on \"inventory\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "inventory_variant_id_idx_4a7fac73",
+        "table": "inventory"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"inventory_variant_id_idx_4a7fac73\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"inventory_variant_id_idx_4a7fac73\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"inventory_variant_id_idx_4a7fac73\"",
+        "sql": "CREATE INDEX \"inventory_variant_id_idx_4a7fac73\" ON \"public\".\"inventory\" (\"variant_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"inventory_variant_id_idx_4a7fac73\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"inventory_variant_id_idx_4a7fac73\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.products.products_seller_id_idx_de05cd59",
+    "label": "Create index \"products_seller_id_idx_de05cd59\" on \"products\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "products_seller_id_idx_de05cd59",
+        "table": "products"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"products_seller_id_idx_de05cd59\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"products_seller_id_idx_de05cd59\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"products_seller_id_idx_de05cd59\"",
+        "sql": "CREATE INDEX \"products_seller_id_idx_de05cd59\" ON \"public\".\"products\" (\"seller_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"products_seller_id_idx_de05cd59\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"products_seller_id_idx_de05cd59\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.variants.variants_product_id_idx_22a2b7d2",
+    "label": "Create index \"variants_product_id_idx_22a2b7d2\" on \"variants\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "variants_product_id_idx_22a2b7d2",
+        "table": "variants"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"variants_product_id_idx_22a2b7d2\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"variants_product_id_idx_22a2b7d2\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"variants_product_id_idx_22a2b7d2\"",
+        "sql": "CREATE INDEX \"variants_product_id_idx_22a2b7d2\" ON \"public\".\"variants\" (\"product_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"variants_product_id_idx_22a2b7d2\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"variants_product_id_idx_22a2b7d2\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.inventory.inventory_variant_id_fkey",
+    "label": "Add foreign key \"inventory_variant_id_fkey\" on \"inventory\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "inventory_variant_id_fkey",
+        "table": "inventory"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"inventory_variant_id_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "inventory_variant_id_fkey",
+          "public",
+          "\"public\".\"inventory\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"inventory_variant_id_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"inventory\"\nADD CONSTRAINT \"inventory_variant_id_fkey\"\nFOREIGN KEY (\"variant_id\")\nREFERENCES \"public\".\"variants\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"inventory_variant_id_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "inventory_variant_id_fkey",
+          "public",
+          "\"public\".\"inventory\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.sellers.sellers_user_id_fkey",
+    "label": "Add foreign key \"sellers_user_id_fkey\" on \"sellers\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "sellers_user_id_fkey",
+        "table": "sellers"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"sellers_user_id_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "sellers_user_id_fkey",
+          "public",
+          "\"public\".\"sellers\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"sellers_user_id_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"sellers\"\nADD CONSTRAINT \"sellers_user_id_fkey\"\nFOREIGN KEY (\"user_id\")\nREFERENCES \"public\".\"users\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"sellers_user_id_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "sellers_user_id_fkey",
+          "public",
+          "\"public\".\"sellers\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.products.products_seller_id_fkey",
+    "label": "Add foreign key \"products_seller_id_fkey\" on \"products\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "products_seller_id_fkey",
+        "table": "products"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"products_seller_id_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "products_seller_id_fkey",
+          "public",
+          "\"public\".\"products\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"products_seller_id_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"products\"\nADD CONSTRAINT \"products_seller_id_fkey\"\nFOREIGN KEY (\"seller_id\")\nREFERENCES \"public\".\"sellers\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"products_seller_id_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "products_seller_id_fkey",
+          "public",
+          "\"public\".\"products\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.variants.variants_product_id_fkey",
+    "label": "Add foreign key \"variants_product_id_fkey\" on \"variants\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "variants_product_id_fkey",
+        "table": "variants"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"variants_product_id_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "variants_product_id_fkey",
+          "public",
+          "\"public\".\"variants\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"variants_product_id_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"variants\"\nADD CONSTRAINT \"variants_product_id_fkey\"\nFOREIGN KEY (\"product_id\")\nREFERENCES \"public\".\"products\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"variants_product_id_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "variants_product_id_fkey",
+          "public",
+          "\"public\".\"variants\""
+        ]
+      }
+    ]
+  }
+]
