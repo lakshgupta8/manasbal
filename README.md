@@ -49,6 +49,27 @@ pnpm dev          # all apps in parallel
 | `pnpm test:visual` | Storybook screenshots and accessibility checks (needs Docker) |
 | `pnpm format`      | Prettier across the repo                                      |
 
+## Local databases
+
+Needs Docker. Postgres, Valkey (Redis-compatible), Mailpit (catches emails) and Meilisearch (search) run in containers:
+
+```bash
+cp .env.example apps/api/.env   # once; Windows: copy .env.example apps\api\.env
+docker compose up -d            # start
+docker compose ps               # check
+docker compose stop             # stop, keeping your data
+docker compose down             # stop and remove the containers (the databases start empty next time)
+```
+
+| Service     | Address                                                 |
+| ----------- | ------------------------------------------------------- |
+| Postgres    | `localhost:5432` (user, password, database: `manasbal`) |
+| Valkey      | `localhost:6379`                                        |
+| Mailpit     | http://localhost:8025 (web) · `localhost:1025` (SMTP)   |
+| Meilisearch | http://localhost:7700                                   |
+
+Port 5432 must be free: stop any other Postgres running on your computer first.
+
 ## Documentation
 
 - [Architecture decisions](docs/adr)
