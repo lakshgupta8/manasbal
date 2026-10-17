@@ -57,6 +57,7 @@ pnpm dev          # all apps in parallel
 ## Contributors
 
 - [Lakshya Gupta](https://github.com/lakshgupta8): lead, backend
+- [Nitiksha Rawat](https://github.com/nitiksharwt): frontend, review
 
 ## License
 
