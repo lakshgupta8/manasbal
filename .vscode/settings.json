@@ -28,5 +28,9 @@
     "**/dist/**": true,
     "**/.next/**": true,
     "**/.turbo/**": true
+  },
+  "sonarlint.connectedMode.project": {
+    "connectionId": "lakshgupta8",
+    "projectKey": "lakshgupta8_manasbal"
   }
 }
