@@ -1,0 +1,26 @@
+# Local databases and helpers for development. Start: docker compose up -d · Stop: docker compose down
+services:
+  postgres:
+    image: postgres:17-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: manasbal
+      POSTGRES_PASSWORD: manasbal
+      POSTGRES_DB: manasbal
+
+  valkey:
+    image: valkey/valkey:8-alpine
+    ports:
+      - "6379:6379"
+
+  mailpit:
+    image: axllent/mailpit:v1.31
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # Web UI
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.54
+    ports:
+      - "7700:7700"

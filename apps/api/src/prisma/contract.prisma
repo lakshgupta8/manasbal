@@ -1,0 +1,42 @@
+// use prisma-8
+
+// Tables are plural snake_case, because "user" is a reserved word in Postgres.
+// is_sample and created_by_visitor mark demo rows, so the nightly reset deletes exactly the right data.
+
+model User {
+  id               Uuid     @id @default(uuid())
+  email            String   @unique
+  passwordHash     String   @map("password_hash")
+  name             String
+  role             String   @default("buyer")
+  isSample         Boolean  @default(false) @map("is_sample")
+  createdByVisitor Boolean  @default(false) @map("created_by_visitor")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  @@map("users")
+}
+
+model Category {
+  id       Uuid       @id @default(uuid())
+  parentId Uuid?      @map("parent_id")
+  name     String
+  slug     String     @unique
+  parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children Category[] @relation("CategoryTree")
+  products Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id          Uuid     @id @default(uuid())
+  categoryId  Uuid     @map("category_id")
+  name        String
+  slug        String   @unique
+  description String?
+  isSample    Boolean  @default(false) @map("is_sample")
+  createdAt   DateTime @default(now()) @map("created_at")
+  category    Category @relation(fields: [categoryId], references: [id])
+
+  @@map("products")
+}

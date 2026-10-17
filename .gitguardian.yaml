@@ -1,0 +1,5 @@
+version: 2
+secret:
+  ignored-paths:
+    # Local-only development credentials (the Postgres container's user and password).
+    - docker-compose.yml
