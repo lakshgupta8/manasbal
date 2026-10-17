@@ -183,7 +183,8 @@ jobs:
         id: deploy
         run: >
           pnpm dlx --package=netlify-cli@27.12.0 netlify deploy --prod --no-build
-          --dir apps/console/dist --site "$NETLIFY_SITE_ID" --message "release $GITHUB_SHA"
+          --filter @manasbal/console --dir apps/console/dist --site "$NETLIFY_SITE_ID"
+          --message "release $GITHUB_SHA"
 
       - name: Smoke test
         run: |
