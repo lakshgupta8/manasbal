@@ -2,7 +2,7 @@ import { LotusMark } from "./LotusMark";
 import "./DemoBanner.css";
 
 export interface DemoBannerProps {
-  className?: string;
+  readonly className?: string;
 }
 
 /** Sitewide notice that Manasbal is a demo: nothing is for sale and every order is simulated. */
