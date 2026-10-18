@@ -2,9 +2,9 @@ import { useId, type SVGProps } from "react";
 
 export interface LotusMarkProps extends Omit<SVGProps<SVGSVGElement>, "children"> {
   /** Width and height in px. */
-  size?: number;
+  readonly size?: number;
   /** Accessible name. Without one the mark is decorative and hidden from assistive tech. */
-  title?: string;
+  readonly title?: string;
 }
 
 /** The Manasbal brand mark: a lotus on the lake, drawn in-house. */
