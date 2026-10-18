@@ -10,3 +10,4 @@
 - [ ] No secrets, real personal data, real brands or copied code
 - [ ] ADR added if this makes a significant decision
 - [ ] Base branch is dev
+- [ ] Description is short and has no tool-credit footer ("Generated with …")

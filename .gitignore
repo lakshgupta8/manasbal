@@ -35,11 +35,5 @@ Thumbs.db
 !.vscode/extensions.json
 !.vscode/settings.json
 
-# Local-only planning notes
-ROADMAP.md
-team/
-docs/legal/
-docs/adr/0001-clean-room-rewrite.md
-
 # Lighthouse CI reports
 .lighthouseci/
