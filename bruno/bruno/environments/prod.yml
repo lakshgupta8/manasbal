@@ -1,0 +1,5 @@
+name: prod
+variables:
+  - name: baseUrl
+    value: https://manasbal-api.onrender.com
+    description: ""
