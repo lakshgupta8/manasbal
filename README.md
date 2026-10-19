@@ -78,7 +78,7 @@ Port 5432 must be free: stop any other Postgres running on your computer first.
 ## Contributors
 
 - [Lakshya Gupta](https://github.com/lakshgupta8): lead and maintainer; architecture, database, most of the API, CI/CD and deployment
-- [Nitiksha Rawat](https://github.com/nitiksharwt): contributor; individual API endpoints with their tests, API request collections, review
+- [Nitiksha Rawat](https://github.com/nitiksharwt): contributor; features across the API and the storefront (endpoints, pages and components), API request collections, review
 
 ## License
 
