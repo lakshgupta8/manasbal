@@ -1,4 +1,5 @@
 import { Controller, Get } from "@nestjs/common";
+import { SkipThrottle } from "@nestjs/throttler";
 
 export interface HealthStatus {
   status: "ok";
@@ -8,7 +9,8 @@ export interface HealthStatus {
 
 // Liveness check used by the deploy smoke test and the uptime monitor. `version` is the
 // commit baked into the image (APP_VERSION), so the smoke test can tell the new deploy
-// from the old one still answering.
+// from the old one still answering. Monitors poll it often, so it is not rate limited.
+@SkipThrottle()
 @Controller("health")
 export class HealthController {
   @Get()
