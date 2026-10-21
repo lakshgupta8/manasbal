@@ -3,7 +3,7 @@ import { APP_GUARD } from "@nestjs/core";
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import type { Redis } from "ioredis";
 import { ValkeyThrottlerStorage } from "./valkey-throttler.storage.js";
-import { VALKEY, ValkeyModule } from "./valkey.module.js";
+import { VALKEY, ValkeyModule } from "../valkey/valkey.module.js";
 
 export const RATE_LIMIT = 100;
 export const RATE_WINDOW_MS = 60_000;
