@@ -1,0 +1,54 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "HealthController_check",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthStatus"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Health"]
+      }
+    }
+  },
+  "info": {
+    "title": "Manasbal API",
+    "description": "HTTP API of the Manasbal storefront",
+    "version": "generated",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "schemas": {
+      "HealthStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["ok"]
+          },
+          "service": {
+            "type": "string",
+            "enum": ["manasbal-api"]
+          },
+          "version": {
+            "type": "string",
+            "example": "dev"
+          }
+        },
+        "required": ["status", "service", "version"]
+      }
+    }
+  }
+}

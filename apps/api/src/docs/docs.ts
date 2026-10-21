@@ -1,18 +1,21 @@
+import type { INestApplication } from "@nestjs/common";
 import type { NestFastifyApplication } from "@nestjs/platform-fastify";
-import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import { DocumentBuilder, SwaggerModule, type OpenAPIObject } from "@nestjs/swagger";
 
 export const DOCS_PATH = "docs";
 export const DOCS_JSON_PATH = "docs-json";
 
-// Serves the interactive page at /docs and the raw OpenAPI description at /docs-json.
-export function setupDocs(app: NestFastifyApplication): void {
+export function createOpenApiDocument(app: INestApplication, version: string): OpenAPIObject {
   const config = new DocumentBuilder()
     .setTitle("Manasbal API")
     .setDescription("HTTP API of the Manasbal storefront")
-    .setVersion(process.env.APP_VERSION ?? "dev")
+    .setVersion(version)
     .build();
+  return SwaggerModule.createDocument(app, config);
+}
 
-  SwaggerModule.setup(DOCS_PATH, app, SwaggerModule.createDocument(app, config), {
-    jsonDocumentUrl: DOCS_JSON_PATH,
-  });
+// Serves the interactive page at /docs and the raw OpenAPI description at /docs-json.
+export function setupDocs(app: NestFastifyApplication): void {
+  const document = createOpenApiDocument(app, process.env.APP_VERSION ?? "dev");
+  SwaggerModule.setup(DOCS_PATH, app, document, { jsonDocumentUrl: DOCS_JSON_PATH });
 }

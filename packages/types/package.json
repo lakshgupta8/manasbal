@@ -1,0 +1,19 @@
+{
+  "name": "@manasbal/types",
+  "version": "0.0.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "generate": "openapi-typescript openapi.json --output src/openapi.d.ts && prettier --write openapi.json src/openapi.d.ts",
+    "typecheck": "tsc"
+  },
+  "devDependencies": {
+    "@manasbal/tsconfig": "workspace:*",
+    "openapi-typescript": "^7.13.0",
+    "typescript": "~6.0.3"
+  }
+}
