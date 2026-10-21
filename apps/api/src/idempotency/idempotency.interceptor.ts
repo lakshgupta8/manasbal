@@ -4,6 +4,7 @@ import {
   CallHandler,
   ConflictException,
   ExecutionContext,
+  Inject,
   Injectable,
   Logger,
   NestInterceptor,
@@ -17,6 +18,7 @@ import { IdempotencyStore, type IdempotencyRecord } from "./idempotency.store.js
 export const IDEMPOTENCY_HEADER = "idempotency-key";
 export const REPLAYED_HEADER = "idempotent-replayed";
 const MAX_KEY_LENGTH = 255;
+type Store = Pick<IdempotencyStore, "claim" | "complete" | "release">;
 // Reads are safe to repeat anyway, so only requests that change something use keys.
 const CHANGING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
@@ -33,7 +35,9 @@ function fingerprintOf(request: FastifyRequest): string {
 export class IdempotencyInterceptor implements NestInterceptor {
   private readonly logger = new Logger(IdempotencyInterceptor.name);
 
-  constructor(private readonly store: IdempotencyStore) {}
+  // Injected by token and typed by its methods: a class type here would make the compiler
+  // emit a never-taken "is the class defined?" check for the decorator metadata.
+  constructor(@Inject(IdempotencyStore) private readonly store: Store) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const http = context.switchToHttp();

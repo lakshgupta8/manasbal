@@ -10,7 +10,7 @@ import {
 import { firstValueFrom, of, throwError } from "rxjs";
 import { describe, expect, it, vi } from "vitest";
 import { IdempotencyInterceptor } from "./idempotency.interceptor.js";
-import type { IdempotencyRecord, IdempotencyStore } from "./idempotency.store.js";
+import type { IdempotencyRecord } from "./idempotency.store.js";
 
 interface FakeRequest {
   method: string;
@@ -33,7 +33,7 @@ function setup(request: Partial<FakeRequest>, claimed: IdempotencyRecord | null 
   const context = {
     switchToHttp: () => ({ getRequest: () => fullRequest, getResponse: () => reply }),
   } as unknown as ExecutionContext;
-  const interceptor = new IdempotencyInterceptor(store as unknown as IdempotencyStore);
+  const interceptor = new IdempotencyInterceptor(store);
   return { store, reply, context, interceptor };
 }
 
