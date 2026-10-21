@@ -1,9 +1,17 @@
 import { Controller, Get } from "@nestjs/common";
+import { ApiOkResponse, ApiProperty } from "@nestjs/swagger";
 import { SkipThrottle } from "@nestjs/throttler";
 
-export interface HealthStatus {
+// A class rather than an interface so the OpenAPI description (and the generated SDK) knows
+// the shape of the answer.
+export class HealthStatus {
+  @ApiProperty({ enum: ["ok"] })
   status: "ok";
+
+  @ApiProperty({ enum: ["manasbal-api"] })
   service: "manasbal-api";
+
+  @ApiProperty({ example: "dev" })
   version: string;
 }
 
@@ -14,6 +22,7 @@ export interface HealthStatus {
 @Controller("health")
 export class HealthController {
   @Get()
+  @ApiOkResponse({ type: HealthStatus })
   check(): HealthStatus {
     return { status: "ok", service: "manasbal-api", version: process.env.APP_VERSION ?? "dev" };
   }

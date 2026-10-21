@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "nest build",
+    "openapi": "node dist/docs/emit-openapi.js",
     "start": "nest start",
     "dev": "nest start --watch",
     "start:dev": "nest start --watch",
