@@ -1,10 +1,12 @@
 name: Preview database
 
-# One Neon branch per pull request, deleted when the PR closes. Switched on by setting the
-# repository variable NEON_PROJECT_ID and the secret NEON_API_KEY.
+# One Neon branch per pull request into main (the weekly dev -> main PR, ADR 0009), deleted when
+# the PR closes. Switched on by setting the repository variable NEON_PROJECT_ID and the secret
+# NEON_API_KEY.
 
 on:
   pull_request:
+    branches: [main]
     types: [opened, reopened, synchronize, closed]
 
 permissions:
