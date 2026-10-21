@@ -1,6 +1,7 @@
 # Netlify (Free: 300 credits a month, 15 per production deploy).
-# Deploy previews build here for every PR. Production deploys come only from the release
-# workflow (Netlify CLI), never from a push to main.
+# Deploy previews build only for PRs into main (the Deploy Previews setting in the Netlify
+# dashboard) and only when a change can affect the console (ignore-build.sh). Production deploys
+# come only from the release workflow (Netlify CLI), never from a push to main.
 
 [build]
   base = "apps/console"
@@ -13,6 +14,9 @@
 [context.production]
   # "exit 0" tells Netlify to skip this build.
   ignore = "exit 0"
+
+[context.deploy-preview]
+  ignore = "bash ignore-build.sh"
 
 # Single-page app: every route serves index.html.
 [[redirects]]

@@ -3,7 +3,8 @@
   "ignoreCommand": "bash ignore-build.sh",
   "git": {
     "deploymentEnabled": {
-      "main": false
+      "**": false,
+      "dev": true
     }
   }
 }
