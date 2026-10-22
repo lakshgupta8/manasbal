@@ -13,7 +13,7 @@ const image = `mcr.microsoft.com/playwright:v${version}-noble`;
 const container = `manasbal-visual-${process.pid}`;
 const port = 3123;
 
-const docker = (...args) => execFileSync("docker", args, { encoding: "utf8" });
+const docker = (...args) => execFileSync("docker", args, { encoding: "utf8", env: { PATH: process.env.PATH } });
 
 function startBrowser() {
   // prettier-ignore

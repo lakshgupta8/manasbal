@@ -40,6 +40,12 @@ jobs:
       - name: API end-to-end tests
         run: pnpm test:e2e
 
+      # packages/types is generated from the API; regenerate it and fail if the committed copy differs.
+      - name: Generated API types are up to date
+        run: |
+          pnpm api-types
+          git diff --exit-code -- packages/types             || { echo "::error::packages/types is out of date. Run 'pnpm api-types' and commit the result."; exit 1; }
+
       - name: Legal guardrails (brands, licences)
         run: |
           pnpm check:brands
@@ -62,7 +68,7 @@ jobs:
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
           token: ${{ env.CODECOV_TOKEN }}
-          files: apps/api/coverage/lcov.info,packages/ui/coverage/lcov.info
+          files: apps/api/coverage/lcov.info,packages/ui/coverage/lcov.info,packages/sdk/coverage/lcov.info
           fail_ci_if_error: true
 
   lighthouse:

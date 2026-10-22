@@ -5,3 +5,5 @@ pnpm-lock.yaml
 **/coverage
 ROADMAP.md
 team/
+apps/api/src/prisma/contract.*
+apps/api/migrations/
