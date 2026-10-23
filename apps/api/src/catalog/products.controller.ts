@@ -6,7 +6,10 @@ import {
   ApiQuery,
   ApiTags,
 } from "@nestjs/swagger";
-import type { ProductPage as ProductPageShape } from "@manasbal/types";
+import type {
+  ProductPage as ProductPageShape,
+  ProductSummary as ProductSummaryShape,
+} from "@manasbal/types";
 import { DEFAULT_LIMIT, MAX_LIMIT } from "../pagination/pagination.js";
 import { ProductsService } from "./products.service.js";
 
@@ -38,12 +41,14 @@ export class ProductSummary {
   })
   pricePaise: number | null;
 
-  @ApiProperty({ type: () => ProductCategory })
-  category: ProductCategory;
+  // Typed with the shared shape, not the class: a class type makes the decorator metadata emit a
+  // branch that never runs. The decorator still documents it as ProductCategory.
+  @ApiProperty({ type: ProductCategory })
+  category: ProductSummaryShape["category"];
 }
 
 export class ProductPage {
-  @ApiProperty({ type: () => [ProductSummary] })
+  @ApiProperty({ type: [ProductSummary] })
   items: ProductSummary[];
 
   @ApiProperty({
