@@ -275,6 +275,56 @@
         },
         "tags": ["Catalog"]
       }
+    },
+    "/products": {
+      "get": {
+        "operationId": "ProductsController_list",
+        "parameters": [
+          {
+            "name": "category",
+            "required": false,
+            "in": "query",
+            "description": "Category slug",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "nextCursor from the previous page",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "1 to 100, default 20",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The cursor or limit is not valid"
+          }
+        },
+        "tags": ["Catalog"]
+      }
     }
   },
   "info": {
@@ -359,6 +409,60 @@
           }
         },
         "required": ["id", "name", "slug", "children"]
+      },
+      "ProductCategory": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": ["slug", "name"]
+      },
+      "ProductSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "pricePaise": {
+            "type": "integer",
+            "nullable": true,
+            "description": "The cheapest variant's price in whole paise, or null when there are no variants",
+            "example": 49900
+          },
+          "category": {
+            "$ref": "#/components/schemas/ProductCategory"
+          }
+        },
+        "required": ["id", "slug", "name", "pricePaise", "category"]
+      },
+      "ProductPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductSummary"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true,
+            "description": "Pass as cursor to get the next page; null on the last page"
+          }
+        },
+        "required": ["items", "nextCursor"]
       }
     }
   }

@@ -68,6 +68,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/products": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["ProductsController_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -99,6 +115,27 @@ export interface components {
       name: string;
       slug: string;
       children: components["schemas"]["Category"][];
+    };
+    ProductCategory: {
+      slug: string;
+      name: string;
+    };
+    ProductSummary: {
+      /** Format: uuid */
+      id: string;
+      slug: string;
+      name: string;
+      /**
+       * @description The cheapest variant's price in whole paise, or null when there are no variants
+       * @example 49900
+       */
+      pricePaise: number | null;
+      category: components["schemas"]["ProductCategory"];
+    };
+    ProductPage: {
+      items: components["schemas"]["ProductSummary"][];
+      /** @description Pass as cursor to get the next page; null on the last page */
+      nextCursor: string | null;
     };
   };
   responses: never;
@@ -307,6 +344,39 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["Category"][];
         };
+      };
+    };
+  };
+  ProductsController_list: {
+    parameters: {
+      query?: {
+        /** @description Category slug */
+        category?: string;
+        /** @description nextCursor from the previous page */
+        cursor?: string;
+        /** @description 1 to 100, default 20 */
+        limit?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProductPage"];
+        };
+      };
+      /** @description The cursor or limit is not valid */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
