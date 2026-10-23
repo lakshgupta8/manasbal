@@ -253,6 +253,28 @@
         },
         "tags": ["Addresses"]
       }
+    },
+    "/categories": {
+      "get": {
+        "operationId": "CategoriesController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Category"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Catalog"]
+      }
     }
   },
   "info": {
@@ -315,6 +337,28 @@
           }
         },
         "required": ["id", "name", "line1", "city", "state", "pincode", "phone", "isDefault"]
+      },
+      "Category": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Category"
+            }
+          }
+        },
+        "required": ["id", "name", "slug", "children"]
       }
     }
   }
