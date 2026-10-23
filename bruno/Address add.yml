@@ -32,7 +32,7 @@ runtime:
       operator: isString
     - expression: res.body.pincode
       operator: eq
-      value: "190006"
+      value: '"190006"'
     - expression: res.body.isDefault
       operator: eq
       value: "true"
