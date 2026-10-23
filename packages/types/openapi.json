@@ -19,6 +19,240 @@
         },
         "tags": ["Health"]
       }
+    },
+    "/me/addresses": {
+      "get": {
+        "operationId": "AddressesController_list",
+        "parameters": [
+          {
+            "name": "x-demo-user",
+            "in": "header",
+            "description": "Id of the user to act as. Outside production only, until sign-in exists.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Address"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No user, or the API runs in production"
+          }
+        },
+        "tags": ["Addresses"]
+      },
+      "post": {
+        "operationId": "AddressesController_create",
+        "parameters": [
+          {
+            "name": "x-demo-user",
+            "in": "header",
+            "description": "Id of the user to act as. Outside production only, until sign-in exists.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "line1": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "city": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "state": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "pincode": {
+                    "type": "string",
+                    "pattern": "^[1-9]\\d{5}$"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "pattern": "^[6-9]\\d{9}$"
+                  },
+                  "isDefault": {
+                    "type": "boolean"
+                  }
+                },
+                "required": ["name", "line1", "city", "state", "pincode", "phone"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Address"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No user, or the API runs in production"
+          }
+        },
+        "tags": ["Addresses"]
+      }
+    },
+    "/me/addresses/{id}": {
+      "patch": {
+        "operationId": "AddressesController_update",
+        "parameters": [
+          {
+            "name": "x-demo-user",
+            "in": "header",
+            "description": "Id of the user to act as. Outside production only, until sign-in exists.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "line1": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "city": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "state": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "pincode": {
+                    "type": "string",
+                    "pattern": "^[1-9]\\d{5}$"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "pattern": "^[6-9]\\d{9}$"
+                  },
+                  "isDefault": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Address"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No user, or the API runs in production"
+          },
+          "404": {
+            "description": "The user has no address with this id"
+          }
+        },
+        "tags": ["Addresses"]
+      },
+      "delete": {
+        "operationId": "AddressesController_remove",
+        "parameters": [
+          {
+            "name": "x-demo-user",
+            "in": "header",
+            "description": "Id of the user to act as. Outside production only, until sign-in exists.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": "No user, or the API runs in production"
+          },
+          "404": {
+            "description": "The user has no address with this id"
+          },
+          "409": {
+            "description": "An order was sent to this address"
+          }
+        },
+        "tags": ["Addresses"]
+      }
     }
   },
   "info": {
@@ -48,6 +282,39 @@
           }
         },
         "required": ["status", "service", "version"]
+      },
+      "Address": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "line1": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "pincode": {
+            "type": "string",
+            "example": "190006"
+          },
+          "phone": {
+            "type": "string",
+            "example": "9800000000"
+          },
+          "isDefault": {
+            "type": "boolean"
+          }
+        },
+        "required": ["id", "name", "line1", "city", "state", "pincode", "phone", "isDefault"]
       }
     }
   }
