@@ -1,0 +1,45 @@
+info:
+  name: Address add
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{baseUrl}}/me/addresses"
+  headers:
+    - name: x-demo-user
+      value: "{{demoUser}}"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Test Buyer",
+        "line1": "12 Sample Lane",
+        "city": "Sampleton",
+        "state": "Example State",
+        "pincode": "190006",
+        "phone": "9800000000",
+        "isDefault": true
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "201"
+    - expression: res.body.id
+      operator: isString
+    - expression: res.body.pincode
+      operator: eq
+      value: "190006"
+    - expression: res.body.isDefault
+      operator: eq
+      value: "true"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

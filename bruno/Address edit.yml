@@ -1,0 +1,37 @@
+info:
+  name: Address edit
+  type: http
+  seq: 4
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/me/addresses/{{addressId}}"
+  headers:
+    - name: x-demo-user
+      value: "{{demoUser}}"
+  body:
+    type: json
+    data: |-
+      {
+        "city": "Othertown"
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.id
+      operator: eq
+      value: "{{addressId}}"
+    - expression: res.body.city
+      operator: eq
+      value: Othertown
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
