@@ -2,7 +2,11 @@ import { buildCategoryTree, CategoriesService, type CategoryRow } from "./catego
 
 const { all, orderBy } = vi.hoisted(() => {
   const all = vi.fn<() => Promise<unknown[]>>();
-  return { all, orderBy: vi.fn(() => ({ all })) };
+  const orderBy = vi.fn((order: (category: { name: { asc(): string } }) => string) => {
+    order({ name: { asc: () => "name asc" } });
+    return { all };
+  });
+  return { all, orderBy };
 });
 
 // The query itself needs a real database and is covered in test/categories.e2e-spec.ts.
