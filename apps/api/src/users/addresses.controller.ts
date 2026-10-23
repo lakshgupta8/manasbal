@@ -1,0 +1,112 @@
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
+  UseGuards,
+} from "@nestjs/common";
+import {
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiHeader,
+  ApiNoContentResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiProperty,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from "@nestjs/swagger";
+import {
+  addressInputSchema,
+  addressPatchSchema,
+  type AddressInput,
+  type AddressPatch,
+} from "@manasbal/types";
+import { ApiZodBody, ZodValidationPipe } from "../validation/zod-validation.pipe.js";
+import { AddressesService } from "./addresses.service.js";
+import { CurrentUserId, DEMO_USER_HEADER, DemoUserGuard } from "./demo-user.guard.js";
+
+// A class rather than an interface so the OpenAPI description (and the generated SDK) knows
+// the shape of the answer.
+export class Address {
+  @ApiProperty({ format: "uuid" })
+  id: string;
+
+  @ApiProperty()
+  name: string;
+
+  @ApiProperty()
+  line1: string;
+
+  @ApiProperty()
+  city: string;
+
+  @ApiProperty()
+  state: string;
+
+  @ApiProperty({ example: "190006" })
+  pincode: string;
+
+  @ApiProperty({ example: "9800000000" })
+  phone: string;
+
+  @ApiProperty()
+  isDefault: boolean;
+}
+
+// The signed-in user's delivery addresses. The default one comes first.
+@ApiTags("Addresses")
+@ApiHeader({
+  name: DEMO_USER_HEADER,
+  description: "Id of the user to act as. Outside production only, until sign-in exists.",
+  required: true,
+})
+@ApiUnauthorizedResponse({ description: "No user, or the API runs in production" })
+@UseGuards(DemoUserGuard)
+@Controller("me/addresses")
+export class AddressesController {
+  constructor(private readonly addresses: AddressesService) {}
+
+  @Get()
+  @ApiOkResponse({ type: [Address] })
+  list(@CurrentUserId() userId: string): Promise<Address[]> {
+    return this.addresses.list(userId);
+  }
+
+  @Post()
+  @ApiZodBody(addressInputSchema)
+  @ApiCreatedResponse({ type: Address })
+  create(
+    @CurrentUserId() userId: string,
+    @Body(new ZodValidationPipe(addressInputSchema)) input: AddressInput,
+  ): Promise<Address> {
+    return this.addresses.create(userId, input);
+  }
+
+  @Patch(":id")
+  @ApiZodBody(addressPatchSchema)
+  @ApiOkResponse({ type: Address })
+  @ApiNotFoundResponse({ description: "The user has no address with this id" })
+  update(
+    @CurrentUserId() userId: string,
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body(new ZodValidationPipe(addressPatchSchema)) patch: AddressPatch,
+  ): Promise<Address> {
+    return this.addresses.update(userId, id, patch);
+  }
+
+  @Delete(":id")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiNoContentResponse()
+  @ApiNotFoundResponse({ description: "The user has no address with this id" })
+  @ApiConflictResponse({ description: "An order was sent to this address" })
+  remove(@CurrentUserId() userId: string, @Param("id", ParseUUIDPipe) id: string): Promise<void> {
+    return this.addresses.remove(userId, id);
+  }
+}

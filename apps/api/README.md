@@ -22,3 +22,9 @@ pnpm --filter @manasbal/api exec prisma db migrate --advance-ref db     # apply 
 ```
 
 Commit the contract, the generated files and `migrations/`. Don't edit the generated files by hand.
+
+## Acting as a user
+
+Sign-in doesn't exist yet. Outside production, endpoints under `/me` take the user's id in an `x-demo-user` header (pick one in Prisma Studio, see AGENTS.md). In production they always answer 401.
+
+The API imports the request schemas from `@manasbal/types` at run time, so build that package before `start:dev`: `pnpm --filter @manasbal/types build`. `pnpm dev` does it for you.

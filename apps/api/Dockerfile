@@ -10,7 +10,8 @@ FROM base AS build
 COPY . .
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile --filter @manasbal/api...
-RUN pnpm --filter @manasbal/api build \
+# "@manasbal/api..." also builds the workspace packages the API imports at run time, first.
+RUN pnpm --filter "@manasbal/api..." build \
  && pnpm --filter @manasbal/api deploy --prod --legacy /out
 
 FROM node:24-alpine AS runtime

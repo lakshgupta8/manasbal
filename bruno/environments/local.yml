@@ -3,3 +3,9 @@ variables:
   - name: baseUrl
     value: http://localhost:3001
     description: ""
+  - name: demoUser
+    value: 71efaaf0-3fd7-4587-b370-588263a0d779
+    description: ""
+  - name: addressId
+    value: e8c6e7be-f6c3-4716-afe9-48f66e40a1b7
+    description: ""
