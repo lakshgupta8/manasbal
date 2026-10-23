@@ -1,4 +1,14 @@
-import { buildCategoryTree, type CategoryRow } from "./categories.service.js";
+import { buildCategoryTree, CategoriesService, type CategoryRow } from "./categories.service.js";
+
+const { all, orderBy } = vi.hoisted(() => {
+  const all = vi.fn<() => Promise<unknown[]>>();
+  return { all, orderBy: vi.fn(() => ({ all })) };
+});
+
+// The query itself needs a real database and is covered in test/categories.e2e-spec.ts.
+vi.mock("../prisma/db.js", () => ({
+  getDb: () => ({ orm: { public: { Category: { orderBy } } } }),
+}));
 
 const CLOTHING = "1a2b3c4d-0000-4000-8000-000000000001";
 const SHIRTS = "1a2b3c4d-0000-4000-8000-000000000002";
@@ -54,5 +64,23 @@ describe("buildCategoryTree", () => {
 
   it("answers an empty list when there are no categories", () => {
     expect(buildCategoryTree([])).toEqual([]);
+  });
+});
+
+describe("CategoriesService", () => {
+  it("reads the categories and answers them as a tree", async () => {
+    all.mockResolvedValue([row(SHIRTS, "Shirts", CLOTHING), row(CLOTHING, "Clothing", null)]);
+
+    const tree = await new CategoriesService().tree();
+
+    expect(orderBy).toHaveBeenCalledTimes(1);
+    expect(tree).toEqual([
+      {
+        id: CLOTHING,
+        name: "Clothing",
+        slug: "clothing",
+        children: [{ id: SHIRTS, name: "Shirts", slug: "shirts", children: [] }],
+      },
+    ]);
   });
 });
