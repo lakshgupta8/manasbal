@@ -5,3 +5,6 @@ export type { components, operations, paths } from "./openapi.js";
 import type { components } from "./openapi.js";
 
 export type HealthStatus = components["schemas"]["HealthStatus"];
+
+// Request shapes, written by hand with Zod so the API and the shop validate the same way.
+export * from "./addresses.js";
