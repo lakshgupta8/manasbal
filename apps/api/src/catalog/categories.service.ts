@@ -10,7 +10,7 @@ export interface CategoryRow {
 }
 
 // Nests each category under its parent. A category whose parent isn't in the list is kept at the
-// top, so no row is lost. Rows keep their input order among siblings.
+// top. Rows keep their input order among siblings.
 export function buildCategoryTree(rows: CategoryRow[]): CategoryNode[] {
   const entries = rows.map((row) => ({
     node: { id: row.id, name: row.name, slug: row.slug, children: [] as CategoryNode[] },
