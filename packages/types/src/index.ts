@@ -9,3 +9,5 @@ export type Address = components["schemas"]["Address"];
 
 // Request shapes, written by hand with Zod so the API and the shop validate the same way.
 export * from "./addresses.js";
+// Answer shapes, written by hand with Zod.
+export * from "./categories.js";
