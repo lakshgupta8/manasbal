@@ -155,4 +155,8 @@ describe("GET /products/:slug/reviews (e2e)", () => {
     const bad = Buffer.from("yesterday|nope").toString("base64url");
     expect((await get(`/products/tee/reviews?cursor=${bad}`)).status).toBe(400);
   });
+
+  it.each(["0", "101"])("answers 400 for a limit of %s", async (limit) => {
+    expect((await get(`/products/tee/reviews?limit=${limit}`)).status).toBe(400);
+  });
 });

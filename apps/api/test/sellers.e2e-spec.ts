@@ -44,6 +44,8 @@ describe("GET /sellers/:slug (e2e)", () => {
     }
     await store("open-store", "approved", 2);
     await store("waiting-store", "pending", 1);
+    await store("turned-down-store", "rejected", 1);
+    await store("empty-store", "approved", 0);
 
     const moduleRef = await Test.createTestingModule({
       imports: [SellersModule],
@@ -76,5 +78,18 @@ describe("GET /sellers/:slug (e2e)", () => {
     expect(pending.headers["content-type"]).toContain("application/problem+json");
     // Only the request id may differ.
     expect({ ...pending.json(), requestId: "" }).toEqual({ ...unknown.json(), requestId: "" });
+  });
+
+  it("answers 404 for a store that is neither approved nor pending", async () => {
+    const response = await get("/sellers/turned-down-store");
+
+    expect(response.statusCode).toBe(404);
+  });
+
+  it("answers an approved store with no products as a count of 0", async () => {
+    const response = await get("/sellers/empty-store");
+
+    expect(response.statusCode).toBe(200);
+    expect(sellerStoreSchema.parse(response.json()).productCount).toBe(0);
   });
 });

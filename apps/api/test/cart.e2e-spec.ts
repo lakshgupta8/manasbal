@@ -150,4 +150,33 @@ describe("/cart (e2e)", () => {
     expect((await add(undefined, { variantId, quantity: 1 })).statusCode).toBe(401);
     expect((await app.inject({ method: "GET", url: "/cart" })).statusCode).toBe(401);
   });
+
+  it("lets only one of two simultaneous adds take the last two items", async () => {
+    const orm = database.db.orm.public;
+    const racer = await orm.User.select("id").create({
+      email: "racer@example.test",
+      passwordHash: "",
+      name: "Test Racer",
+    });
+    const product = await orm.Product.where({ slug: "striped-tee" }).select("id").first();
+    const variant = await orm.Variant.select("id").create({
+      productId: product!.id,
+      sku: "TEE-L",
+      size: "L",
+      pricePaise: 49900,
+    });
+    await orm.Inventory.select("id").create({
+      variantId: variant.id,
+      location: "north",
+      quantity: 2,
+      reserved: 0,
+    });
+
+    const responses = await Promise.all([
+      add(racer.id, { variantId: variant.id, quantity: 2 }),
+      add(racer.id, { variantId: variant.id, quantity: 2 }),
+    ]);
+
+    expect(responses.map((response) => response.statusCode).sort()).toEqual([201, 409]);
+  });
 });
