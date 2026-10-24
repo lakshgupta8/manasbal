@@ -1,4 +1,5 @@
 import { BadRequestException } from "@nestjs/common";
+import { z } from "zod";
 
 export const DEFAULT_LIMIT = 20;
 export const MAX_LIMIT = 100;
@@ -58,4 +59,23 @@ export function toPage<T>(rows: T[], params: PageParams, keyOf: (row: T) => stri
   const last = items.at(-1);
   const hasMore = rows.length > params.limit && last !== undefined;
   return { items, nextCursor: hasMore ? encodeCursor(keyOf(last)) : null };
+}
+
+// A row's place in a list sorted newest first: when it was created, then its id to break ties.
+export interface TimeKey {
+  createdAt: string;
+  id: string;
+}
+
+// The cursor key is `${createdAt}|${id}`. Anything else is the client's mistake, not a 500.
+export function parseTimeKey(key: string): TimeKey {
+  const [createdAt, id, ...rest] = key.split("|");
+  if (
+    rest.length > 0 ||
+    !z.iso.datetime().safeParse(createdAt).success ||
+    !z.uuid().safeParse(id).success
+  ) {
+    throw new BadRequestException("cursor is not valid");
+  }
+  return { createdAt: createdAt!, id: id! };
 }

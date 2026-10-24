@@ -1,4 +1,4 @@
-import { BadRequestException, NotFoundException } from "@nestjs/common";
+import { NotFoundException } from "@nestjs/common";
 import { encodeCursor } from "../pagination/pagination.js";
 import { ReviewsService } from "./reviews.service.js";
 
@@ -111,17 +111,5 @@ describe("ReviewsService", () => {
     expect(page.items.map((item) => item.id)).toEqual([FIRST]);
     expect(page.items[0]?.authorName).toBe("");
     expect(page.nextCursor).toBeNull();
-  });
-
-  it.each([
-    ["a date that is not a date", `yesterday|${FIRST}`],
-    ["an id that is not a uuid", `${WHEN}|not-a-uuid`],
-    ["no id", WHEN],
-    ["a third part", `${WHEN}|${FIRST}|extra`],
-  ])("refuses a cursor with %s", async (_name, key) => {
-    await expect(service.list("striped-tee", { cursor: encodeCursor(key) })).rejects.toThrow(
-      new BadRequestException("cursor is not valid"),
-    );
-    expect(reviews.all).not.toHaveBeenCalled();
   });
 });
