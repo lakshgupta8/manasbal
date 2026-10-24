@@ -4,7 +4,7 @@ Manasbal is a two-person portfolio project, open source under the [Apache Licens
 
 ## Setup
 
-1. Node.js 24 LTS (`.nvmrc`) and pnpm 10
+1. Node.js 24.22.1 or later (`.nvmrc`; `pnpm install` refuses an older one) and pnpm 10
 2. `pnpm install`
 3. `pnpm dev`
 

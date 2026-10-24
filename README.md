@@ -31,7 +31,7 @@ The name comes from [Manasbal Lake](https://en.wikipedia.org/wiki/Manasbal_Lake)
 
 ## Getting started
 
-Requires **Node.js 24 LTS** (see [`.nvmrc`](.nvmrc)) and **pnpm 10**.
+Requires **Node.js 24.22.1 or later** (the October 2026 security release, see [`.nvmrc`](.nvmrc)) and **pnpm 10**.
 
 ```bash
 pnpm install
