@@ -1,0 +1,29 @@
+info:
+  name: Cart
+  type: http
+  seq: 12
+
+http:
+  method: GET
+  url: "{{baseUrl}}/cart"
+  headers:
+    - name: x-demo-user
+      value: "{{demoUser}}"
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.items
+      operator: isArray
+    - expression: res.body.subtotalPaise
+      operator: isNumber
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

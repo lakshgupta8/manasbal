@@ -1,0 +1,26 @@
+info:
+  name: Product reviews
+  type: http
+  seq: 11
+
+http:
+  method: GET
+  url: "{{baseUrl}}/products/{{productSlug}}/reviews?limit=2"
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.items
+      operator: isArray
+    - expression: res.body.items[0].authorName
+      operator: isString
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

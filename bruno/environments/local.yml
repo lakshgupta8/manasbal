@@ -3,3 +3,24 @@ variables:
   - name: baseUrl
     value: http://localhost:3001
     description: ""
+  - name: demoUser
+    value: 71efaaf0-3fd7-4587-b370-588263a0d779
+    description: ""
+  - name: addressId
+    value: 8b1eadc8-8e25-4df2-b42c-006dce2b4b05
+    description: ""
+  - name: productId
+    value: 4a862f84-536f-4527-8cf7-ad66c6600f96
+    description: ""
+  - name: sellerSlug
+    value: pocket-tee
+    description: ""
+  - name: productSlug
+    value: striped-crew-tee
+    description: ""
+  - name: variantId
+    value: b58f0ae6-220a-49ed-ad8b-7693064cf887
+    description: ""
+  - name: adminUser
+    value: 3fbacab0-047e-4acb-a75d-fc32e380cee1
+    description: ""

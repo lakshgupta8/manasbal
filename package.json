@@ -4,7 +4,7 @@
   "license": "Apache-2.0",
   "packageManager": "pnpm@10.20.0",
   "engines": {
-    "node": ">=24"
+    "node": ">=24.22.1"
   },
   "scripts": {
     "dev": "turbo run dev",
@@ -17,7 +17,7 @@
     "prepare": "husky",
     "test:e2e": "turbo run test:e2e",
     "test:visual": "pnpm --filter @manasbal/ui test:visual",
-    "api-types": "pnpm --filter @manasbal/api build && pnpm --filter @manasbal/api openapi && pnpm --filter @manasbal/types generate",
+    "api-types": "pnpm turbo run build --filter=@manasbal/api && pnpm --filter @manasbal/api openapi && pnpm --filter @manasbal/types generate",
     "check:brands": "node scripts/check-brands.mjs",
     "check:licenses": "node scripts/check-licenses.mjs",
     "size": "size-limit",

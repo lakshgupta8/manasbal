@@ -6,6 +6,7 @@ import {
   decodeCursor,
   encodeCursor,
   parsePageQuery,
+  parseTimeKey,
   toPage,
 } from "./pagination.js";
 
@@ -67,5 +68,23 @@ describe("toPage", () => {
 
   it("handles an empty result", () => {
     expect(toPage([], params, keyOf)).toEqual({ items: [], nextCursor: null });
+  });
+});
+
+describe("parseTimeKey", () => {
+  const WHEN = "2026-10-24T08:46:07.123Z";
+  const ID = "1a2b3c4d-0000-4000-8000-000000000001";
+
+  it("reads the time and the id", () => {
+    expect(parseTimeKey(`${WHEN}|${ID}`)).toEqual({ createdAt: WHEN, id: ID });
+  });
+
+  it.each([
+    ["a date that is not a date", `yesterday|${ID}`],
+    ["an id that is not a uuid", `${WHEN}|not-a-uuid`],
+    ["no id", WHEN],
+    ["a third part", `${WHEN}|${ID}|extra`],
+  ])("rejects a key with %s", (_name, key) => {
+    expect(() => parseTimeKey(key)).toThrow(new BadRequestException("cursor is not valid"));
   });
 });

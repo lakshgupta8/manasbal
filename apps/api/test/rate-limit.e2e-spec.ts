@@ -1,9 +1,9 @@
 import { Controller, Get, Module } from "@nestjs/common";
 import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fastify";
 import { Test } from "@nestjs/testing";
-import { GenericContainer, Wait, type StartedTestContainer } from "testcontainers";
 import { RATE_LIMIT } from "../src/rate-limit/rate-limit.module.js";
 import { AppModule } from "../src/app.module.js";
+import { startTestValkey, type TestValkey } from "./support/test-valkey.js";
 
 @Controller("ping")
 class PingController {
@@ -18,17 +18,11 @@ class TestAppModule {}
 
 // Needs Docker: a real Valkey holds the counts, as in production.
 describe("rate limiting (e2e)", () => {
-  let valkey: StartedTestContainer;
+  let valkey: TestValkey;
   let app: NestFastifyApplication;
-  let previousUrl: string | undefined;
 
   beforeAll(async () => {
-    valkey = await new GenericContainer("valkey/valkey:8-alpine")
-      .withExposedPorts(6379)
-      .withWaitStrategy(Wait.forLogMessage("Ready to accept connections"))
-      .start();
-    previousUrl = process.env["REDIS_URL"];
-    process.env["REDIS_URL"] = `redis://${valkey.getHost()}:${valkey.getMappedPort(6379)}`;
+    valkey = await startTestValkey();
 
     const moduleRef = await Test.createTestingModule({ imports: [TestAppModule] }).compile();
     app = moduleRef.createNestApplication<NestFastifyApplication>(new FastifyAdapter());
@@ -37,10 +31,8 @@ describe("rate limiting (e2e)", () => {
   }, 120_000);
 
   afterAll(async () => {
-    await app.close();
-    if (previousUrl === undefined) delete process.env["REDIS_URL"];
-    else process.env["REDIS_URL"] = previousUrl;
-    await valkey.stop();
+    await app?.close();
+    await valkey?.stop();
   });
 
   it("answers the first 100 requests and rejects the 101st with 429", async () => {

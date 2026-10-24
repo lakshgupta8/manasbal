@@ -31,7 +31,7 @@ The name comes from [Manasbal Lake](https://en.wikipedia.org/wiki/Manasbal_Lake)
 
 ## Getting started
 
-Requires **Node.js 24 LTS** (see [`.nvmrc`](.nvmrc)) and **pnpm 10**.
+Requires **Node.js 24.22.1 or later** (the October 2026 security release, see [`.nvmrc`](.nvmrc)) and **pnpm 10**.
 
 ```bash
 pnpm install
@@ -69,6 +69,14 @@ docker compose down             # stop and remove the containers (the databases 
 | Meilisearch | http://localhost:7700                                   |
 
 Port 5432 must be free: stop any other Postgres running on your computer first.
+
+## API
+
+The API listens on http://localhost:3001 (set `PORT` to change it). Start the databases first (see above), then `pnpm dev`, or only the API with `pnpm --filter @manasbal/api dev`.
+
+**Docs.** With the API running, open http://localhost:3001/docs for the interactive page, where you can try each endpoint. The raw OpenAPI description is at http://localhost:3001/docs-json. `pnpm --filter @manasbal/api openapi` writes the same description to a file without starting the server (run `pnpm build` first).
+
+**Bruno collection.** Requests for every endpoint are in [`bruno`](bruno); see its [README](bruno/README.md) for how to open and run them.
 
 ## Documentation
 

@@ -20,6 +20,198 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/me/addresses": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["AddressesController_list"];
+    put?: never;
+    post: operations["AddressesController_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/me/addresses/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: operations["AddressesController_remove"];
+    options?: never;
+    head?: never;
+    patch: operations["AddressesController_update"];
+    trace?: never;
+  };
+  "/categories": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["CategoriesController_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/products": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["ProductsController_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/products/{id}/stock": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["ProductsController_stock"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/products/{slug}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["ProductsController_detail"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/sellers/{slug}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["SellersController_store"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/products/{slug}/reviews": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["ReviewsController_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/cart": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["CartController_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/cart/items": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["CartController_addItem"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/orders": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["OrdersController_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/admin/audit-log": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["AdminController_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -31,6 +223,179 @@ export interface components {
       service: "manasbal-api";
       /** @example dev */
       version: string;
+    };
+    Address: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      line1: string;
+      city: string;
+      state: string;
+      /** @example 190006 */
+      pincode: string;
+      /** @example 9800000000 */
+      phone: string;
+      isDefault: boolean;
+    };
+    Category: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      slug: string;
+      children: components["schemas"]["Category"][];
+    };
+    ProductCategory: {
+      slug: string;
+      name: string;
+    };
+    ProductSummary: {
+      /** Format: uuid */
+      id: string;
+      slug: string;
+      name: string;
+      /**
+       * @description The cheapest variant's price in whole paise, or null when there are no variants
+       * @example 49900
+       */
+      pricePaise: number | null;
+      category: components["schemas"]["ProductCategory"];
+    };
+    ProductPage: {
+      items: components["schemas"]["ProductSummary"][];
+      /** @description Pass as cursor to get the next page; null on the last page */
+      nextCursor: string | null;
+    };
+    VariantStock: {
+      /** Format: uuid */
+      variantId: string;
+      sku: string;
+      size: string | null;
+      colour: string | null;
+      /**
+       * @description Quantity minus reserved over every location, never below 0
+       * @example 7
+       */
+      available: number;
+    };
+    ProductStock: {
+      /** Format: uuid */
+      productId: string;
+      variants: components["schemas"]["VariantStock"][];
+    };
+    ProductSeller: {
+      slug: string;
+      storeName: string;
+    };
+    VariantDetail: {
+      /** Format: uuid */
+      variantId: string;
+      sku: string;
+      size: string | null;
+      colour: string | null;
+      /**
+       * @description Price in whole paise
+       * @example 49900
+       */
+      pricePaise: number;
+      /**
+       * @description Quantity minus reserved over every location, never below 0
+       * @example 7
+       */
+      available: number;
+    };
+    ProductDetail: {
+      /** Format: uuid */
+      id: string;
+      slug: string;
+      name: string;
+      description: string | null;
+      /**
+       * @description The cheapest variant's price in whole paise, or null when there are no variants
+       * @example 49900
+       */
+      pricePaise: number | null;
+      category: components["schemas"]["ProductCategory"];
+      seller: components["schemas"]["ProductSeller"];
+      variants: components["schemas"]["VariantDetail"][];
+    };
+    SellerStore: {
+      slug: string;
+      storeName: string;
+      /** @description How many products the store lists */
+      productCount: number;
+    };
+    Review: {
+      /** Format: uuid */
+      id: string;
+      rating: number;
+      body: string;
+      /** @description The reviewer first name only */
+      authorName: string;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    ReviewPage: {
+      items: components["schemas"]["Review"][];
+      /** @description Pass as cursor to get the next page; null on the last page */
+      nextCursor: string | null;
+    };
+    CartLine: {
+      /** Format: uuid */
+      variantId: string;
+      productName: string;
+      sku: string;
+      quantity: number;
+      /**
+       * @description Whole paise
+       * @example 49900
+       */
+      unitPricePaise: number;
+      /**
+       * @description Whole paise
+       * @example 99800
+       */
+      linePaise: number;
+    };
+    Cart: {
+      /** @description Sorted by product name, then SKU */
+      items: components["schemas"]["CartLine"][];
+      /** @description Whole paise */
+      subtotalPaise: number;
+    };
+    OrderSummary: {
+      /** Format: uuid */
+      id: string;
+      status: string;
+      /** @description Whole paise */
+      totalPaise: number;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    OrderPage: {
+      items: components["schemas"]["OrderSummary"][];
+      /** @description Pass as cursor to get the next page; null on the last page */
+      nextCursor: string | null;
+    };
+    AuditEntry: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      actorId: string | null;
+      /** @example address.create */
+      action: string;
+      /** @example address */
+      targetType: string;
+      /** Format: uuid */
+      targetId: string;
+      /** @description The x-request-id of the request that made the change */
+      requestId: string;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    AuditPage: {
+      items: components["schemas"]["AuditEntry"][];
+      /** @description Pass as cursor to get the next page; null on the last page */
+      nextCursor: string | null;
     };
   };
   responses: never;
@@ -57,6 +422,523 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["HealthStatus"];
         };
+      };
+    };
+  };
+  AddressesController_list: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it. */
+        "x-demo-user"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Address"][];
+        };
+      };
+      /** @description No user, or the API runs in production */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AddressesController_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it. */
+        "x-demo-user"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          name: string;
+          line1: string;
+          city: string;
+          state: string;
+          pincode: string;
+          phone: string;
+          isDefault?: boolean;
+        };
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Address"];
+        };
+      };
+      /** @description No user, or the API runs in production */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AddressesController_remove: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it. */
+        "x-demo-user"?: string;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No user, or the API runs in production */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The user has no address with this id */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description An order was sent to this address */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AddressesController_update: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it. */
+        "x-demo-user"?: string;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          name?: string;
+          line1?: string;
+          city?: string;
+          state?: string;
+          pincode?: string;
+          phone?: string;
+          isDefault?: boolean;
+        };
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Address"];
+        };
+      };
+      /** @description No user, or the API runs in production */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The user has no address with this id */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  CategoriesController_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Category"][];
+        };
+      };
+    };
+  };
+  ProductsController_list: {
+    parameters: {
+      query?: {
+        /** @description Category slug */
+        category?: string;
+        /** @description nextCursor from the previous page */
+        cursor?: string;
+        /** @description 1 to 100, default 20 */
+        limit?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProductPage"];
+        };
+      };
+      /** @description The cursor or limit is not valid */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProductsController_stock: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProductStock"];
+        };
+      };
+      /** @description The id is not a uuid */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No such product */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProductsController_detail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        slug: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProductDetail"];
+        };
+      };
+      /** @description No such product */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SellersController_store: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        slug: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SellerStore"];
+        };
+      };
+      /** @description No such store, or it is not approved yet */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ReviewsController_list: {
+    parameters: {
+      query?: {
+        /** @description nextCursor from the previous page */
+        cursor?: string;
+        /** @description 1 to 100, default 20 */
+        limit?: string;
+      };
+      header?: never;
+      path: {
+        slug: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ReviewPage"];
+        };
+      };
+      /** @description The cursor or limit is not valid */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No such product */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  CartController_get: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it. */
+        "x-demo-user"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Cart"];
+        };
+      };
+      /** @description No user, or the API runs in production */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  CartController_addItem: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it. */
+        "x-demo-user"?: string;
+        /** @description Repeats of the same key answer the first result instead of adding again */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: uuid */
+          variantId: string;
+          quantity: number;
+        };
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Cart"];
+        };
+      };
+      /** @description No user, or the API runs in production */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No such variant */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description More than the stock */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  OrdersController_list: {
+    parameters: {
+      query?: {
+        /** @description nextCursor from the previous page */
+        cursor?: string;
+        /** @description 1 to 100, default 20 */
+        limit?: string;
+      };
+      header?: {
+        /** @description Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it. */
+        "x-demo-user"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OrderPage"];
+        };
+      };
+      /** @description The cursor or limit is not valid */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No user, or the API runs in production */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AdminController_list: {
+    parameters: {
+      query?: {
+        /** @description nextCursor from the previous page */
+        cursor?: string;
+        /** @description 1 to 100, default 20 */
+        limit?: string;
+      };
+      header?: {
+        /** @description Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it. */
+        "x-demo-user"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AuditPage"];
+        };
+      };
+      /** @description The cursor or limit is not valid */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No user, or the API runs in production */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The user is not an admin */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };

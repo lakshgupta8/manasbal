@@ -19,6 +19,672 @@
         },
         "tags": ["Health"]
       }
+    },
+    "/me/addresses": {
+      "get": {
+        "operationId": "AddressesController_list",
+        "parameters": [
+          {
+            "name": "x-demo-user",
+            "in": "header",
+            "description": "Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Address"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No user, or the API runs in production"
+          }
+        },
+        "tags": ["Addresses"]
+      },
+      "post": {
+        "operationId": "AddressesController_create",
+        "parameters": [
+          {
+            "name": "x-demo-user",
+            "in": "header",
+            "description": "Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "line1": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "city": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "state": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "pincode": {
+                    "type": "string",
+                    "pattern": "^[1-9]\\d{5}$"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "pattern": "^[6-9]\\d{9}$"
+                  },
+                  "isDefault": {
+                    "type": "boolean"
+                  }
+                },
+                "required": ["name", "line1", "city", "state", "pincode", "phone"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Address"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No user, or the API runs in production"
+          }
+        },
+        "tags": ["Addresses"]
+      }
+    },
+    "/me/addresses/{id}": {
+      "patch": {
+        "operationId": "AddressesController_update",
+        "parameters": [
+          {
+            "name": "x-demo-user",
+            "in": "header",
+            "description": "Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "line1": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "city": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "state": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "pincode": {
+                    "type": "string",
+                    "pattern": "^[1-9]\\d{5}$"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "pattern": "^[6-9]\\d{9}$"
+                  },
+                  "isDefault": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Address"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No user, or the API runs in production"
+          },
+          "404": {
+            "description": "The user has no address with this id"
+          }
+        },
+        "tags": ["Addresses"]
+      },
+      "delete": {
+        "operationId": "AddressesController_remove",
+        "parameters": [
+          {
+            "name": "x-demo-user",
+            "in": "header",
+            "description": "Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "401": {
+            "description": "No user, or the API runs in production"
+          },
+          "404": {
+            "description": "The user has no address with this id"
+          },
+          "409": {
+            "description": "An order was sent to this address"
+          }
+        },
+        "tags": ["Addresses"]
+      }
+    },
+    "/categories": {
+      "get": {
+        "operationId": "CategoriesController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Category"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Catalog"]
+      }
+    },
+    "/products": {
+      "get": {
+        "operationId": "ProductsController_list",
+        "parameters": [
+          {
+            "name": "category",
+            "required": false,
+            "in": "query",
+            "description": "Category slug",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "nextCursor from the previous page",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "1 to 100, default 20",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The cursor or limit is not valid"
+          }
+        },
+        "tags": ["Catalog"]
+      }
+    },
+    "/products/{id}/stock": {
+      "get": {
+        "operationId": "ProductsController_stock",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductStock"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The id is not a uuid"
+          },
+          "404": {
+            "description": "No such product"
+          }
+        },
+        "tags": ["Catalog"]
+      }
+    },
+    "/products/{slug}": {
+      "get": {
+        "operationId": "ProductsController_detail",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such product"
+          }
+        },
+        "tags": ["Catalog"]
+      }
+    },
+    "/sellers/{slug}": {
+      "get": {
+        "operationId": "SellersController_store",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SellerStore"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such store, or it is not approved yet"
+          }
+        },
+        "tags": ["Sellers"]
+      }
+    },
+    "/products/{slug}/reviews": {
+      "get": {
+        "operationId": "ReviewsController_list",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "nextCursor from the previous page",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "1 to 100, default 20",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The cursor or limit is not valid"
+          },
+          "404": {
+            "description": "No such product"
+          }
+        },
+        "tags": ["Catalog"]
+      }
+    },
+    "/cart": {
+      "get": {
+        "operationId": "CartController_get",
+        "parameters": [
+          {
+            "name": "x-demo-user",
+            "in": "header",
+            "description": "Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Cart"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No user, or the API runs in production"
+          }
+        },
+        "tags": ["Cart"]
+      }
+    },
+    "/cart/items": {
+      "post": {
+        "operationId": "CartController_addItem",
+        "parameters": [
+          {
+            "name": "x-demo-user",
+            "in": "header",
+            "description": "Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Repeats of the same key answer the first result instead of adding again",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "variantId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                  },
+                  "quantity": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 10
+                  }
+                },
+                "required": ["variantId", "quantity"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Cart"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No user, or the API runs in production"
+          },
+          "404": {
+            "description": "No such variant"
+          },
+          "409": {
+            "description": "More than the stock"
+          }
+        },
+        "tags": ["Cart"]
+      }
+    },
+    "/orders": {
+      "get": {
+        "operationId": "OrdersController_list",
+        "parameters": [
+          {
+            "name": "x-demo-user",
+            "in": "header",
+            "description": "Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "nextCursor from the previous page",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "1 to 100, default 20",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The cursor or limit is not valid"
+          },
+          "401": {
+            "description": "No user, or the API runs in production"
+          }
+        },
+        "tags": ["Orders"]
+      }
+    },
+    "/admin/audit-log": {
+      "get": {
+        "operationId": "AdminController_list",
+        "parameters": [
+          {
+            "name": "x-demo-user",
+            "in": "header",
+            "description": "Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "nextCursor from the previous page",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "1 to 100, default 20",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The cursor or limit is not valid"
+          },
+          "401": {
+            "description": "No user, or the API runs in production"
+          },
+          "403": {
+            "description": "The user is not an admin"
+          }
+        },
+        "tags": ["Admin"]
+      }
     }
   },
   "info": {
@@ -48,6 +714,451 @@
           }
         },
         "required": ["status", "service", "version"]
+      },
+      "Address": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "line1": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "pincode": {
+            "type": "string",
+            "example": "190006"
+          },
+          "phone": {
+            "type": "string",
+            "example": "9800000000"
+          },
+          "isDefault": {
+            "type": "boolean"
+          }
+        },
+        "required": ["id", "name", "line1", "city", "state", "pincode", "phone", "isDefault"]
+      },
+      "Category": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Category"
+            }
+          }
+        },
+        "required": ["id", "name", "slug", "children"]
+      },
+      "ProductCategory": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": ["slug", "name"]
+      },
+      "ProductSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "pricePaise": {
+            "type": "integer",
+            "nullable": true,
+            "description": "The cheapest variant's price in whole paise, or null when there are no variants",
+            "example": 49900
+          },
+          "category": {
+            "$ref": "#/components/schemas/ProductCategory"
+          }
+        },
+        "required": ["id", "slug", "name", "pricePaise", "category"]
+      },
+      "ProductPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductSummary"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true,
+            "description": "Pass as cursor to get the next page; null on the last page"
+          }
+        },
+        "required": ["items", "nextCursor"]
+      },
+      "VariantStock": {
+        "type": "object",
+        "properties": {
+          "variantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sku": {
+            "type": "string"
+          },
+          "size": {
+            "type": "string",
+            "nullable": true
+          },
+          "colour": {
+            "type": "string",
+            "nullable": true
+          },
+          "available": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Quantity minus reserved over every location, never below 0",
+            "example": 7
+          }
+        },
+        "required": ["variantId", "sku", "size", "colour", "available"]
+      },
+      "ProductStock": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "variants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VariantStock"
+            }
+          }
+        },
+        "required": ["productId", "variants"]
+      },
+      "ProductSeller": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "storeName": {
+            "type": "string"
+          }
+        },
+        "required": ["slug", "storeName"]
+      },
+      "VariantDetail": {
+        "type": "object",
+        "properties": {
+          "variantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sku": {
+            "type": "string"
+          },
+          "size": {
+            "type": "string",
+            "nullable": true
+          },
+          "colour": {
+            "type": "string",
+            "nullable": true
+          },
+          "pricePaise": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Price in whole paise",
+            "example": 49900
+          },
+          "available": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Quantity minus reserved over every location, never below 0",
+            "example": 7
+          }
+        },
+        "required": ["variantId", "sku", "size", "colour", "pricePaise", "available"]
+      },
+      "ProductDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "pricePaise": {
+            "type": "integer",
+            "nullable": true,
+            "description": "The cheapest variant's price in whole paise, or null when there are no variants",
+            "example": 49900
+          },
+          "category": {
+            "$ref": "#/components/schemas/ProductCategory"
+          },
+          "seller": {
+            "$ref": "#/components/schemas/ProductSeller"
+          },
+          "variants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VariantDetail"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "name",
+          "description",
+          "pricePaise",
+          "category",
+          "seller",
+          "variants"
+        ]
+      },
+      "SellerStore": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "storeName": {
+            "type": "string"
+          },
+          "productCount": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "How many products the store lists"
+          }
+        },
+        "required": ["slug", "storeName", "productCount"]
+      },
+      "Review": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "rating": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "body": {
+            "type": "string"
+          },
+          "authorName": {
+            "type": "string",
+            "description": "The reviewer first name only"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["id", "rating", "body", "authorName", "createdAt"]
+      },
+      "ReviewPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Review"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true,
+            "description": "Pass as cursor to get the next page; null on the last page"
+          }
+        },
+        "required": ["items", "nextCursor"]
+      },
+      "CartLine": {
+        "type": "object",
+        "properties": {
+          "variantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "productName": {
+            "type": "string"
+          },
+          "sku": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "unitPricePaise": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Whole paise",
+            "example": 49900
+          },
+          "linePaise": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Whole paise",
+            "example": 99800
+          }
+        },
+        "required": ["variantId", "productName", "sku", "quantity", "unitPricePaise", "linePaise"]
+      },
+      "Cart": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "description": "Sorted by product name, then SKU",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CartLine"
+            }
+          },
+          "subtotalPaise": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Whole paise"
+          }
+        },
+        "required": ["items", "subtotalPaise"]
+      },
+      "OrderSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "totalPaise": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Whole paise"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["id", "status", "totalPaise", "createdAt"]
+      },
+      "OrderPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderSummary"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true,
+            "description": "Pass as cursor to get the next page; null on the last page"
+          }
+        },
+        "required": ["items", "nextCursor"]
+      },
+      "AuditEntry": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actorId": {
+            "type": "string",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "action": {
+            "type": "string",
+            "example": "address.create"
+          },
+          "targetType": {
+            "type": "string",
+            "example": "address"
+          },
+          "targetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestId": {
+            "type": "string",
+            "description": "The x-request-id of the request that made the change"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["id", "actorId", "action", "targetType", "targetId", "requestId", "createdAt"]
+      },
+      "AuditPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuditEntry"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true,
+            "description": "Pass as cursor to get the next page; null on the last page"
+          }
+        },
+        "required": ["items", "nextCursor"]
       }
     }
   }

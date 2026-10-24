@@ -2,6 +2,8 @@
 
 // Tables are plural snake_case, because "user" is a reserved word in Postgres.
 // is_sample and created_by_visitor mark demo rows, so the nightly reset deletes exactly the right data.
+// Every table a visitor can write to, directly or as a side effect, has both columns; categories and
+// coupons have neither, because only the seed or an admin writes them.
 
 model User {
   id               Uuid     @id @default(uuid())
@@ -16,6 +18,7 @@ model User {
   addresses        Address[]
   orders           Order[]
   reviews          Review[]
+  cart             Cart?
   auditLogs        AuditLog[]
 
   @@map("users")
@@ -41,6 +44,7 @@ model Product {
   slug        String   @unique
   description String?
   isSample    Boolean  @default(false) @map("is_sample")
+  createdByVisitor Boolean @default(false) @map("created_by_visitor")
   createdAt   DateTime @default(now()) @map("created_at")
   seller      Seller   @relation(fields: [sellerId], references: [id])
   category    Category @relation(fields: [categoryId], references: [id])
@@ -57,6 +61,7 @@ model Seller {
   slug      String    @unique
   status    String    @default("pending")
   isSample  Boolean   @default(false) @map("is_sample")
+  createdByVisitor Boolean @default(false) @map("created_by_visitor")
   user      User      @relation(fields: [userId], references: [id])
   products  Product[]
   subOrders SubOrder[]
@@ -71,9 +76,12 @@ model Variant {
   size       String?
   colour     String?
   pricePaise Int         @map("price_paise")
+  isSample         Boolean @default(false) @map("is_sample")
+  createdByVisitor Boolean @default(false) @map("created_by_visitor")
   product    Product     @relation(fields: [productId], references: [id])
   inventory  Inventory[]
   orderItems OrderItem[]
+  cartItems  CartItem[]
 
   @@map("variants")
 }
@@ -84,6 +92,8 @@ model Inventory {
   location  String
   quantity  Int     @default(0)
   reserved  Int     @default(0)
+  isSample         Boolean @default(false) @map("is_sample")
+  createdByVisitor Boolean @default(false) @map("created_by_visitor")
   variant   Variant @relation(fields: [variantId], references: [id])
 
   @@map("inventory")
@@ -100,6 +110,7 @@ model Address {
   phone            String
   isDefault        Boolean @default(false) @map("is_default")
   createdByVisitor Boolean @default(false) @map("created_by_visitor")
+  isSample         Boolean @default(false) @map("is_sample")
   user             User    @relation(fields: [userId], references: [id])
   orders           Order[]
 
@@ -126,6 +137,7 @@ model Order {
   totalPaise       Int        @map("total_paise")
   idempotencyKey   String     @unique @map("idempotency_key")
   createdByVisitor Boolean    @default(false) @map("created_by_visitor")
+  isSample         Boolean @default(false) @map("is_sample")
   createdAt        DateTime   @default(now()) @map("created_at")
   user             User       @relation(fields: [userId], references: [id])
   address          Address    @relation(fields: [addressId], references: [id])
@@ -142,6 +154,8 @@ model SubOrder {
   sellerId      Uuid        @map("seller_id")
   status        String
   subtotalPaise Int         @map("subtotal_paise")
+  isSample         Boolean @default(false) @map("is_sample")
+  createdByVisitor Boolean @default(false) @map("created_by_visitor")
   order         Order       @relation(fields: [orderId], references: [id])
   seller        Seller      @relation(fields: [sellerId], references: [id])
   items         OrderItem[]
@@ -155,6 +169,8 @@ model OrderItem {
   variantId      Uuid     @map("variant_id")
   quantity       Int
   unitPricePaise Int      @map("unit_price_paise")
+  isSample         Boolean @default(false) @map("is_sample")
+  createdByVisitor Boolean @default(false) @map("created_by_visitor")
   subOrder       SubOrder @relation(fields: [subOrderId], references: [id])
   variant        Variant  @relation(fields: [variantId], references: [id])
   review         Review?
@@ -168,6 +184,8 @@ model Payment {
   status      String
   amountPaise Int      @map("amount_paise")
   gatewayRef  String   @map("gateway_ref")
+  isSample         Boolean @default(false) @map("is_sample")
+  createdByVisitor Boolean @default(false) @map("created_by_visitor")
   createdAt   DateTime @default(now()) @map("created_at")
   order       Order    @relation(fields: [orderId], references: [id])
 
@@ -183,10 +201,12 @@ model Review {
   body             String
   isSample         Boolean   @default(false) @map("is_sample")
   createdByVisitor Boolean   @default(false) @map("created_by_visitor")
+  createdAt        DateTime  @default(now()) @map("created_at")
   orderItem        OrderItem @relation(fields: [orderItemId], references: [id])
   user             User      @relation(fields: [userId], references: [id])
   product          Product   @relation(fields: [productId], references: [id])
 
+  @@index([productId, createdAt, id])
   @@map("reviews")
 }
 
@@ -197,8 +217,35 @@ model AuditLog {
   targetType String   @map("target_type")
   targetId   Uuid     @map("target_id")
   requestId  String   @map("request_id")
+  isSample         Boolean @default(false) @map("is_sample")
+  createdByVisitor Boolean @default(false) @map("created_by_visitor")
   createdAt  DateTime @default(now()) @map("created_at")
   actor      User?    @relation(fields: [actorId], references: [id])
 
   @@map("audit_logs")
+}
+
+model Cart {
+  id               Uuid       @id @default(uuid())
+  userId           Uuid       @unique @map("user_id")
+  createdByVisitor Boolean    @default(false) @map("created_by_visitor")
+  isSample         Boolean @default(false) @map("is_sample")
+  user             User       @relation(fields: [userId], references: [id])
+  items            CartItem[]
+
+  @@map("carts")
+}
+
+model CartItem {
+  id        Uuid    @id @default(uuid())
+  cartId    Uuid    @map("cart_id")
+  variantId Uuid    @map("variant_id")
+  quantity  Int
+  isSample         Boolean @default(false) @map("is_sample")
+  createdByVisitor Boolean @default(false) @map("created_by_visitor")
+  cart      Cart    @relation(fields: [cartId], references: [id])
+  variant   Variant @relation(fields: [variantId], references: [id])
+
+  @@unique([cartId, variantId])
+  @@map("cart_items")
 }
