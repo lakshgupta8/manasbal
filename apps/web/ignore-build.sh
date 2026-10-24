@@ -8,7 +8,7 @@ if [ "${VERCEL_GIT_COMMIT_REF:-}" = "dev" ] && [ -z "${VERCEL_GIT_PULL_REQUEST_I
   exit 0
 fi
 
-PATHS=(. ../../packages/tsconfig ../../packages/ui ../../package.json ../../pnpm-lock.yaml ../../pnpm-workspace.yaml ../../turbo.json)
+PATHS=(. ../../packages/tsconfig ../../packages/ui ../../package.json ../../pnpm-lock.yaml ../../pnpm-workspace.yaml ../../turbo.json ../../packages/sdk ../../packages/types)
 
 # Compare with the last built commit on this branch; a new branch has none, so compare with dev.
 BASE="${VERCEL_GIT_PREVIOUS_SHA:-}"
