@@ -9,6 +9,7 @@ const row = {
   targetType: "address",
   targetId: TARGET.id,
   requestId: "req-1",
+  createdByVisitor: true,
 };
 
 const { defaultCreate } = vi.hoisted(() => ({ defaultCreate: vi.fn() }));

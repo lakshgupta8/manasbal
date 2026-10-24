@@ -64,7 +64,13 @@ export class CartService {
       if (wanted > available) throw new ConflictException(`Only ${available} left`);
 
       if (line === null) {
-        await db.CartItem.create({ cartId: cart.id, variantId, quantity: wanted });
+        // Lines made through the demo are removed by the nightly reset.
+        await db.CartItem.create({
+          cartId: cart.id,
+          variantId,
+          quantity: wanted,
+          createdByVisitor: true,
+        });
       } else {
         await db.CartItem.where({ id: line.id }).update({ quantity: wanted });
       }

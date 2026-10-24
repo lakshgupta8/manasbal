@@ -104,7 +104,7 @@ describe("/me/addresses (e2e)", () => {
     await as(userA, "DELETE", `/me/addresses/${id}`, undefined, "test-req-4");
 
     const rows = await database.db.orm.public.AuditLog.where({ targetId: id })
-      .select("actorId", "action", "targetType", "requestId")
+      .select("actorId", "action", "targetType", "requestId", "createdByVisitor")
       .all();
 
     expect(rows).toHaveLength(3);
@@ -115,18 +115,21 @@ describe("/me/addresses (e2e)", () => {
           action: "address.create",
           targetType: "address",
           requestId: "test-req-1",
+          createdByVisitor: true,
         },
         {
           actorId: userA,
           action: "address.update",
           targetType: "address",
           requestId: "test-req-2",
+          createdByVisitor: true,
         },
         {
           actorId: userA,
           action: "address.delete",
           targetType: "address",
           requestId: "test-req-4",
+          createdByVisitor: true,
         },
       ]),
     );

@@ -30,6 +30,7 @@ export class AuditService {
       targetType: target.type,
       targetId: target.id,
       requestId: who.requestId,
+      createdByVisitor: true,
     });
   }
 }
