@@ -3,12 +3,17 @@ import { APP_FILTER } from "@nestjs/core";
 import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fastify";
 import { Test } from "@nestjs/testing";
 import type { InjectOptions } from "fastify";
+import { AuditModule } from "../audit/audit.module.js";
+import { fastifyOptions, REQUEST_ID_HEADER } from "../logging/logging.config.js";
 import { ProblemDetailsFilter } from "../errors/problem-details.filter.js";
 import { AddressesService } from "./addresses.service.js";
 import { DEMO_USER_HEADER, DemoUserGuard } from "./demo-user.guard.js";
 import { UsersModule } from "./users.module.js";
 
 const USER_ID = "7b0c1e2a-3d4f-4a5b-8c6d-7e8f9a0b1c2d";
+const REQUEST_ID = "test-req-1";
+// What CurrentActor hands the service: the signed-in user and the request's id.
+const ACTOR = { userId: USER_ID, requestId: REQUEST_ID };
 const ADDRESS_ID = "0f1e2d3c-4b5a-4968-8776-655443322110";
 
 // Every endpoint, called the way a client that knows the demo header would call it.
@@ -37,7 +42,7 @@ describe("AddressesController in production", () => {
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [UsersModule],
+      imports: [AuditModule, UsersModule],
       providers: [{ provide: APP_FILTER, useClass: ProblemDetailsFilter }],
     }).compile();
     app = moduleRef.createNestApplication<NestFastifyApplication>(new FastifyAdapter());
@@ -91,7 +96,9 @@ describe("AddressesController", () => {
         },
       })
       .compile();
-    app = moduleRef.createNestApplication<NestFastifyApplication>(new FastifyAdapter());
+    app = moduleRef.createNestApplication<NestFastifyApplication>(
+      new FastifyAdapter(fastifyOptions),
+    );
     await app.init();
     await app.getHttpAdapter().getInstance().ready();
   });
@@ -116,28 +123,37 @@ describe("AddressesController", () => {
   it("creates an address from the parsed body", async () => {
     service.create.mockResolvedValue({ id: ADDRESS_ID });
 
-    const response = await app.inject(requests[1]!);
+    const response = await app.inject({
+      ...requests[1]!,
+      headers: { [REQUEST_ID_HEADER]: REQUEST_ID },
+    });
 
     expect(response.statusCode).toBe(201);
-    expect(service.create).toHaveBeenCalledWith(USER_ID, requests[1]!.payload);
+    expect(service.create).toHaveBeenCalledWith(ACTOR, requests[1]!.payload);
   });
 
   it("edits an address", async () => {
     service.update.mockResolvedValue({ id: ADDRESS_ID });
 
-    const response = await app.inject(requests[2]!);
+    const response = await app.inject({
+      ...requests[2]!,
+      headers: { [REQUEST_ID_HEADER]: REQUEST_ID },
+    });
 
     expect(response.statusCode).toBe(200);
-    expect(service.update).toHaveBeenCalledWith(USER_ID, ADDRESS_ID, { city: "Othertown" });
+    expect(service.update).toHaveBeenCalledWith(ACTOR, ADDRESS_ID, { city: "Othertown" });
   });
 
   it("deletes an address with no body in the answer", async () => {
     service.remove.mockResolvedValue(undefined);
 
-    const response = await app.inject(requests[3]!);
+    const response = await app.inject({
+      ...requests[3]!,
+      headers: { [REQUEST_ID_HEADER]: REQUEST_ID },
+    });
 
     expect(response.statusCode).toBe(204);
-    expect(service.remove).toHaveBeenCalledWith(USER_ID, ADDRESS_ID);
+    expect(service.remove).toHaveBeenCalledWith(ACTOR, ADDRESS_ID);
   });
 
   it("answers 400 for an id that isn't a uuid, without asking the service", async () => {

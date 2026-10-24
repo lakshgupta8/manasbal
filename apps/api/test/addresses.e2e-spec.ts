@@ -1,7 +1,9 @@
 import { APP_FILTER } from "@nestjs/core";
 import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fastify";
 import { Test } from "@nestjs/testing";
+import { AuditModule } from "../src/audit/audit.module.js";
 import { ProblemDetailsFilter } from "../src/errors/problem-details.filter.js";
+import { fastifyOptions, REQUEST_ID_HEADER } from "../src/logging/logging.config.js";
 import { DEMO_USER_HEADER } from "../src/users/demo-user.guard.js";
 import { UsersModule } from "../src/users/users.module.js";
 import { startTestDatabase, type TestDatabase } from "./support/test-database.js";
@@ -27,7 +29,17 @@ describe("/me/addresses (e2e)", () => {
     method: "GET" | "POST" | "PATCH" | "DELETE",
     url: string,
     payload?: object,
-  ) => app.inject({ method, url, payload, headers: { [DEMO_USER_HEADER]: userId } });
+    requestId?: string,
+  ) =>
+    app.inject({
+      method,
+      url,
+      payload,
+      headers: {
+        [DEMO_USER_HEADER]: userId,
+        ...(requestId === undefined ? {} : { [REQUEST_ID_HEADER]: requestId }),
+      },
+    });
 
   async function createUser(email: string): Promise<string> {
     const user = await database.db.orm.public.User.select("id").create({
@@ -45,10 +57,12 @@ describe("/me/addresses (e2e)", () => {
     userB = await createUser("user-b@example.test");
 
     const moduleRef = await Test.createTestingModule({
-      imports: [UsersModule],
+      imports: [AuditModule, UsersModule],
       providers: [{ provide: APP_FILTER, useClass: ProblemDetailsFilter }],
     }).compile();
-    app = moduleRef.createNestApplication<NestFastifyApplication>(new FastifyAdapter());
+    app = moduleRef.createNestApplication<NestFastifyApplication>(
+      new FastifyAdapter(fastifyOptions),
+    );
     await app.init();
     await app.getHttpAdapter().getInstance().ready();
   }, 180_000);
@@ -78,6 +92,44 @@ describe("/me/addresses (e2e)", () => {
 
     expect((await as(userA, "DELETE", `/me/addresses/${id}`)).statusCode).toBe(204);
     expect((await as(userA, "GET", "/me/addresses")).json()).toEqual([]);
+  });
+
+  it("writes an audit row for each change, and none for an edit that finds nothing", async () => {
+    const { id } = (await as(userA, "POST", "/me/addresses", address, "test-req-1")).json<{
+      id: string;
+    }>();
+    await as(userA, "PATCH", `/me/addresses/${id}`, { city: "Othertown" }, "test-req-2");
+    // Another user's edit is a 404 and records nothing.
+    await as(userB, "PATCH", `/me/addresses/${id}`, { city: "Elsewhere" }, "test-req-3");
+    await as(userA, "DELETE", `/me/addresses/${id}`, undefined, "test-req-4");
+
+    const rows = await database.db.orm.public.AuditLog.where({ targetId: id })
+      .select("actorId", "action", "targetType", "requestId")
+      .all();
+
+    expect(rows).toHaveLength(3);
+    expect(rows).toEqual(
+      expect.arrayContaining([
+        {
+          actorId: userA,
+          action: "address.create",
+          targetType: "address",
+          requestId: "test-req-1",
+        },
+        {
+          actorId: userA,
+          action: "address.update",
+          targetType: "address",
+          requestId: "test-req-2",
+        },
+        {
+          actorId: userA,
+          action: "address.delete",
+          targetType: "address",
+          requestId: "test-req-4",
+        },
+      ]),
+    );
   });
 
   it("gives user B a 404 for user A's address and leaves it alone", async () => {

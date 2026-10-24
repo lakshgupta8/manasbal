@@ -2,6 +2,7 @@ import { ConflictException, NotFoundException } from "@nestjs/common";
 import { AddressesService } from "./addresses.service.js";
 
 const USER_ID = "7b0c1e2a-3d4f-4a5b-8c6d-7e8f9a0b1c2d";
+const WHO = { userId: USER_ID, requestId: "req-1" };
 const ADDRESS_ID = "0f1e2d3c-4b5a-4968-8776-655443322110";
 
 const input = {
@@ -52,11 +53,13 @@ vi.mock("../prisma/db.js", () => ({
 }));
 
 describe("AddressesService", () => {
-  const service = new AddressesService();
+  const audit = { record: vi.fn() };
+  const service = new AddressesService(audit);
 
   beforeEach(() => {
     Address = fakeCollection();
     Order = fakeCollection();
+    audit.record.mockReset();
   });
 
   it("lists only the user's addresses, the default first", async () => {
@@ -76,7 +79,7 @@ describe("AddressesService", () => {
   it("creates a non-default address for the user, marked for the demo reset", async () => {
     Address.create.mockResolvedValue({ id: ADDRESS_ID });
 
-    await service.create(USER_ID, input);
+    await service.create(WHO, input);
 
     expect(Address.create).toHaveBeenCalledWith({
       ...input,
@@ -85,10 +88,19 @@ describe("AddressesService", () => {
       createdByVisitor: true,
     });
     expect(Address.updateAndCount).not.toHaveBeenCalled();
+    // The audit row goes in the same transaction, so it gets the transaction's orm.
+    expect(audit.record).toHaveBeenCalledWith(
+      WHO,
+      "address.create",
+      { type: "address", id: ADDRESS_ID },
+      expect.anything(),
+    );
   });
 
   it("clears the user's old default before creating a new one", async () => {
-    await service.create(USER_ID, { ...input, isDefault: true });
+    Address.create.mockResolvedValue({ id: ADDRESS_ID });
+
+    await service.create(WHO, { ...input, isDefault: true });
 
     expect(Address.filters).toEqual([{ userId: USER_ID, isDefault: true }]);
     expect(Address.updateAndCount).toHaveBeenCalledWith({ isDefault: false });
@@ -98,19 +110,25 @@ describe("AddressesService", () => {
     Address.first.mockResolvedValue({ id: ADDRESS_ID });
     Address.update.mockResolvedValue({ id: ADDRESS_ID, city: "Othertown" });
 
-    await expect(service.update(USER_ID, ADDRESS_ID, { city: "Othertown" })).resolves.toEqual({
+    await expect(service.update(WHO, ADDRESS_ID, { city: "Othertown" })).resolves.toEqual({
       id: ADDRESS_ID,
       city: "Othertown",
     });
     expect(Address.filters).toContainEqual({ id: ADDRESS_ID, userId: USER_ID });
     expect(Address.updateAndCount).not.toHaveBeenCalled();
+    expect(audit.record).toHaveBeenCalledWith(
+      WHO,
+      "address.update",
+      { type: "address", id: ADDRESS_ID },
+      expect.anything(),
+    );
   });
 
   it("clears the old default when an edit makes an address the default", async () => {
     Address.first.mockResolvedValue({ id: ADDRESS_ID });
     Address.update.mockResolvedValue({ id: ADDRESS_ID, isDefault: true });
 
-    await service.update(USER_ID, ADDRESS_ID, { isDefault: true });
+    await service.update(WHO, ADDRESS_ID, { isDefault: true });
 
     expect(Address.updateAndCount).toHaveBeenCalledWith({ isDefault: false });
   });
@@ -118,33 +136,42 @@ describe("AddressesService", () => {
   it("answers 404 when editing an address the user doesn't have", async () => {
     Address.first.mockResolvedValue(null);
 
-    await expect(service.update(USER_ID, ADDRESS_ID, { city: "Othertown" })).rejects.toThrow(
+    await expect(service.update(WHO, ADDRESS_ID, { city: "Othertown" })).rejects.toThrow(
       NotFoundException,
     );
     expect(Address.update).not.toHaveBeenCalled();
+    expect(audit.record).not.toHaveBeenCalled();
   });
 
   it("deletes the user's address", async () => {
     Address.first.mockResolvedValue({ id: ADDRESS_ID });
     Order.first.mockResolvedValue(null);
 
-    await service.remove(USER_ID, ADDRESS_ID);
+    await service.remove(WHO, ADDRESS_ID);
 
     expect(Address.delete).toHaveBeenCalled();
+    expect(audit.record).toHaveBeenCalledWith(
+      WHO,
+      "address.delete",
+      { type: "address", id: ADDRESS_ID },
+      expect.anything(),
+    );
   });
 
   it("answers 404 when deleting an address the user doesn't have", async () => {
     Address.first.mockResolvedValue(null);
 
-    await expect(service.remove(USER_ID, ADDRESS_ID)).rejects.toThrow(NotFoundException);
+    await expect(service.remove(WHO, ADDRESS_ID)).rejects.toThrow(NotFoundException);
     expect(Address.delete).not.toHaveBeenCalled();
+    expect(audit.record).not.toHaveBeenCalled();
   });
 
   it("answers 409 when an order was sent to the address", async () => {
     Address.first.mockResolvedValue({ id: ADDRESS_ID });
     Order.first.mockResolvedValue({ id: "order" });
 
-    await expect(service.remove(USER_ID, ADDRESS_ID)).rejects.toThrow(ConflictException);
+    await expect(service.remove(WHO, ADDRESS_ID)).rejects.toThrow(ConflictException);
     expect(Address.delete).not.toHaveBeenCalled();
+    expect(audit.record).not.toHaveBeenCalled();
   });
 });

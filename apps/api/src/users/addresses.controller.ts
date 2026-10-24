@@ -30,7 +30,13 @@ import {
 } from "@manasbal/types";
 import { ApiZodBody, ZodValidationPipe } from "../validation/zod-validation.pipe.js";
 import { AddressesService } from "./addresses.service.js";
-import { CurrentUserId, DEMO_USER_HEADER, DemoUserGuard } from "./demo-user.guard.js";
+import {
+  type Actor,
+  CurrentActor,
+  CurrentUserId,
+  DEMO_USER_HEADER,
+  DemoUserGuard,
+} from "./demo-user.guard.js";
 
 // A class rather than an interface so the OpenAPI description (and the generated SDK) knows
 // the shape of the answer.
@@ -83,10 +89,10 @@ export class AddressesController {
   @ApiZodBody(addressInputSchema)
   @ApiCreatedResponse({ type: Address })
   create(
-    @CurrentUserId() userId: string,
+    @CurrentActor() who: Actor,
     @Body(new ZodValidationPipe(addressInputSchema)) input: AddressInput,
   ): Promise<Address> {
-    return this.addresses.create(userId, input);
+    return this.addresses.create(who, input);
   }
 
   @Patch(":id")
@@ -94,11 +100,11 @@ export class AddressesController {
   @ApiOkResponse({ type: Address })
   @ApiNotFoundResponse({ description: "The user has no address with this id" })
   update(
-    @CurrentUserId() userId: string,
+    @CurrentActor() who: Actor,
     @Param("id", ParseUUIDPipe) id: string,
     @Body(new ZodValidationPipe(addressPatchSchema)) patch: AddressPatch,
   ): Promise<Address> {
-    return this.addresses.update(userId, id, patch);
+    return this.addresses.update(who, id, patch);
   }
 
   @Delete(":id")
@@ -106,7 +112,7 @@ export class AddressesController {
   @ApiNoContentResponse()
   @ApiNotFoundResponse({ description: "The user has no address with this id" })
   @ApiConflictResponse({ description: "An order was sent to this address" })
-  remove(@CurrentUserId() userId: string, @Param("id", ParseUUIDPipe) id: string): Promise<void> {
-    return this.addresses.remove(userId, id);
+  remove(@CurrentActor() who: Actor, @Param("id", ParseUUIDPipe) id: string): Promise<void> {
+    return this.addresses.remove(who, id);
   }
 }
