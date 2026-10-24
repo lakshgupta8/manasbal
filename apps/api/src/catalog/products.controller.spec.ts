@@ -1,4 +1,7 @@
+import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fastify";
+import { Test } from "@nestjs/testing";
 import { ProductsController } from "./products.controller.js";
+import { ProductsService } from "./products.service.js";
 
 describe("ProductsController", () => {
   it("passes the query to the service and answers its page", async () => {
@@ -17,5 +20,22 @@ describe("ProductsController", () => {
 
     await expect(controller.stock("p1")).resolves.toBe(stock);
     expect(service.stock).toHaveBeenCalledWith("p1");
+  });
+
+  it("refuses an id that is not a uuid with 400, without calling the service", async () => {
+    const service = { list: vi.fn(), stock: vi.fn() };
+    const moduleRef = await Test.createTestingModule({
+      controllers: [ProductsController],
+      providers: [{ provide: ProductsService, useValue: service }],
+    }).compile();
+    const app = moduleRef.createNestApplication<NestFastifyApplication>(new FastifyAdapter());
+    await app.init();
+    await app.getHttpAdapter().getInstance().ready();
+
+    const response = await app.inject({ method: "GET", url: "/products/not-a-uuid/stock" });
+    await app.close();
+
+    expect(response.statusCode).toBe(400);
+    expect(service.stock).not.toHaveBeenCalled();
   });
 });

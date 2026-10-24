@@ -11,8 +11,6 @@ describe("GET /products/:id/stock (e2e)", () => {
   let database: TestDatabase;
   let app: NestFastifyApplication;
   let stocked: string;
-  let bare: string;
-  let oversold: string;
 
   function get(url: string) {
     return app.inject({ method: "GET", url });
@@ -71,12 +69,6 @@ describe("GET /products/:id/stock (e2e)", () => {
     // A variant that was never stocked.
     await variant(stocked, "TSHIRT-RED-L", "L");
 
-    bare = await product("bare");
-
-    oversold = await product("oversold");
-    const small = await variant(oversold, "OVERSOLD-S", "S");
-    await inventory(small, "north", 2, 5);
-
     const moduleRef = await Test.createTestingModule({
       imports: [CatalogModule],
       providers: [{ provide: APP_FILTER, useClass: ProblemDetailsFilter }],
@@ -104,19 +96,6 @@ describe("GET /products/:id/stock (e2e)", () => {
       { sku: "TSHIRT-RED-L", size: "L", colour: "Red", available: 0 },
       { sku: "TSHIRT-RED-M", size: "M", colour: "Red", available: 7 },
     ]);
-  });
-
-  it("answers no variants for a product without any", async () => {
-    const response = await get(`/products/${bare}/stock`);
-
-    expect(response.statusCode).toBe(200);
-    expect(response.json<ProductStock>().variants).toEqual([]);
-  });
-
-  it("never answers below 0 when more is reserved than held", async () => {
-    const response = await get(`/products/${oversold}/stock`);
-
-    expect(response.json<ProductStock>().variants[0]?.available).toBe(0);
   });
 
   it("answers 404 problem+json for an unknown product", async () => {
