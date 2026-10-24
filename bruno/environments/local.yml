@@ -18,3 +18,6 @@ variables:
   - name: productSlug
     value: striped-crew-tee
     description: ""
+  - name: variantId
+    value: be07c815-d4dd-4a9f-901b-82a50367e817
+    description: ""
