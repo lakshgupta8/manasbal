@@ -48,8 +48,9 @@ export class Cart {
 @ApiTags("Cart")
 @ApiHeader({
   name: DEMO_USER_HEADER,
-  description: "Id of the user to act as. Outside production only, until sign-in exists.",
-  required: true,
+  description:
+    "Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it.",
+  required: false,
 })
 @ApiUnauthorizedResponse({ description: "No user, or the API runs in production" })
 @UseGuards(DemoUserGuard)
