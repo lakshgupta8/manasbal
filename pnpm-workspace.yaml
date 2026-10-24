@@ -5,6 +5,9 @@ packages:
 # typescript-eslint and the Nest CLI don't support TypeScript 7 yet (checked Oct 2026).
 overrides:
   typescript: ~6.0.3
+  # CVE-2023-54404 (denial of service on unbounded arrays) is fixed in 4.6.6. eslint-plugin-react-hooks
+  # still locked an older copy.
+  "zod@<4.6.6": ^4.6.6
 
 # @nestjs/platform-fastify imports rxjs without declaring it, so it only resolved through
 # pnpm's hidden hoisting. Declaring the peer makes the link explicit and stable.
