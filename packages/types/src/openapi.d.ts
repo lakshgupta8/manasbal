@@ -196,6 +196,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/admin/audit-log": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["AdminController_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -357,6 +373,27 @@ export interface components {
     };
     OrderPage: {
       items: components["schemas"]["OrderSummary"][];
+      /** @description Pass as cursor to get the next page; null on the last page */
+      nextCursor: string | null;
+    };
+    AuditEntry: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      actorId: string | null;
+      /** @example address.create */
+      action: string;
+      /** @example address */
+      targetType: string;
+      /** Format: uuid */
+      targetId: string;
+      /** @description The x-request-id of the request that made the change */
+      requestId: string;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    AuditPage: {
+      items: components["schemas"]["AuditEntry"][];
       /** @description Pass as cursor to get the next page; null on the last page */
       nextCursor: string | null;
     };
@@ -850,6 +887,54 @@ export interface operations {
       };
       /** @description No user, or the API runs in production */
       401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AdminController_list: {
+    parameters: {
+      query?: {
+        /** @description nextCursor from the previous page */
+        cursor?: string;
+        /** @description 1 to 100, default 20 */
+        limit?: string;
+      };
+      header: {
+        /** @description Id of the user to act as. Outside production only, until sign-in exists. */
+        "x-demo-user": string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AuditPage"];
+        };
+      };
+      /** @description The cursor or limit is not valid */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No user, or the API runs in production */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The user is not an admin */
+      403: {
         headers: {
           [name: string]: unknown;
         };

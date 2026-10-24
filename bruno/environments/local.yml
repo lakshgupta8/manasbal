@@ -7,17 +7,20 @@ variables:
     value: 71efaaf0-3fd7-4587-b370-588263a0d779
     description: ""
   - name: addressId
-    value: e8c6e7be-f6c3-4716-afe9-48f66e40a1b7
+    value: 8b1eadc8-8e25-4df2-b42c-006dce2b4b05
     description: ""
   - name: productId
-    value: 3a9695ae-5638-4a46-804f-0ba00d0dd545
+    value: 4a862f84-536f-4527-8cf7-ad66c6600f96
     description: ""
   - name: sellerSlug
-    value: sample-threads
+    value: pocket-tee
     description: ""
   - name: productSlug
     value: striped-crew-tee
     description: ""
   - name: variantId
-    value: be07c815-d4dd-4a9f-901b-82a50367e817
+    value: b58f0ae6-220a-49ed-ad8b-7693064cf887
+    description: ""
+  - name: adminUser
+    value: 3fbacab0-047e-4acb-a75d-fc32e380cee1
     description: ""

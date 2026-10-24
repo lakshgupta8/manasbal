@@ -629,6 +629,62 @@
         },
         "tags": ["Orders"]
       }
+    },
+    "/admin/audit-log": {
+      "get": {
+        "operationId": "AdminController_list",
+        "parameters": [
+          {
+            "name": "x-demo-user",
+            "in": "header",
+            "description": "Id of the user to act as. Outside production only, until sign-in exists.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "nextCursor from the previous page",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "1 to 100, default 20",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The cursor or limit is not valid"
+          },
+          "401": {
+            "description": "No user, or the API runs in production"
+          },
+          "403": {
+            "description": "The user is not an admin"
+          }
+        },
+        "tags": ["Admin"]
+      }
     }
   },
   "info": {
@@ -1042,6 +1098,58 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/OrderSummary"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true,
+            "description": "Pass as cursor to get the next page; null on the last page"
+          }
+        },
+        "required": ["items", "nextCursor"]
+      },
+      "AuditEntry": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actorId": {
+            "type": "string",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "action": {
+            "type": "string",
+            "example": "address.create"
+          },
+          "targetType": {
+            "type": "string",
+            "example": "address"
+          },
+          "targetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestId": {
+            "type": "string",
+            "description": "The x-request-id of the request that made the change"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["id", "actorId", "action", "targetType", "targetId", "requestId", "createdAt"]
+      },
+      "AuditPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuditEntry"
             }
           },
           "nextCursor": {
