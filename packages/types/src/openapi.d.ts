@@ -428,9 +428,9 @@ export interface operations {
   AddressesController_list: {
     parameters: {
       query?: never;
-      header: {
-        /** @description Id of the user to act as. Outside production only, until sign-in exists. */
-        "x-demo-user": string;
+      header?: {
+        /** @description Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it. */
+        "x-demo-user"?: string;
       };
       path?: never;
       cookie?: never;
@@ -457,9 +457,9 @@ export interface operations {
   AddressesController_create: {
     parameters: {
       query?: never;
-      header: {
-        /** @description Id of the user to act as. Outside production only, until sign-in exists. */
-        "x-demo-user": string;
+      header?: {
+        /** @description Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it. */
+        "x-demo-user"?: string;
       };
       path?: never;
       cookie?: never;
@@ -498,9 +498,9 @@ export interface operations {
   AddressesController_remove: {
     parameters: {
       query?: never;
-      header: {
-        /** @description Id of the user to act as. Outside production only, until sign-in exists. */
-        "x-demo-user": string;
+      header?: {
+        /** @description Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it. */
+        "x-demo-user"?: string;
       };
       path: {
         id: string;
@@ -541,9 +541,9 @@ export interface operations {
   AddressesController_update: {
     parameters: {
       query?: never;
-      header: {
-        /** @description Id of the user to act as. Outside production only, until sign-in exists. */
-        "x-demo-user": string;
+      header?: {
+        /** @description Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it. */
+        "x-demo-user"?: string;
       };
       path: {
         id: string;
@@ -774,9 +774,9 @@ export interface operations {
   CartController_get: {
     parameters: {
       query?: never;
-      header: {
-        /** @description Id of the user to act as. Outside production only, until sign-in exists. */
-        "x-demo-user": string;
+      header?: {
+        /** @description Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it. */
+        "x-demo-user"?: string;
       };
       path?: never;
       cookie?: never;
@@ -803,9 +803,9 @@ export interface operations {
   CartController_addItem: {
     parameters: {
       query?: never;
-      header: {
-        /** @description Id of the user to act as. Outside production only, until sign-in exists. */
-        "x-demo-user": string;
+      header?: {
+        /** @description Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it. */
+        "x-demo-user"?: string;
         /** @description Repeats of the same key answer the first result instead of adding again */
         "Idempotency-Key"?: string;
       };
@@ -861,9 +861,9 @@ export interface operations {
         /** @description 1 to 100, default 20 */
         limit?: string;
       };
-      header: {
-        /** @description Id of the user to act as. Outside production only, until sign-in exists. */
-        "x-demo-user": string;
+      header?: {
+        /** @description Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it. */
+        "x-demo-user"?: string;
       };
       path?: never;
       cookie?: never;
@@ -902,9 +902,9 @@ export interface operations {
         /** @description 1 to 100, default 20 */
         limit?: string;
       };
-      header: {
-        /** @description Id of the user to act as. Outside production only, until sign-in exists. */
-        "x-demo-user": string;
+      header?: {
+        /** @description Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it. */
+        "x-demo-user"?: string;
       };
       path?: never;
       cookie?: never;
