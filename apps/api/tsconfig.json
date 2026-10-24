@@ -18,7 +18,7 @@
     "skipLibCheck": true,
     "strict": true,
     "strictPropertyInitialization": false,
-    "types": ["vitest/globals", "node"],
+    "types": ["vitest/globals", "node", "temporal-spec/global"],
     "resolveJsonModule": true
   },
   "exclude": ["node_modules", "dist", "migrations", "prisma.config.ts"]
