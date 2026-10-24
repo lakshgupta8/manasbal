@@ -1,33 +1,13 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import type { ReviewPage } from "@manasbal/types";
-import { z } from "zod";
-import { parsePageQuery, toPage, type PageQuery } from "../pagination/pagination.js";
+import { parsePageQuery, parseTimeKey, toPage, type PageQuery } from "../pagination/pagination.js";
 import { getDb } from "../prisma/db.js";
-
-// A review's place in the list: when it was written, then its id to break ties.
-interface ReviewKey {
-  createdAt: string;
-  id: string;
-}
-
-// The cursor key is `${createdAt}|${id}`. Anything else is the client's mistake, not a 500.
-function parseKey(key: string): ReviewKey {
-  const [createdAt, id, ...rest] = key.split("|");
-  if (
-    rest.length > 0 ||
-    !z.iso.datetime().safeParse(createdAt).success ||
-    !z.uuid().safeParse(id).success
-  ) {
-    throw new BadRequestException("cursor is not valid");
-  }
-  return { createdAt: createdAt!, id: id! };
-}
 
 @Injectable()
 export class ReviewsService {
   async list(slug: string, { cursor, limit }: PageQuery): Promise<ReviewPage> {
     const params = parsePageQuery({ cursor, limit });
-    const after = params.after === undefined ? undefined : parseKey(params.after);
+    const after = params.after === undefined ? undefined : parseTimeKey(params.after);
 
     const db = getDb().orm.public;
     const product = await db.Product.where({ slug }).select("id").first();

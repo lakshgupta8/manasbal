@@ -16,6 +16,7 @@ model User {
   addresses        Address[]
   orders           Order[]
   reviews          Review[]
+  cart             Cart?
   auditLogs        AuditLog[]
 
   @@map("users")
@@ -74,6 +75,7 @@ model Variant {
   product    Product     @relation(fields: [productId], references: [id])
   inventory  Inventory[]
   orderItems OrderItem[]
+  cartItems  CartItem[]
 
   @@map("variants")
 }
@@ -203,4 +205,26 @@ model AuditLog {
   actor      User?    @relation(fields: [actorId], references: [id])
 
   @@map("audit_logs")
+}
+
+model Cart {
+  id               Uuid       @id @default(uuid())
+  userId           Uuid       @unique @map("user_id")
+  createdByVisitor Boolean    @default(false) @map("created_by_visitor")
+  user             User       @relation(fields: [userId], references: [id])
+  items            CartItem[]
+
+  @@map("carts")
+}
+
+model CartItem {
+  id        Uuid    @id @default(uuid())
+  cartId    Uuid    @map("cart_id")
+  variantId Uuid    @map("variant_id")
+  quantity  Int
+  cart      Cart    @relation(fields: [cartId], references: [id])
+  variant   Variant @relation(fields: [variantId], references: [id])
+
+  @@unique([cartId, variantId])
+  @@map("cart_items")
 }
