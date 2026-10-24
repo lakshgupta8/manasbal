@@ -46,3 +46,16 @@ export const CurrentUserId = createParamDecorator(
   (_data: unknown, context: ExecutionContext): string =>
     context.switchToHttp().getRequest<DemoUserRequest>().userId!,
 );
+
+// Who made the request, for the audit log: the user DemoUserGuard let in and the request's ID.
+export interface Actor {
+  userId: string;
+  requestId: string;
+}
+
+export const CurrentActor = createParamDecorator(
+  (_data: unknown, context: ExecutionContext): Actor => {
+    const request = context.switchToHttp().getRequest<DemoUserRequest>();
+    return { userId: request.userId!, requestId: String(request.id) };
+  },
+);
