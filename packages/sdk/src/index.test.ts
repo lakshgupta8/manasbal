@@ -33,8 +33,6 @@ describe("createApiClient", () => {
   }
 
   const ID = "00000000-0000-4000-8000-000000000001";
-  // The OpenAPI description lists the header as required on these calls, so the types ask for it.
-  const AS = { "x-demo-user": ID };
   const VARIANT = "00000000-0000-4000-8000-000000000002";
 
   it("gets a product by slug, with typed variants", async () => {
@@ -62,7 +60,7 @@ describe("createApiClient", () => {
   it("sends the cursor and limit of a list as a query string", async () => {
     const { api, fetch } = fakeApi({ items: [], nextCursor: null });
 
-    await api.GET("/orders", { params: { header: AS, query: { limit: "5", cursor: "abc" } } });
+    await api.GET("/orders", { params: { query: { limit: "5", cursor: "abc" } } });
 
     expect(fetch.mock.calls[0]![0].url).toBe("http://api.test/orders?limit=5&cursor=abc");
   });
@@ -71,7 +69,6 @@ describe("createApiClient", () => {
     const { api, fetch } = fakeApi({ items: [], subtotalPaise: 0 }, 201);
 
     await api.POST("/cart/items", {
-      params: { header: AS },
       body: { variantId: VARIANT, quantity: 1 },
     });
 
@@ -85,10 +82,10 @@ describe("createApiClient", () => {
     const { api, fetch } = fakeApi({}, 200);
 
     await api.PATCH("/me/addresses/{id}", {
-      params: { header: AS, path: { id: ID } },
+      params: { path: { id: ID } },
       body: { city: "Pune" },
     });
-    await api.DELETE("/me/addresses/{id}", { params: { header: AS, path: { id: ID } } });
+    await api.DELETE("/me/addresses/{id}", { params: { path: { id: ID } } });
 
     const [patch, remove] = fetch.mock.calls.map(([request]) => request);
     expect([patch!.method, patch!.url]).toEqual(["PATCH", `http://api.test/me/addresses/${ID}`]);
@@ -110,18 +107,17 @@ describe("createApiClient", () => {
   it("gets the admin audit log", async () => {
     const { api, fetch } = fakeApi({ items: [], nextCursor: null });
 
-    await api.GET("/admin/audit-log", { params: { header: AS } });
+    await api.GET("/admin/audit-log", {});
 
     expect(fetch.mock.calls[0]![0].url).toBe("http://api.test/admin/audit-log");
   });
 
-  // The header comes from the option here, so the call leaves out its own.
   it("sends the demo user header only when given one", async () => {
     const withUser = fakeApi({ items: [], subtotalPaise: 0 }, 200, "application/json", ID);
     const without = fakeApi({ items: [], subtotalPaise: 0 });
 
-    await withUser.api.GET("/cart", { params: { header: {} as never } });
-    await without.api.GET("/cart", { params: { header: {} as never } });
+    await withUser.api.GET("/cart");
+    await without.api.GET("/cart");
 
     expect(withUser.fetch.mock.calls[0]![0].headers.get("x-demo-user")).toBe(ID);
     expect(without.fetch.mock.calls[0]![0].headers.has("x-demo-user")).toBe(false);
