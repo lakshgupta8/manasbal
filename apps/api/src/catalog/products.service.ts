@@ -1,11 +1,18 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
-import type { ProductPage, ProductSummary } from "@manasbal/types";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import type { ProductPage, ProductStock, ProductSummary } from "@manasbal/types";
 import { z } from "zod";
 import { parsePageQuery, toPage, type PageQuery } from "../pagination/pagination.js";
 import { getDb } from "../prisma/db.js";
 
 export interface ProductListQuery extends PageQuery {
   category?: string;
+}
+
+// What a buyer can order from one variant: quantity minus reserved over every location, never
+// below 0.
+export function availableOf(inventory: { quantity: number; reserved: number }[]): number {
+  const total = inventory.reduce((sum, row) => sum + row.quantity - row.reserved, 0);
+  return Math.max(0, total);
 }
 
 @Injectable()
@@ -53,5 +60,31 @@ export class ProductsService {
       };
     });
     return toPage(items, params, (p) => p.id);
+  }
+
+  async stock(id: string): Promise<ProductStock> {
+    const product = await getDb()
+      .orm.public.Product.where({ id })
+      // Only the columns the answer needs: reading a timestamp column would need a global Temporal.
+      .select("id")
+      .include("variants", (v) =>
+        v
+          .orderBy((variant) => variant.sku.asc())
+          .select("id", "sku", "size", "colour")
+          .include("inventory", (i) => i.select("quantity", "reserved")),
+      )
+      .first();
+    if (product === null) throw new NotFoundException("No product with this id");
+
+    return {
+      productId: product.id,
+      variants: product.variants.map((variant) => ({
+        variantId: variant.id,
+        sku: variant.sku,
+        size: variant.size,
+        colour: variant.colour,
+        available: availableOf(variant.inventory),
+      })),
+    };
   }
 }

@@ -1,6 +1,6 @@
-import { BadRequestException } from "@nestjs/common";
+import { BadRequestException, NotFoundException } from "@nestjs/common";
 import { encodeCursor } from "../pagination/pagination.js";
-import { ProductsService } from "./products.service.js";
+import { availableOf, ProductsService } from "./products.service.js";
 
 interface ProductRow {
   id: string;
@@ -8,6 +8,24 @@ interface ProductRow {
   name: string;
   variants: number | null;
   category: { slug: string; name: string } | null;
+}
+
+interface VariantQuery {
+  select(...fields: string[]): VariantQuery;
+  min(field: string): VariantQuery;
+  orderBy(order: (v: { sku: { asc(): string } }) => string): VariantQuery;
+  include(relation: string, shape: (q: VariantQuery) => unknown): VariantQuery;
+}
+
+interface StockRow {
+  id: string;
+  variants: {
+    id: string;
+    sku: string;
+    size: string | null;
+    colour: string | null;
+    inventory: { quantity: number; reserved: number }[];
+  }[];
 }
 
 const { products, categoryWhere, categoryFirst } = vi.hoisted(() => {
@@ -25,11 +43,25 @@ const { products, categoryWhere, categoryFirst } = vi.hoisted(() => {
     include: vi.fn(function (
       this: unknown,
       _relation: string,
-      shape: (q: { select(...fields: string[]): string; min(field: string): string }) => string,
+      shape: (q: VariantQuery) => unknown,
     ) {
-      shape({ select: () => "select", min: () => "min" });
+      // One fake serves every include: the variants query chains orderBy/select/include itself.
+      const query: VariantQuery = {
+        select: () => query,
+        min: () => query,
+        orderBy: (order) => {
+          order({ sku: { asc: () => "sku asc" } });
+          return query;
+        },
+        include: (_nested, nestedShape) => {
+          nestedShape(query);
+          return query;
+        },
+      };
+      shape(query);
       return this;
     }),
+    first: vi.fn<() => Promise<StockRow | null>>(),
     all: vi.fn<() => Promise<ProductRow[]>>(),
   };
   const categoryFirst = vi.fn<() => Promise<{ id: string } | null>>();
@@ -145,5 +177,67 @@ describe("ProductsService", () => {
     products.all.mockResolvedValue([{ ...row(FIRST), category: null }]);
 
     await expect(service.list({})).rejects.toThrow(`product ${FIRST} has no category`);
+  });
+
+  describe("stock", () => {
+    it("answers what is available per variant", async () => {
+      products.first.mockResolvedValue({
+        id: FIRST,
+        variants: [
+          {
+            id: SECOND,
+            sku: "TSHIRT-RED-M",
+            size: "M",
+            colour: "Red",
+            inventory: [
+              { quantity: 5, reserved: 1 },
+              { quantity: 4, reserved: 1 },
+            ],
+          },
+        ],
+      });
+
+      await expect(service.stock(FIRST)).resolves.toEqual({
+        productId: FIRST,
+        variants: [
+          { variantId: SECOND, sku: "TSHIRT-RED-M", size: "M", colour: "Red", available: 7 },
+        ],
+      });
+      expect(products.where).toHaveBeenCalledWith({ id: FIRST });
+      expect(products.select).toHaveBeenCalledWith("id");
+    });
+
+    it("answers no variants for a product without any", async () => {
+      products.first.mockResolvedValue({ id: FIRST, variants: [] });
+
+      await expect(service.stock(FIRST)).resolves.toEqual({ productId: FIRST, variants: [] });
+    });
+
+    it("refuses an unknown product with 404", async () => {
+      products.first.mockResolvedValue(null);
+
+      await expect(service.stock(FIRST)).rejects.toThrow(
+        new NotFoundException("No product with this id"),
+      );
+    });
+  });
+});
+
+describe("availableOf", () => {
+  it("adds up quantity minus reserved over every location", () => {
+    expect(
+      availableOf([
+        { quantity: 5, reserved: 1 },
+        { quantity: 4, reserved: 1 },
+      ]),
+    ).toBe(7);
+  });
+
+  it("is 0 without inventory rows", () => {
+    expect(availableOf([])).toBe(0);
+  });
+
+  it("never goes below 0 when more is reserved than held", () => {
+    expect(availableOf([{ quantity: 2, reserved: 5 }])).toBe(0);
   });
 });

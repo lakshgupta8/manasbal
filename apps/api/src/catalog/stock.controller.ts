@@ -7,7 +7,7 @@ import {
   ApiTags,
 } from "@nestjs/swagger";
 import type { ProductStock as ProductStockShape } from "@manasbal/types";
-import { StockService } from "./stock.service.js";
+import { ProductsService } from "./products.service.js";
 
 // Classes rather than interfaces so the OpenAPI description knows the shape of the answer. They
 // mirror productStockSchema in @manasbal/types.
@@ -44,7 +44,7 @@ export class ProductStock {
 @ApiTags("Catalog")
 @Controller()
 export class StockController {
-  constructor(private readonly stock: StockService) {}
+  constructor(private readonly products: ProductsService) {}
 
   // How many of each variant of a product can be bought right now.
   @Get("products/:id/stock")
@@ -52,6 +52,6 @@ export class StockController {
   @ApiBadRequestResponse({ description: "The id is not a uuid" })
   @ApiNotFoundResponse({ description: "No such product" })
   get(@Param("id", ParseUUIDPipe) id: string): Promise<ProductStockShape> {
-    return this.stock.forProduct(id);
+    return this.products.stock(id);
   }
 }
