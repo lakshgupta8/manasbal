@@ -328,7 +328,7 @@
     },
     "/products/{id}/stock": {
       "get": {
-        "operationId": "StockController_get",
+        "operationId": "ProductsController_stock",
         "parameters": [
           {
             "name": "id",

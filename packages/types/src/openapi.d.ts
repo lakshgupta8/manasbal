@@ -91,7 +91,7 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    get: operations["StockController_get"];
+    get: operations["ProductsController_stock"];
     put?: never;
     post?: never;
     delete?: never;
@@ -413,7 +413,7 @@ export interface operations {
       };
     };
   };
-  StockController_get: {
+  ProductsController_stock: {
     parameters: {
       query?: never;
       header?: never;

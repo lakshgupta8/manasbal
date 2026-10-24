@@ -1,6 +1,7 @@
-import { Controller, Get, Query } from "@nestjs/common";
+import { Controller, Get, Param, ParseUUIDPipe, Query } from "@nestjs/common";
 import {
   ApiBadRequestResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiProperty,
   ApiQuery,
@@ -8,6 +9,7 @@ import {
 } from "@nestjs/swagger";
 import type {
   ProductPage as ProductPageShape,
+  ProductStock as ProductStockShape,
   ProductSummary as ProductSummaryShape,
 } from "@manasbal/types";
 import { DEFAULT_LIMIT, MAX_LIMIT } from "../pagination/pagination.js";
@@ -59,6 +61,36 @@ export class ProductPage {
   nextCursor: string | null;
 }
 
+export class VariantStock {
+  @ApiProperty({ format: "uuid" })
+  variantId: string;
+
+  @ApiProperty()
+  sku: string;
+
+  @ApiProperty({ type: String, nullable: true })
+  size: string | null;
+
+  @ApiProperty({ type: String, nullable: true })
+  colour: string | null;
+
+  @ApiProperty({
+    type: "integer",
+    minimum: 0,
+    description: "Quantity minus reserved over every location, never below 0",
+    example: 7,
+  })
+  available: number;
+}
+
+export class ProductStock {
+  @ApiProperty({ format: "uuid" })
+  productId: string;
+
+  @ApiProperty({ type: [VariantStock] })
+  variants: VariantStock[];
+}
+
 @ApiTags("Catalog")
 @Controller()
 export class ProductsController {
@@ -81,5 +113,14 @@ export class ProductsController {
     @Query("limit") limit?: string,
   ): Promise<ProductPageShape> {
     return this.products.list({ category, cursor, limit });
+  }
+
+  // How many of each variant of a product can be bought right now.
+  @Get("products/:id/stock")
+  @ApiOkResponse({ type: ProductStock })
+  @ApiBadRequestResponse({ description: "The id is not a uuid" })
+  @ApiNotFoundResponse({ description: "No such product" })
+  stock(@Param("id", ParseUUIDPipe) id: string): Promise<ProductStockShape> {
+    return this.products.stock(id);
   }
 }
