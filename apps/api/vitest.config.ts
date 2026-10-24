@@ -6,6 +6,7 @@ export default defineConfig({
   resolve: { tsconfigPaths: true },
   test: {
     globals: true,
+    setupFiles: ["./test/support/temporal.ts"],
     root: "./",
     include: ["**/*.spec.ts"],
     coverage: {
