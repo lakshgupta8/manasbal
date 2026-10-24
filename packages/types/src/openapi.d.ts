@@ -100,6 +100,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/products/{slug}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["ProductsController_detail"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/sellers/{slug}": {
     parameters: {
       query?: never;
@@ -249,6 +265,42 @@ export interface components {
       /** Format: uuid */
       productId: string;
       variants: components["schemas"]["VariantStock"][];
+    };
+    ProductSeller: {
+      slug: string;
+      storeName: string;
+    };
+    VariantDetail: {
+      /** Format: uuid */
+      variantId: string;
+      sku: string;
+      size: string | null;
+      colour: string | null;
+      /**
+       * @description Price in whole paise
+       * @example 49900
+       */
+      pricePaise: number;
+      /**
+       * @description Quantity minus reserved over every location, never below 0
+       * @example 7
+       */
+      available: number;
+    };
+    ProductDetail: {
+      /** Format: uuid */
+      id: string;
+      slug: string;
+      name: string;
+      description: string | null;
+      /**
+       * @description The cheapest variant's price in whole paise, or null when there are no variants
+       * @example 49900
+       */
+      pricePaise: number | null;
+      category: components["schemas"]["ProductCategory"];
+      seller: components["schemas"]["ProductSeller"];
+      variants: components["schemas"]["VariantDetail"][];
     };
     SellerStore: {
       slug: string;
@@ -576,6 +628,34 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+      /** @description No such product */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProductsController_detail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        slug: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProductDetail"];
+        };
       };
       /** @description No such product */
       404: {
