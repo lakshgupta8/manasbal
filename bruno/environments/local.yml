@@ -21,3 +21,6 @@ variables:
   - name: variantId
     value: be07c815-d4dd-4a9f-901b-82a50367e817
     description: ""
+  - name: adminUser
+    value: 5179b86e-e8cb-4343-ae7e-dbda08d20ed9
+    description: ""
