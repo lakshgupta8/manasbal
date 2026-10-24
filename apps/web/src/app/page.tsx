@@ -1,22 +1,6 @@
 import Image from "next/image";
-import { connection } from "next/server";
 import { Suspense } from "react";
-import { getCategories } from "@/lib/categories";
-
-// Rendered on each request (connection()), never at build time, so a build without the API
-// doesn't bake in the "unavailable" message.
-async function Categories() {
-  await connection();
-  const categories = await getCategories();
-  if (categories === null) return <p>Categories are unavailable right now</p>;
-  return (
-    <ul>
-      {categories.map((category) => (
-        <li key={category.id}>{category.name}</li>
-      ))}
-    </ul>
-  );
-}
+import { Categories } from "@/components/categories";
 
 export default function Home() {
   return (
