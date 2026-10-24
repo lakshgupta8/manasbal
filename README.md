@@ -70,6 +70,20 @@ docker compose down             # stop and remove the containers (the databases 
 
 Port 5432 must be free: stop any other Postgres running on your computer first.
 
+## API
+
+The API listens on http://localhost:3001 (set `PORT` to change it). Start the databases first (see above), then `pnpm dev`, or only the API with `pnpm --filter @manasbal/api dev`.
+
+**Docs.** With the API running, open http://localhost:3001/docs for the interactive page, where you can try each endpoint. The raw OpenAPI description is at http://localhost:3001/docs-json. `pnpm --filter @manasbal/api openapi` writes the same description to a file without starting the server (run `pnpm build` first).
+
+**Bruno collection.** The requests in [`bruno`](bruno) can be run with [Bruno](https://www.usebruno.com/):
+
+1. Open Bruno, choose **Open Collection**, and pick the `bruno` folder.
+2. Choose the **local** environment (top right). **prod** points at the hosted demo API.
+3. Run one request, or the whole collection with **Run** on the collection.
+
+The ids in [`bruno/environments/local.yml`](bruno/environments/local.yml) (`demoUser`, `adminUser`, `addressId`, `variantId` and the others) belong to rows in one database. On your own database, replace them with ids that exist there, or those requests answer 401 or 404. Requests that act as a user send the `demoUser` id in the `x-demo-user` header; the API accepts that header outside production only.
+
 ## Documentation
 
 - [Architecture decisions](docs/adr)
