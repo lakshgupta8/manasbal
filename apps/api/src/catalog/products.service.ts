@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import type { ProductPage, ProductStock, ProductSummary } from "@manasbal/types";
+import type { ProductDetail, ProductPage, ProductStock, ProductSummary } from "@manasbal/types";
 import { z } from "zod";
 import { parsePageQuery, toPage, type PageQuery } from "../pagination/pagination.js";
 import { getDb } from "../prisma/db.js";
@@ -85,6 +85,48 @@ export class ProductsService {
         colour: variant.colour,
         available: availableOf(variant.inventory),
       })),
+    };
+  }
+
+  async detail(slug: string): Promise<ProductDetail> {
+    const product = await getDb()
+      .orm.public.Product.where({ slug })
+      // Only the columns the answer needs: created_at stays unread.
+      .select("id", "slug", "name", "description")
+      .include("category", (c) => c.select("slug", "name"))
+      .include("seller", (s) => s.select("slug", "storeName"))
+      .include("variants", (v) =>
+        v
+          .orderBy((variant) => variant.sku.asc())
+          .select("id", "sku", "size", "colour", "pricePaise")
+          .include("inventory", (i) => i.select("quantity", "reserved")),
+      )
+      .first();
+    if (product === null) throw new NotFoundException("No product with this slug");
+
+    // Every product has a category and a seller in the schema; the ORM still types the includes
+    // as nullable.
+    const { category, seller } = product;
+    if (category === null) throw new Error(`product ${product.id} has no category`);
+    if (seller === null) throw new Error(`product ${product.id} has no seller`);
+
+    const variants = product.variants.map((variant) => ({
+      variantId: variant.id,
+      sku: variant.sku,
+      size: variant.size,
+      colour: variant.colour,
+      pricePaise: variant.pricePaise,
+      available: availableOf(variant.inventory),
+    }));
+    return {
+      id: product.id,
+      slug: product.slug,
+      name: product.name,
+      description: product.description,
+      pricePaise: variants.length === 0 ? null : Math.min(...variants.map((v) => v.pricePaise)),
+      category: { slug: category.slug, name: category.name },
+      seller: { slug: seller.slug, storeName: seller.storeName },
+      variants,
     };
   }
 }

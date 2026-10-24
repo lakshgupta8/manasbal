@@ -360,6 +360,37 @@
         "tags": ["Catalog"]
       }
     },
+    "/products/{slug}": {
+      "get": {
+        "operationId": "ProductsController_detail",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such product"
+          }
+        },
+        "tags": ["Catalog"]
+      }
+    },
     "/sellers/{slug}": {
       "get": {
         "operationId": "SellersController_store",
@@ -779,6 +810,98 @@
           }
         },
         "required": ["productId", "variants"]
+      },
+      "ProductSeller": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "storeName": {
+            "type": "string"
+          }
+        },
+        "required": ["slug", "storeName"]
+      },
+      "VariantDetail": {
+        "type": "object",
+        "properties": {
+          "variantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sku": {
+            "type": "string"
+          },
+          "size": {
+            "type": "string",
+            "nullable": true
+          },
+          "colour": {
+            "type": "string",
+            "nullable": true
+          },
+          "pricePaise": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Price in whole paise",
+            "example": 49900
+          },
+          "available": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Quantity minus reserved over every location, never below 0",
+            "example": 7
+          }
+        },
+        "required": ["variantId", "sku", "size", "colour", "pricePaise", "available"]
+      },
+      "ProductDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "pricePaise": {
+            "type": "integer",
+            "nullable": true,
+            "description": "The cheapest variant's price in whole paise, or null when there are no variants",
+            "example": 49900
+          },
+          "category": {
+            "$ref": "#/components/schemas/ProductCategory"
+          },
+          "seller": {
+            "$ref": "#/components/schemas/ProductSeller"
+          },
+          "variants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VariantDetail"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "name",
+          "description",
+          "pricePaise",
+          "category",
+          "seller",
+          "variants"
+        ]
       },
       "SellerStore": {
         "type": "object",

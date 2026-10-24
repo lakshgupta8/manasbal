@@ -41,3 +41,17 @@ export const productStockSchema = z.object({
 
 export type VariantStock = z.infer<typeof variantStockSchema>;
 export type ProductStock = z.infer<typeof productStockSchema>;
+
+// What GET /products/:slug answers. pricePaise is the cheapest variant's price, as in the list,
+// or null when the product has no variants yet.
+export const productDetailSchema = z.object({
+  id: z.uuid(),
+  slug: z.string(),
+  name: z.string(),
+  description: z.string().nullable(),
+  pricePaise: z.number().int().nonnegative().nullable(),
+  category: z.object({ slug: z.string(), name: z.string() }),
+  seller: z.object({ slug: z.string(), storeName: z.string() }),
+  variants: z.array(variantStockSchema.extend({ pricePaise: z.number().int().nonnegative() })),
+});
+export type ProductDetail = z.infer<typeof productDetailSchema>;

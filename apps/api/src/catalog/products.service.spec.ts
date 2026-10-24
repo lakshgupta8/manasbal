@@ -28,6 +28,16 @@ interface StockRow {
   }[];
 }
 
+interface DetailRow {
+  id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  category: { slug: string; name: string } | null;
+  seller: { slug: string; storeName: string } | null;
+  variants: (StockRow["variants"][number] & { pricePaise: number })[];
+}
+
 const { products, categoryWhere, categoryFirst } = vi.hoisted(() => {
   // Stands in for the ORM's query builder: each step records its call and returns the same query.
   // The callbacks are run so the service's own arrow functions are exercised.
@@ -61,7 +71,7 @@ const { products, categoryWhere, categoryFirst } = vi.hoisted(() => {
       shape(query);
       return this;
     }),
-    first: vi.fn<() => Promise<StockRow | null>>(),
+    first: vi.fn<() => Promise<StockRow | DetailRow | null>>(),
     all: vi.fn<() => Promise<ProductRow[]>>(),
   };
   const categoryFirst = vi.fn<() => Promise<{ id: string } | null>>();
@@ -219,6 +229,106 @@ describe("ProductsService", () => {
       await expect(service.stock(FIRST)).rejects.toThrow(
         new NotFoundException("No product with this id"),
       );
+    });
+  });
+
+  describe("detail", () => {
+    const detailRow = (overrides: Partial<DetailRow> = {}): DetailRow => ({
+      id: FIRST,
+      slug: "red-tee",
+      name: "Red tee",
+      description: "A plain red tee",
+      category: { slug: "shirts", name: "Shirts" },
+      seller: { slug: "tee-shop", storeName: "Tee Shop" },
+      variants: [],
+      ...overrides,
+    });
+
+    it("answers the product with its category, seller and priced variants sorted by sku", async () => {
+      products.first.mockResolvedValue(
+        detailRow({
+          variants: [
+            {
+              id: SECOND,
+              sku: "TEE-M",
+              size: "M",
+              colour: "Red",
+              pricePaise: 52900,
+              inventory: [
+                { quantity: 5, reserved: 1 },
+                { quantity: 4, reserved: 1 },
+              ],
+            },
+            {
+              id: THIRD,
+              sku: "TEE-S",
+              size: null,
+              colour: null,
+              pricePaise: 49900,
+              inventory: [{ quantity: 2, reserved: 2 }],
+            },
+          ],
+        }),
+      );
+
+      await expect(service.detail("red-tee")).resolves.toEqual({
+        id: FIRST,
+        slug: "red-tee",
+        name: "Red tee",
+        description: "A plain red tee",
+        pricePaise: 49900,
+        category: { slug: "shirts", name: "Shirts" },
+        seller: { slug: "tee-shop", storeName: "Tee Shop" },
+        variants: [
+          {
+            variantId: SECOND,
+            sku: "TEE-M",
+            size: "M",
+            colour: "Red",
+            pricePaise: 52900,
+            available: 7,
+          },
+          {
+            variantId: THIRD,
+            sku: "TEE-S",
+            size: null,
+            colour: null,
+            pricePaise: 49900,
+            available: 0,
+          },
+        ],
+      });
+      expect(products.where).toHaveBeenCalledWith({ slug: "red-tee" });
+      expect(products.select).toHaveBeenCalledWith("id", "slug", "name", "description");
+    });
+
+    it("answers no variants and a null price for a product without any", async () => {
+      products.first.mockResolvedValue(detailRow());
+
+      await expect(service.detail("red-tee")).resolves.toMatchObject({
+        pricePaise: null,
+        variants: [],
+      });
+    });
+
+    it("refuses an unknown product with 404", async () => {
+      products.first.mockResolvedValue(null);
+
+      await expect(service.detail("nope")).rejects.toThrow(
+        new NotFoundException("No product with this slug"),
+      );
+    });
+
+    it("fails loudly on a product without its category", async () => {
+      products.first.mockResolvedValue(detailRow({ category: null }));
+
+      await expect(service.detail("red-tee")).rejects.toThrow(`product ${FIRST} has no category`);
+    });
+
+    it("fails loudly on a product without its seller", async () => {
+      products.first.mockResolvedValue(detailRow({ seller: null }));
+
+      await expect(service.detail("red-tee")).rejects.toThrow(`product ${FIRST} has no seller`);
     });
   });
 });
