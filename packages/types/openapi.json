@@ -359,6 +359,37 @@
         },
         "tags": ["Catalog"]
       }
+    },
+    "/sellers/{slug}": {
+      "get": {
+        "operationId": "SellersController_store",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SellerStore"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such store, or it is not approved yet"
+          }
+        },
+        "tags": ["Sellers"]
+      }
     }
   },
   "info": {
@@ -540,6 +571,23 @@
           }
         },
         "required": ["productId", "variants"]
+      },
+      "SellerStore": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "storeName": {
+            "type": "string"
+          },
+          "productCount": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "How many products the store lists"
+          }
+        },
+        "required": ["slug", "storeName", "productCount"]
       }
     }
   }

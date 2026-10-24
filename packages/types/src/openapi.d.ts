@@ -100,6 +100,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/sellers/{slug}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["SellersController_store"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -169,6 +185,12 @@ export interface components {
       /** Format: uuid */
       productId: string;
       variants: components["schemas"]["VariantStock"][];
+    };
+    SellerStore: {
+      slug: string;
+      storeName: string;
+      /** @description How many products the store lists */
+      productCount: number;
     };
   };
   responses: never;
@@ -440,6 +462,34 @@ export interface operations {
         content?: never;
       };
       /** @description No such product */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SellersController_store: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        slug: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SellerStore"];
+        };
+      };
+      /** @description No such store, or it is not approved yet */
       404: {
         headers: {
           [name: string]: unknown;
