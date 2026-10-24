@@ -9,3 +9,6 @@ variables:
   - name: addressId
     value: e8c6e7be-f6c3-4716-afe9-48f66e40a1b7
     description: ""
+  - name: productId
+    value: 3a9695ae-5638-4a46-804f-0ba00d0dd545
+    description: ""

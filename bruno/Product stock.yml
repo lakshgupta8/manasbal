@@ -1,0 +1,24 @@
+info:
+  name: Product stock
+  type: http
+  seq: 9
+
+http:
+  method: GET
+  url: "{{baseUrl}}/products/{{productId}}/stock"
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.variants
+      operator: isArray
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

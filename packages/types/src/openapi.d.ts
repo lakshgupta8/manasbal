@@ -84,6 +84,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/products/{id}/stock": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["ProductsController_stock"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -136,6 +152,23 @@ export interface components {
       items: components["schemas"]["ProductSummary"][];
       /** @description Pass as cursor to get the next page; null on the last page */
       nextCursor: string | null;
+    };
+    VariantStock: {
+      /** Format: uuid */
+      variantId: string;
+      sku: string;
+      size: string | null;
+      colour: string | null;
+      /**
+       * @description Quantity minus reserved over every location, never below 0
+       * @example 7
+       */
+      available: number;
+    };
+    ProductStock: {
+      /** Format: uuid */
+      productId: string;
+      variants: components["schemas"]["VariantStock"][];
     };
   };
   responses: never;
@@ -373,6 +406,41 @@ export interface operations {
       };
       /** @description The cursor or limit is not valid */
       400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProductsController_stock: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ProductStock"];
+        };
+      };
+      /** @description The id is not a uuid */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No such product */
+      404: {
         headers: {
           [name: string]: unknown;
         };

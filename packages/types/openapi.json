@@ -325,6 +325,40 @@
         },
         "tags": ["Catalog"]
       }
+    },
+    "/products/{id}/stock": {
+      "get": {
+        "operationId": "ProductsController_stock",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductStock"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The id is not a uuid"
+          },
+          "404": {
+            "description": "No such product"
+          }
+        },
+        "tags": ["Catalog"]
+      }
     }
   },
   "info": {
@@ -463,6 +497,49 @@
           }
         },
         "required": ["items", "nextCursor"]
+      },
+      "VariantStock": {
+        "type": "object",
+        "properties": {
+          "variantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sku": {
+            "type": "string"
+          },
+          "size": {
+            "type": "string",
+            "nullable": true
+          },
+          "colour": {
+            "type": "string",
+            "nullable": true
+          },
+          "available": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Quantity minus reserved over every location, never below 0",
+            "example": 7
+          }
+        },
+        "required": ["variantId", "sku", "size", "colour", "available"]
+      },
+      "ProductStock": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "variants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VariantStock"
+            }
+          }
+        },
+        "required": ["productId", "variants"]
       }
     }
   }
