@@ -442,6 +442,162 @@
         },
         "tags": ["Catalog"]
       }
+    },
+    "/cart": {
+      "get": {
+        "operationId": "CartController_get",
+        "parameters": [
+          {
+            "name": "x-demo-user",
+            "in": "header",
+            "description": "Id of the user to act as. Outside production only, until sign-in exists.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Cart"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No user, or the API runs in production"
+          }
+        },
+        "tags": ["Cart"]
+      }
+    },
+    "/cart/items": {
+      "post": {
+        "operationId": "CartController_addItem",
+        "parameters": [
+          {
+            "name": "x-demo-user",
+            "in": "header",
+            "description": "Id of the user to act as. Outside production only, until sign-in exists.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Repeats of the same key answer the first result instead of adding again",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "variantId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                  },
+                  "quantity": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 10
+                  }
+                },
+                "required": ["variantId", "quantity"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Cart"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No user, or the API runs in production"
+          },
+          "404": {
+            "description": "No such variant"
+          },
+          "409": {
+            "description": "More than the stock"
+          }
+        },
+        "tags": ["Cart"]
+      }
+    },
+    "/orders": {
+      "get": {
+        "operationId": "OrdersController_list",
+        "parameters": [
+          {
+            "name": "x-demo-user",
+            "in": "header",
+            "description": "Id of the user to act as. Outside production only, until sign-in exists.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "nextCursor from the previous page",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "1 to 100, default 20",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The cursor or limit is not valid"
+          },
+          "401": {
+            "description": "No user, or the API runs in production"
+          }
+        },
+        "tags": ["Orders"]
+      }
     }
   },
   "info": {
@@ -674,6 +830,95 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Review"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true,
+            "description": "Pass as cursor to get the next page; null on the last page"
+          }
+        },
+        "required": ["items", "nextCursor"]
+      },
+      "CartLine": {
+        "type": "object",
+        "properties": {
+          "variantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "productName": {
+            "type": "string"
+          },
+          "sku": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "unitPricePaise": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Whole paise",
+            "example": 49900
+          },
+          "linePaise": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Whole paise",
+            "example": 99800
+          }
+        },
+        "required": ["variantId", "productName", "sku", "quantity", "unitPricePaise", "linePaise"]
+      },
+      "Cart": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "description": "Sorted by product name, then SKU",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CartLine"
+            }
+          },
+          "subtotalPaise": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Whole paise"
+          }
+        },
+        "required": ["items", "subtotalPaise"]
+      },
+      "OrderSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "totalPaise": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Whole paise"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["id", "status", "totalPaise", "createdAt"]
+      },
+      "OrderPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderSummary"
             }
           },
           "nextCursor": {

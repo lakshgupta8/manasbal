@@ -132,6 +132,54 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/cart": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["CartController_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/cart/items": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["CartController_addItem"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/orders": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["OrdersController_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -220,6 +268,43 @@ export interface components {
     };
     ReviewPage: {
       items: components["schemas"]["Review"][];
+      /** @description Pass as cursor to get the next page; null on the last page */
+      nextCursor: string | null;
+    };
+    CartLine: {
+      /** Format: uuid */
+      variantId: string;
+      productName: string;
+      sku: string;
+      quantity: number;
+      /**
+       * @description Whole paise
+       * @example 49900
+       */
+      unitPricePaise: number;
+      /**
+       * @description Whole paise
+       * @example 99800
+       */
+      linePaise: number;
+    };
+    Cart: {
+      /** @description Sorted by product name, then SKU */
+      items: components["schemas"]["CartLine"][];
+      /** @description Whole paise */
+      subtotalPaise: number;
+    };
+    OrderSummary: {
+      /** Format: uuid */
+      id: string;
+      status: string;
+      /** @description Whole paise */
+      totalPaise: number;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    OrderPage: {
+      items: components["schemas"]["OrderSummary"][];
       /** @description Pass as cursor to get the next page; null on the last page */
       nextCursor: string | null;
     };
@@ -562,6 +647,129 @@ export interface operations {
       };
       /** @description No such product */
       404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  CartController_get: {
+    parameters: {
+      query?: never;
+      header: {
+        /** @description Id of the user to act as. Outside production only, until sign-in exists. */
+        "x-demo-user": string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Cart"];
+        };
+      };
+      /** @description No user, or the API runs in production */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  CartController_addItem: {
+    parameters: {
+      query?: never;
+      header: {
+        /** @description Id of the user to act as. Outside production only, until sign-in exists. */
+        "x-demo-user": string;
+        /** @description Repeats of the same key answer the first result instead of adding again */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: uuid */
+          variantId: string;
+          quantity: number;
+        };
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Cart"];
+        };
+      };
+      /** @description No user, or the API runs in production */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No such variant */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description More than the stock */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  OrdersController_list: {
+    parameters: {
+      query?: {
+        /** @description nextCursor from the previous page */
+        cursor?: string;
+        /** @description 1 to 100, default 20 */
+        limit?: string;
+      };
+      header: {
+        /** @description Id of the user to act as. Outside production only, until sign-in exists. */
+        "x-demo-user": string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OrderPage"];
+        };
+      };
+      /** @description The cursor or limit is not valid */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No user, or the API runs in production */
+      401: {
         headers: {
           [name: string]: unknown;
         };
