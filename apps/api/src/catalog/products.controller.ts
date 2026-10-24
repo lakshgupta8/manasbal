@@ -8,6 +8,7 @@ import {
   ApiTags,
 } from "@nestjs/swagger";
 import type {
+  ProductDetail as ProductDetailShape,
   ProductPage as ProductPageShape,
   ProductStock as ProductStockShape,
   ProductSummary as ProductSummaryShape,
@@ -91,6 +92,71 @@ export class ProductStock {
   variants: VariantStock[];
 }
 
+export class ProductSeller {
+  @ApiProperty()
+  slug: string;
+
+  @ApiProperty()
+  storeName: string;
+}
+
+export class VariantDetail {
+  @ApiProperty({ format: "uuid" })
+  variantId: string;
+
+  @ApiProperty()
+  sku: string;
+
+  @ApiProperty({ type: String, nullable: true })
+  size: string | null;
+
+  @ApiProperty({ type: String, nullable: true })
+  colour: string | null;
+
+  @ApiProperty({ type: "integer", minimum: 0, description: "Price in whole paise", example: 49900 })
+  pricePaise: number;
+
+  @ApiProperty({
+    type: "integer",
+    minimum: 0,
+    description: "Quantity minus reserved over every location, never below 0",
+    example: 7,
+  })
+  available: number;
+}
+
+export class ProductDetail {
+  @ApiProperty({ format: "uuid" })
+  id: string;
+
+  @ApiProperty()
+  slug: string;
+
+  @ApiProperty()
+  name: string;
+
+  @ApiProperty({ type: String, nullable: true })
+  description: string | null;
+
+  @ApiProperty({
+    type: "integer",
+    nullable: true,
+    description: "The cheapest variant's price in whole paise, or null when there are no variants",
+    example: 49900,
+  })
+  pricePaise: number | null;
+
+  // Typed with the shared shapes, as ProductSummary.category is, to avoid hidden branches.
+  @ApiProperty({ type: ProductCategory })
+  category: ProductDetailShape["category"];
+
+  @ApiProperty({ type: ProductSeller })
+  seller: ProductDetailShape["seller"];
+
+  @ApiProperty({ type: [VariantDetail] })
+  variants: VariantDetail[];
+}
+
 @ApiTags("Catalog")
 @Controller()
 export class ProductsController {
@@ -122,5 +188,13 @@ export class ProductsController {
   @ApiNotFoundResponse({ description: "No such product" })
   stock(@Param("id", ParseUUIDPipe) id: string): Promise<ProductStockShape> {
     return this.products.stock(id);
+  }
+
+  // One product with everything its page shows.
+  @Get("products/:slug")
+  @ApiOkResponse({ type: ProductDetail })
+  @ApiNotFoundResponse({ description: "No such product" })
+  detail(@Param("slug") slug: string): Promise<ProductDetailShape> {
+    return this.products.detail(slug);
   }
 }
