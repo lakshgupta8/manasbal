@@ -116,6 +116,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/products/{slug}/reviews": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["ReviewsController_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -191,6 +207,21 @@ export interface components {
       storeName: string;
       /** @description How many products the store lists */
       productCount: number;
+    };
+    Review: {
+      /** Format: uuid */
+      id: string;
+      rating: number;
+      body: string;
+      /** @description The reviewer first name only */
+      authorName: string;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    ReviewPage: {
+      items: components["schemas"]["Review"][];
+      /** @description Pass as cursor to get the next page; null on the last page */
+      nextCursor: string | null;
     };
   };
   responses: never;
@@ -490,6 +521,46 @@ export interface operations {
         };
       };
       /** @description No such store, or it is not approved yet */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ReviewsController_list: {
+    parameters: {
+      query?: {
+        /** @description nextCursor from the previous page */
+        cursor?: string;
+        /** @description 1 to 100, default 20 */
+        limit?: string;
+      };
+      header?: never;
+      path: {
+        slug: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ReviewPage"];
+        };
+      };
+      /** @description The cursor or limit is not valid */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No such product */
       404: {
         headers: {
           [name: string]: unknown;
