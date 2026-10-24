@@ -17,3 +17,7 @@ packageExtensions:
 ignoredBuiltDependencies:
   - sharp
   - unrs-resolver
+
+# Refuse to install on a Node older than package.json's engines: 24.22.1 is the October 2026
+# security release.
+engineStrict: true

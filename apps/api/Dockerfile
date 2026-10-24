@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # Built from the repository root: docker build -f apps/api/Dockerfile .
 
-FROM node:24-alpine AS base
+FROM node:24.22.1-alpine AS base
 ENV PNPM_HOME=/pnpm PATH=/pnpm:$PATH
 RUN corepack enable
 WORKDIR /repo
@@ -14,7 +14,7 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
 RUN pnpm --filter "@manasbal/api..." build \
  && pnpm --filter @manasbal/api deploy --prod --legacy /out
 
-FROM node:24-alpine AS runtime
+FROM node:24.22.1-alpine AS runtime
 # The API only needs `node`. Package managers bundled with the base image are attack
 # surface (and the source of most scanner findings), so they're removed.
 RUN rm -rf /usr/local/lib/node_modules /usr/local/bin/npm /usr/local/bin/npx \
