@@ -183,10 +183,12 @@ model Review {
   body             String
   isSample         Boolean   @default(false) @map("is_sample")
   createdByVisitor Boolean   @default(false) @map("created_by_visitor")
+  createdAt        DateTime  @default(now()) @map("created_at")
   orderItem        OrderItem @relation(fields: [orderItemId], references: [id])
   user             User      @relation(fields: [userId], references: [id])
   product          Product   @relation(fields: [productId], references: [id])
 
+  @@index([productId, createdAt, id])
   @@map("reviews")
 }
 

@@ -1101,6 +1101,13 @@
                   "kind": "scalar"
                 }
               },
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
+              },
               "createdByVisitor": {
                 "nullable": false,
                 "type": {
@@ -1205,6 +1212,9 @@
               "fields": {
                 "body": {
                   "column": "body"
+                },
+                "createdAt": {
+                  "column": "created_at"
                 },
                 "createdByVisitor": {
                   "column": "created_by_visitor"
@@ -2568,6 +2578,15 @@
                   "dataType": "pg/text",
                   "nullable": false
                 },
+                "created_at": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "dataType": "pg/timestamptz",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nullable": false
+                },
                 "created_by_visitor": {
                   "codecId": "pg/bool@1",
                   "dataType": "pg/bool",
@@ -2674,6 +2693,16 @@
                 }
               ],
               "indexes": [
+                {
+                  "columns": [
+                    "product_id",
+                    "created_at",
+                    "id"
+                  ],
+                  "name": "reviews_product_id_created_at_id_idx_986a1d4c",
+                  "prefix": "reviews_product_id_created_at_id_idx",
+                  "unique": false
+                },
                 {
                   "columns": [
                     "product_id"
@@ -3037,7 +3066,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "ee29e4eeb53fcfb2910f3ea5f545443bf90bd884761824872dfee207ccf6f3f6"
+    "storageHash": "388d6cebae6daa78831f17e3c0880e1ae9e8ba02e1de6c4e217520db597338e9"
   },
   "execution": {
     "executionHash": "bf826acdb4b384d12ce18fa978b3b361a296376b8227eca42e4d5b440eb1855e",

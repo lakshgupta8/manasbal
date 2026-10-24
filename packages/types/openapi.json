@@ -359,6 +359,89 @@
         },
         "tags": ["Catalog"]
       }
+    },
+    "/sellers/{slug}": {
+      "get": {
+        "operationId": "SellersController_store",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SellerStore"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such store, or it is not approved yet"
+          }
+        },
+        "tags": ["Sellers"]
+      }
+    },
+    "/products/{slug}/reviews": {
+      "get": {
+        "operationId": "ReviewsController_list",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "nextCursor from the previous page",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "1 to 100, default 20",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The cursor or limit is not valid"
+          },
+          "404": {
+            "description": "No such product"
+          }
+        },
+        "tags": ["Catalog"]
+      }
     }
   },
   "info": {
@@ -540,6 +623,66 @@
           }
         },
         "required": ["productId", "variants"]
+      },
+      "SellerStore": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "storeName": {
+            "type": "string"
+          },
+          "productCount": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "How many products the store lists"
+          }
+        },
+        "required": ["slug", "storeName", "productCount"]
+      },
+      "Review": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "rating": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "body": {
+            "type": "string"
+          },
+          "authorName": {
+            "type": "string",
+            "description": "The reviewer first name only"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["id", "rating", "body", "authorName", "createdAt"]
+      },
+      "ReviewPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Review"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true,
+            "description": "Pass as cursor to get the next page; null on the last page"
+          }
+        },
+        "required": ["items", "nextCursor"]
       }
     }
   }

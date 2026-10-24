@@ -95,6 +95,9 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.2
+      temporal-polyfill:
+        specifier: ^1.0.6
+        version: 1.0.6
       zod:
         specifier: ^4.6.7
         version: 4.6.7
@@ -138,6 +141,9 @@ importers:
       source-map-support:
         specifier: ^0.5.21
         version: 0.5.21
+      temporal-spec:
+        specifier: ^1.0.1
+        version: 1.0.1
       testcontainers:
         specifier: ^12.2.1
         version: 12.2.1

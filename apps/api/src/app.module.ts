@@ -7,6 +7,8 @@ import { CatalogModule } from "./catalog/catalog.module.js";
 import { HealthController } from "./health/health.controller.js";
 import { loggingParams } from "./logging/logging.config.js";
 import { RateLimitModule } from "./rate-limit/rate-limit.module.js";
+import { ReviewsModule } from "./reviews/reviews.module.js";
+import { SellersModule } from "./sellers/sellers.module.js";
 import { UsersModule } from "./users/users.module.js";
 
 @Module({
@@ -16,6 +18,8 @@ import { UsersModule } from "./users/users.module.js";
     IdempotencyModule,
     UsersModule,
     CatalogModule,
+    SellersModule,
+    ReviewsModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_FILTER, useClass: ProblemDetailsFilter }],

@@ -12,3 +12,5 @@ export * from "./addresses.js";
 // Answer shapes, written by hand with Zod.
 export * from "./categories.js";
 export * from "./products.js";
+export * from "./reviews.js";
+export * from "./sellers.js";

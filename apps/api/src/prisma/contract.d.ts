@@ -18,7 +18,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'ee29e4eeb53fcfb2910f3ea5f545443bf90bd884761824872dfee207ccf6f3f6'>;
+  StorageHashBase<'388d6cebae6daa78831f17e3c0880e1ae9e8ba02e1de6c4e217520db597338e9'>;
 export type ExecutionHash =
   ExecutionHashBase<'bf826acdb4b384d12ce18fa978b3b361a296376b8227eca42e4d5b440eb1855e'>;
 export type ProfileHash =
@@ -313,6 +313,7 @@ export type FieldOutputTypes = {
     };
     readonly Review: {
       readonly body: CodecTypes['pg/text@1']['output'];
+      readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
       readonly createdByVisitor: CodecTypes['pg/bool@1']['output'];
       readonly id: CodecTypes['pg/uuid@1']['output'];
       readonly isSample: CodecTypes['pg/bool@1']['output'];
@@ -437,6 +438,7 @@ export type FieldInputTypes = {
     };
     readonly Review: {
       readonly body: CodecTypes['pg/text@1']['input'];
+      readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
       readonly createdByVisitor: CodecTypes['pg/bool@1']['input'];
       readonly id: CodecTypes['pg/uuid@1']['input'];
       readonly isSample: CodecTypes['pg/bool@1']['input'];
@@ -561,6 +563,7 @@ export type StorageColumnTypes = {
     };
     readonly reviews: {
       readonly body: CodecTypes['pg/text@1']['output'];
+      readonly created_at: CodecTypes['pg/timestamptz-temporal@1']['output'];
       readonly created_by_visitor: CodecTypes['pg/bool@1']['output'];
       readonly id: CodecTypes['pg/uuid@1']['output'];
       readonly is_sample: CodecTypes['pg/bool@1']['output'];
@@ -685,6 +688,7 @@ export type StorageColumnInputTypes = {
     };
     readonly reviews: {
       readonly body: CodecTypes['pg/text@1']['input'];
+      readonly created_at: CodecTypes['pg/timestamptz-temporal@1']['input'];
       readonly created_by_visitor: CodecTypes['pg/bool@1']['input'];
       readonly id: CodecTypes['pg/uuid@1']['input'];
       readonly is_sample: CodecTypes['pg/bool@1']['input'];
@@ -839,6 +843,7 @@ export namespace Models {
   };
   export type public_Review = {
     body: CodecTypes['pg/text@1']['output'];
+    createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
     createdByVisitor: CodecTypes['pg/bool@1']['output'];
     id: CodecTypes['pg/uuid@1']['output'];
     isSample: CodecTypes['pg/bool@1']['output'];
@@ -1628,6 +1633,13 @@ type ContractBase = Omit<
                   readonly nullable: false;
                   readonly many: false;
                 };
+                readonly created_at: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                  readonly many: false;
+                };
                 readonly created_by_visitor: {
                   readonly dataType: 'pg/bool';
                   readonly codecId: 'pg/bool@1';
@@ -1682,6 +1694,12 @@ type ContractBase = Omit<
               primaryKey: { readonly columns: readonly ['id'] };
               uniques: readonly [{ readonly columns: readonly ['order_item_id'] }];
               indexes: readonly [
+                {
+                  readonly name: 'reviews_product_id_created_at_id_idx_986a1d4c';
+                  readonly prefix: 'reviews_product_id_created_at_id_idx';
+                  readonly columns: readonly ['product_id', 'created_at', 'id'];
+                  readonly unique: false;
+                },
                 {
                   readonly name: 'reviews_product_id_idx_22a2b7d2';
                   readonly prefix: 'reviews_product_id_idx';
@@ -2704,6 +2722,13 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
+              readonly createdAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                };
+              };
               readonly createdByVisitor: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
@@ -2773,6 +2798,7 @@ type ContractBase = Omit<
               readonly namespaceId: 'public';
               readonly fields: {
                 readonly body: { readonly column: 'body' };
+                readonly createdAt: { readonly column: 'created_at' };
                 readonly createdByVisitor: { readonly column: 'created_by_visitor' };
                 readonly id: { readonly column: 'id' };
                 readonly isSample: { readonly column: 'is_sample' };

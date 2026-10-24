@@ -1,0 +1,83 @@
+[
+  {
+    "id": "column.public.reviews.created_at",
+    "label": "Add column \"created_at\" to \"reviews\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "created_at",
+        "table": "reviews"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"created_at\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "reviews",
+          "created_at"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"created_at\"",
+        "sql": "ALTER TABLE \"public\".\"reviews\" ADD COLUMN \"created_at\" timestamptz DEFAULT (now()) NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"created_at\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "reviews",
+          "created_at"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.reviews.reviews_product_id_created_at_id_idx_986a1d4c",
+    "label": "Create index \"reviews_product_id_created_at_id_idx_986a1d4c\" on \"reviews\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "reviews_product_id_created_at_id_idx_986a1d4c",
+        "table": "reviews"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"reviews_product_id_created_at_id_idx_986a1d4c\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"reviews_product_id_created_at_id_idx_986a1d4c\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"reviews_product_id_created_at_id_idx_986a1d4c\"",
+        "sql": "CREATE INDEX \"reviews_product_id_created_at_id_idx_986a1d4c\" ON \"public\".\"reviews\" (\"product_id\", \"created_at\", \"id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"reviews_product_id_created_at_id_idx_986a1d4c\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"reviews_product_id_created_at_id_idx_986a1d4c\""
+        ]
+      }
+    ]
+  }
+]

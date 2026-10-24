@@ -36,6 +36,7 @@
     "pino-http": "^11.0.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
+    "temporal-polyfill": "^1.0.6",
     "zod": "^4.6.7"
   },
   "devDependencies": {
@@ -52,6 +53,7 @@
     "globals": "^17.12.0",
     "prisma": "8.0.0-rc.23",
     "source-map-support": "^0.5.21",
+    "temporal-spec": "^1.0.1",
     "testcontainers": "^12.2.1",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.69.0",
