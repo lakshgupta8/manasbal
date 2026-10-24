@@ -111,6 +111,10 @@ describe("/cart (e2e)", () => {
       ],
       subtotalPaise: 49900,
     });
+    // Carts and lines made through the demo are removed by the nightly reset.
+    expect(
+      await database.db.orm.public.CartItem.where({ variantId }).select("createdByVisitor").all(),
+    ).toEqual([{ createdByVisitor: true }]);
   });
 
   it("raises the quantity of the same line when the variant is added again", async () => {

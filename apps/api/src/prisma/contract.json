@@ -103,6 +103,13 @@
                   "kind": "scalar"
                 }
               },
+              "isSample": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
               "line1": {
                 "nullable": false,
                 "type": {
@@ -193,6 +200,9 @@
                 "isDefault": {
                   "column": "is_default"
                 },
+                "isSample": {
+                  "column": "is_sample"
+                },
                 "line1": {
                   "column": "line1"
                 },
@@ -239,10 +249,24 @@
                   "kind": "scalar"
                 }
               },
+              "createdByVisitor": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
               "id": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/uuid@1",
+                  "kind": "scalar"
+                }
+              },
+              "isSample": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
                   "kind": "scalar"
                 }
               },
@@ -297,8 +321,14 @@
                 "createdAt": {
                   "column": "created_at"
                 },
+                "createdByVisitor": {
+                  "column": "created_by_visitor"
+                },
                 "id": {
                   "column": "id"
+                },
+                "isSample": {
+                  "column": "is_sample"
                 },
                 "requestId": {
                   "column": "request_id"
@@ -327,6 +357,13 @@
                 "nullable": false,
                 "type": {
                   "codecId": "pg/uuid@1",
+                  "kind": "scalar"
+                }
+              },
+              "isSample": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
                   "kind": "scalar"
                 }
               },
@@ -379,6 +416,9 @@
                 "id": {
                   "column": "id"
                 },
+                "isSample": {
+                  "column": "is_sample"
+                },
                 "userId": {
                   "column": "user_id"
                 }
@@ -396,10 +436,24 @@
                   "kind": "scalar"
                 }
               },
+              "createdByVisitor": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
               "id": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/uuid@1",
+                  "kind": "scalar"
+                }
+              },
+              "isSample": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
                   "kind": "scalar"
                 }
               },
@@ -457,8 +511,14 @@
                 "cartId": {
                   "column": "cart_id"
                 },
+                "createdByVisitor": {
+                  "column": "created_by_visitor"
+                },
                 "id": {
                   "column": "id"
+                },
+                "isSample": {
+                  "column": "is_sample"
                 },
                 "quantity": {
                   "column": "quantity"
@@ -648,10 +708,24 @@
           },
           "Inventory": {
             "fields": {
+              "createdByVisitor": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
               "id": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/uuid@1",
+                  "kind": "scalar"
+                }
+              },
+              "isSample": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
                   "kind": "scalar"
                 }
               },
@@ -704,8 +778,14 @@
             },
             "storage": {
               "fields": {
+                "createdByVisitor": {
+                  "column": "created_by_visitor"
+                },
                 "id": {
                   "column": "id"
+                },
+                "isSample": {
+                  "column": "is_sample"
                 },
                 "location": {
                   "column": "location"
@@ -765,6 +845,13 @@
                 "nullable": false,
                 "type": {
                   "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "isSample": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
                   "kind": "scalar"
                 }
               },
@@ -891,6 +978,9 @@
                 "idempotencyKey": {
                   "column": "idempotency_key"
                 },
+                "isSample": {
+                  "column": "is_sample"
+                },
                 "status": {
                   "column": "status"
                 },
@@ -907,10 +997,24 @@
           },
           "OrderItem": {
             "fields": {
+              "createdByVisitor": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
               "id": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/uuid@1",
+                  "kind": "scalar"
+                }
+              },
+              "isSample": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
                   "kind": "scalar"
                 }
               },
@@ -995,8 +1099,14 @@
             },
             "storage": {
               "fields": {
+                "createdByVisitor": {
+                  "column": "created_by_visitor"
+                },
                 "id": {
                   "column": "id"
+                },
+                "isSample": {
+                  "column": "is_sample"
                 },
                 "quantity": {
                   "column": "quantity"
@@ -1031,6 +1141,13 @@
                   "kind": "scalar"
                 }
               },
+              "createdByVisitor": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
               "gatewayRef": {
                 "nullable": false,
                 "type": {
@@ -1042,6 +1159,13 @@
                 "nullable": false,
                 "type": {
                   "codecId": "pg/uuid@1",
+                  "kind": "scalar"
+                }
+              },
+              "isSample": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
                   "kind": "scalar"
                 }
               },
@@ -1086,11 +1210,17 @@
                 "createdAt": {
                   "column": "created_at"
                 },
+                "createdByVisitor": {
+                  "column": "created_by_visitor"
+                },
                 "gatewayRef": {
                   "column": "gateway_ref"
                 },
                 "id": {
                   "column": "id"
+                },
+                "isSample": {
+                  "column": "is_sample"
                 },
                 "orderId": {
                   "column": "order_id"
@@ -1116,6 +1246,13 @@
                 "nullable": false,
                 "type": {
                   "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
+              },
+              "createdByVisitor": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
                   "kind": "scalar"
                 }
               },
@@ -1233,6 +1370,9 @@
                 },
                 "createdAt": {
                   "column": "created_at"
+                },
+                "createdByVisitor": {
+                  "column": "created_by_visitor"
                 },
                 "description": {
                   "column": "description"
@@ -1409,6 +1549,13 @@
           },
           "Seller": {
             "fields": {
+              "createdByVisitor": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
               "id": {
                 "nullable": false,
                 "type": {
@@ -1502,6 +1649,9 @@
             },
             "storage": {
               "fields": {
+                "createdByVisitor": {
+                  "column": "created_by_visitor"
+                },
                 "id": {
                   "column": "id"
                 },
@@ -1527,10 +1677,24 @@
           },
           "SubOrder": {
             "fields": {
+              "createdByVisitor": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
               "id": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/uuid@1",
+                  "kind": "scalar"
+                }
+              },
+              "isSample": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
                   "kind": "scalar"
                 }
               },
@@ -1614,8 +1778,14 @@
             },
             "storage": {
               "fields": {
+                "createdByVisitor": {
+                  "column": "created_by_visitor"
+                },
                 "id": {
                   "column": "id"
+                },
+                "isSample": {
+                  "column": "is_sample"
                 },
                 "orderId": {
                   "column": "order_id"
@@ -1827,10 +1997,24 @@
                   "kind": "scalar"
                 }
               },
+              "createdByVisitor": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
               "id": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/uuid@1",
+                  "kind": "scalar"
+                }
+              },
+              "isSample": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
                   "kind": "scalar"
                 }
               },
@@ -1931,8 +2115,14 @@
                 "colour": {
                   "column": "colour"
                 },
+                "createdByVisitor": {
+                  "column": "created_by_visitor"
+                },
                 "id": {
                   "column": "id"
+                },
+                "isSample": {
+                  "column": "is_sample"
                 },
                 "pricePaise": {
                   "column": "price_paise"
@@ -1982,6 +2172,15 @@
                   "nullable": false
                 },
                 "is_default": {
+                  "codecId": "pg/bool@1",
+                  "dataType": "pg/bool",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
+                  "nullable": false
+                },
+                "is_sample": {
                   "codecId": "pg/bool@1",
                   "dataType": "pg/bool",
                   "default": {
@@ -2080,9 +2279,27 @@
                   },
                   "nullable": false
                 },
+                "created_by_visitor": {
+                  "codecId": "pg/bool@1",
+                  "dataType": "pg/bool",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
+                  "nullable": false
+                },
                 "id": {
                   "codecId": "pg/uuid@1",
                   "dataType": "pg/uuid",
+                  "nullable": false
+                },
+                "is_sample": {
+                  "codecId": "pg/bool@1",
+                  "dataType": "pg/bool",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
                   "nullable": false
                 },
                 "request_id": {
@@ -2146,9 +2363,27 @@
                   "dataType": "pg/uuid",
                   "nullable": false
                 },
+                "created_by_visitor": {
+                  "codecId": "pg/bool@1",
+                  "dataType": "pg/bool",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
+                  "nullable": false
+                },
                 "id": {
                   "codecId": "pg/uuid@1",
                   "dataType": "pg/uuid",
+                  "nullable": false
+                },
+                "is_sample": {
+                  "codecId": "pg/bool@1",
+                  "dataType": "pg/bool",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
                   "nullable": false
                 },
                 "quantity": {
@@ -2248,6 +2483,15 @@
                 "id": {
                   "codecId": "pg/uuid@1",
                   "dataType": "pg/uuid",
+                  "nullable": false
+                },
+                "is_sample": {
+                  "codecId": "pg/bool@1",
+                  "dataType": "pg/bool",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
                   "nullable": false
                 },
                 "user_id": {
@@ -2406,9 +2650,27 @@
             },
             "inventory": {
               "columns": {
+                "created_by_visitor": {
+                  "codecId": "pg/bool@1",
+                  "dataType": "pg/bool",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
+                  "nullable": false
+                },
                 "id": {
                   "codecId": "pg/uuid@1",
                   "dataType": "pg/uuid",
+                  "nullable": false
+                },
+                "is_sample": {
+                  "codecId": "pg/bool@1",
+                  "dataType": "pg/bool",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
                   "nullable": false
                 },
                 "location": {
@@ -2480,9 +2742,27 @@
             },
             "order_items": {
               "columns": {
+                "created_by_visitor": {
+                  "codecId": "pg/bool@1",
+                  "dataType": "pg/bool",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
+                  "nullable": false
+                },
                 "id": {
                   "codecId": "pg/uuid@1",
                   "dataType": "pg/uuid",
+                  "nullable": false
+                },
+                "is_sample": {
+                  "codecId": "pg/bool@1",
+                  "dataType": "pg/bool",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
                   "nullable": false
                 },
                 "quantity": {
@@ -2609,6 +2889,15 @@
                 "idempotency_key": {
                   "codecId": "pg/text@1",
                   "dataType": "pg/text",
+                  "nullable": false
+                },
+                "is_sample": {
+                  "codecId": "pg/bool@1",
+                  "dataType": "pg/bool",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
                   "nullable": false
                 },
                 "status": {
@@ -2741,6 +3030,15 @@
                   },
                   "nullable": false
                 },
+                "created_by_visitor": {
+                  "codecId": "pg/bool@1",
+                  "dataType": "pg/bool",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
+                  "nullable": false
+                },
                 "gateway_ref": {
                   "codecId": "pg/text@1",
                   "dataType": "pg/text",
@@ -2749,6 +3047,15 @@
                 "id": {
                   "codecId": "pg/uuid@1",
                   "dataType": "pg/uuid",
+                  "nullable": false
+                },
+                "is_sample": {
+                  "codecId": "pg/bool@1",
+                  "dataType": "pg/bool",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
                   "nullable": false
                 },
                 "order_id": {
@@ -2812,6 +3119,15 @@
                   "default": {
                     "expression": "now()",
                     "kind": "function"
+                  },
+                  "nullable": false
+                },
+                "created_by_visitor": {
+                  "codecId": "pg/bool@1",
+                  "dataType": "pg/bool",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
                   },
                   "nullable": false
                 },
@@ -3085,6 +3401,15 @@
             },
             "sellers": {
               "columns": {
+                "created_by_visitor": {
+                  "codecId": "pg/bool@1",
+                  "dataType": "pg/bool",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
+                  "nullable": false
+                },
                 "id": {
                   "codecId": "pg/uuid@1",
                   "dataType": "pg/uuid",
@@ -3168,9 +3493,27 @@
             },
             "sub_orders": {
               "columns": {
+                "created_by_visitor": {
+                  "codecId": "pg/bool@1",
+                  "dataType": "pg/bool",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
+                  "nullable": false
+                },
                 "id": {
                   "codecId": "pg/uuid@1",
                   "dataType": "pg/uuid",
+                  "nullable": false
+                },
+                "is_sample": {
+                  "codecId": "pg/bool@1",
+                  "dataType": "pg/bool",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
                   "nullable": false
                 },
                 "order_id": {
@@ -3340,9 +3683,27 @@
                   "dataType": "pg/text",
                   "nullable": true
                 },
+                "created_by_visitor": {
+                  "codecId": "pg/bool@1",
+                  "dataType": "pg/bool",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
+                  "nullable": false
+                },
                 "id": {
                   "codecId": "pg/uuid@1",
                   "dataType": "pg/uuid",
+                  "nullable": false
+                },
+                "is_sample": {
+                  "codecId": "pg/bool@1",
+                  "dataType": "pg/bool",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
                   "nullable": false
                 },
                 "price_paise": {
@@ -3416,7 +3777,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "93bace9667797ea9145e3561f2c349646b7512422d4db8245d6776616f9a25c6"
+    "storageHash": "10e8d873027979987593d52a34d690342367c2036eec90f86b90fce0d6087ac1"
   },
   "execution": {
     "executionHash": "e6b4dd36515dbd41b412b6ac6939b7831ce8737686f071d2a5272343cdee5762",

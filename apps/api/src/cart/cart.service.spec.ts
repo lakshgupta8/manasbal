@@ -157,6 +157,7 @@ describe("CartService", () => {
         cartId: CART_ID,
         variantId: VARIANT_ID,
         quantity: 2,
+        createdByVisitor: true,
       });
       expect(cart.items).toHaveLength(1);
     });
@@ -173,6 +174,7 @@ describe("CartService", () => {
         cartId: CART_ID,
         variantId: VARIANT_ID,
         quantity: 1,
+        createdByVisitor: true,
       });
     });
 

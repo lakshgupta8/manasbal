@@ -1,0 +1,800 @@
+[
+  {
+    "id": "column.public.addresses.is_sample",
+    "label": "Add column \"is_sample\" to \"addresses\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "is_sample",
+        "table": "addresses"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"is_sample\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "addresses",
+          "is_sample"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"is_sample\"",
+        "sql": "ALTER TABLE \"public\".\"addresses\" ADD COLUMN \"is_sample\" bool DEFAULT false NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"is_sample\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "addresses",
+          "is_sample"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.audit_logs.created_by_visitor",
+    "label": "Add column \"created_by_visitor\" to \"audit_logs\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "created_by_visitor",
+        "table": "audit_logs"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"created_by_visitor\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "audit_logs",
+          "created_by_visitor"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"created_by_visitor\"",
+        "sql": "ALTER TABLE \"public\".\"audit_logs\" ADD COLUMN \"created_by_visitor\" bool DEFAULT false NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"created_by_visitor\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "audit_logs",
+          "created_by_visitor"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.audit_logs.is_sample",
+    "label": "Add column \"is_sample\" to \"audit_logs\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "is_sample",
+        "table": "audit_logs"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"is_sample\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "audit_logs",
+          "is_sample"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"is_sample\"",
+        "sql": "ALTER TABLE \"public\".\"audit_logs\" ADD COLUMN \"is_sample\" bool DEFAULT false NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"is_sample\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "audit_logs",
+          "is_sample"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.cart_items.created_by_visitor",
+    "label": "Add column \"created_by_visitor\" to \"cart_items\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "created_by_visitor",
+        "table": "cart_items"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"created_by_visitor\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "cart_items",
+          "created_by_visitor"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"created_by_visitor\"",
+        "sql": "ALTER TABLE \"public\".\"cart_items\" ADD COLUMN \"created_by_visitor\" bool DEFAULT false NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"created_by_visitor\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "cart_items",
+          "created_by_visitor"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.cart_items.is_sample",
+    "label": "Add column \"is_sample\" to \"cart_items\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "is_sample",
+        "table": "cart_items"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"is_sample\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "cart_items",
+          "is_sample"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"is_sample\"",
+        "sql": "ALTER TABLE \"public\".\"cart_items\" ADD COLUMN \"is_sample\" bool DEFAULT false NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"is_sample\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "cart_items",
+          "is_sample"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.carts.is_sample",
+    "label": "Add column \"is_sample\" to \"carts\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "is_sample",
+        "table": "carts"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"is_sample\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "carts",
+          "is_sample"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"is_sample\"",
+        "sql": "ALTER TABLE \"public\".\"carts\" ADD COLUMN \"is_sample\" bool DEFAULT false NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"is_sample\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "carts",
+          "is_sample"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.inventory.created_by_visitor",
+    "label": "Add column \"created_by_visitor\" to \"inventory\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "created_by_visitor",
+        "table": "inventory"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"created_by_visitor\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "inventory",
+          "created_by_visitor"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"created_by_visitor\"",
+        "sql": "ALTER TABLE \"public\".\"inventory\" ADD COLUMN \"created_by_visitor\" bool DEFAULT false NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"created_by_visitor\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "inventory",
+          "created_by_visitor"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.inventory.is_sample",
+    "label": "Add column \"is_sample\" to \"inventory\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "is_sample",
+        "table": "inventory"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"is_sample\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "inventory",
+          "is_sample"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"is_sample\"",
+        "sql": "ALTER TABLE \"public\".\"inventory\" ADD COLUMN \"is_sample\" bool DEFAULT false NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"is_sample\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "inventory",
+          "is_sample"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.order_items.created_by_visitor",
+    "label": "Add column \"created_by_visitor\" to \"order_items\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "created_by_visitor",
+        "table": "order_items"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"created_by_visitor\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "order_items",
+          "created_by_visitor"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"created_by_visitor\"",
+        "sql": "ALTER TABLE \"public\".\"order_items\" ADD COLUMN \"created_by_visitor\" bool DEFAULT false NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"created_by_visitor\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "order_items",
+          "created_by_visitor"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.order_items.is_sample",
+    "label": "Add column \"is_sample\" to \"order_items\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "is_sample",
+        "table": "order_items"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"is_sample\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "order_items",
+          "is_sample"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"is_sample\"",
+        "sql": "ALTER TABLE \"public\".\"order_items\" ADD COLUMN \"is_sample\" bool DEFAULT false NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"is_sample\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "order_items",
+          "is_sample"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.orders.is_sample",
+    "label": "Add column \"is_sample\" to \"orders\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "is_sample",
+        "table": "orders"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"is_sample\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "orders",
+          "is_sample"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"is_sample\"",
+        "sql": "ALTER TABLE \"public\".\"orders\" ADD COLUMN \"is_sample\" bool DEFAULT false NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"is_sample\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "orders",
+          "is_sample"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.payments.created_by_visitor",
+    "label": "Add column \"created_by_visitor\" to \"payments\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "created_by_visitor",
+        "table": "payments"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"created_by_visitor\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "payments",
+          "created_by_visitor"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"created_by_visitor\"",
+        "sql": "ALTER TABLE \"public\".\"payments\" ADD COLUMN \"created_by_visitor\" bool DEFAULT false NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"created_by_visitor\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "payments",
+          "created_by_visitor"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.payments.is_sample",
+    "label": "Add column \"is_sample\" to \"payments\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "is_sample",
+        "table": "payments"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"is_sample\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "payments",
+          "is_sample"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"is_sample\"",
+        "sql": "ALTER TABLE \"public\".\"payments\" ADD COLUMN \"is_sample\" bool DEFAULT false NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"is_sample\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "payments",
+          "is_sample"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.products.created_by_visitor",
+    "label": "Add column \"created_by_visitor\" to \"products\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "created_by_visitor",
+        "table": "products"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"created_by_visitor\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "products",
+          "created_by_visitor"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"created_by_visitor\"",
+        "sql": "ALTER TABLE \"public\".\"products\" ADD COLUMN \"created_by_visitor\" bool DEFAULT false NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"created_by_visitor\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "products",
+          "created_by_visitor"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.sellers.created_by_visitor",
+    "label": "Add column \"created_by_visitor\" to \"sellers\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "created_by_visitor",
+        "table": "sellers"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"created_by_visitor\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "sellers",
+          "created_by_visitor"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"created_by_visitor\"",
+        "sql": "ALTER TABLE \"public\".\"sellers\" ADD COLUMN \"created_by_visitor\" bool DEFAULT false NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"created_by_visitor\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "sellers",
+          "created_by_visitor"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.sub_orders.created_by_visitor",
+    "label": "Add column \"created_by_visitor\" to \"sub_orders\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "created_by_visitor",
+        "table": "sub_orders"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"created_by_visitor\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "sub_orders",
+          "created_by_visitor"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"created_by_visitor\"",
+        "sql": "ALTER TABLE \"public\".\"sub_orders\" ADD COLUMN \"created_by_visitor\" bool DEFAULT false NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"created_by_visitor\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "sub_orders",
+          "created_by_visitor"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.sub_orders.is_sample",
+    "label": "Add column \"is_sample\" to \"sub_orders\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "is_sample",
+        "table": "sub_orders"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"is_sample\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "sub_orders",
+          "is_sample"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"is_sample\"",
+        "sql": "ALTER TABLE \"public\".\"sub_orders\" ADD COLUMN \"is_sample\" bool DEFAULT false NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"is_sample\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "sub_orders",
+          "is_sample"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.variants.created_by_visitor",
+    "label": "Add column \"created_by_visitor\" to \"variants\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "created_by_visitor",
+        "table": "variants"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"created_by_visitor\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "variants",
+          "created_by_visitor"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"created_by_visitor\"",
+        "sql": "ALTER TABLE \"public\".\"variants\" ADD COLUMN \"created_by_visitor\" bool DEFAULT false NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"created_by_visitor\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "variants",
+          "created_by_visitor"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.variants.is_sample",
+    "label": "Add column \"is_sample\" to \"variants\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "is_sample",
+        "table": "variants"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"is_sample\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "variants",
+          "is_sample"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"is_sample\"",
+        "sql": "ALTER TABLE \"public\".\"variants\" ADD COLUMN \"is_sample\" bool DEFAULT false NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"is_sample\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "variants",
+          "is_sample"
+        ]
+      }
+    ]
+  }
+]
