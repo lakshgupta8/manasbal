@@ -97,6 +97,16 @@ describe("GET /orders (e2e)", () => {
     expect(second.nextCursor).toBeNull();
   });
 
+  it("answers 400 for a bad cursor", async () => {
+    const bad = Buffer.from("yesterday|nope").toString("base64url");
+
+    expect((await get(buyer.id, `/orders?cursor=${bad}`)).statusCode).toBe(400);
+  });
+
+  it.each(["0", "101"])("answers 400 for a limit of %s", async (limit) => {
+    expect((await get(buyer.id, `/orders?limit=${limit}`)).statusCode).toBe(400);
+  });
+
   it("answers 401 without the demo header", async () => {
     const response = await app.inject({ method: "GET", url: "/orders" });
 
