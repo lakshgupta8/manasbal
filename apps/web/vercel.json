@@ -1,6 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "ignoreCommand": "bash ignore-build.sh",
+  "buildCommand": "cd ../.. && pnpm turbo run build --filter=@manasbal/web",
   "git": {
     "deploymentEnabled": {
       "**": false,
