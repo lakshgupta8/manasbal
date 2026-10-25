@@ -56,6 +56,14 @@
       "model": "Seller",
       "namespace": "public"
     },
+    "settlements": {
+      "model": "Settlement",
+      "namespace": "public"
+    },
+    "shipments": {
+      "model": "Shipment",
+      "namespace": "public"
+    },
     "sub_orders": {
       "model": "SubOrder",
       "namespace": "public"
@@ -1605,6 +1613,21 @@
                   "namespace": "public"
                 }
               },
+              "settlements": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "sellerId"
+                  ]
+                },
+                "to": {
+                  "model": "Settlement",
+                  "namespace": "public"
+                }
+              },
               "subOrders": {
                 "cardinality": "1:N",
                 "on": {
@@ -1663,6 +1686,232 @@
               },
               "namespaceId": "public",
               "table": "sellers"
+            }
+          },
+          "Settlement": {
+            "fields": {
+              "commissionPaise": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
+              },
+              "createdByVisitor": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
+              "grossPaise": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/uuid@1",
+                  "kind": "scalar"
+                }
+              },
+              "isSample": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
+              "payoutPaise": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "periodStart": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
+              },
+              "sellerId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/uuid@1",
+                  "kind": "scalar"
+                }
+              },
+              "status": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "seller": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "sellerId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Seller",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "commissionPaise": {
+                  "column": "commission_paise"
+                },
+                "createdAt": {
+                  "column": "created_at"
+                },
+                "createdByVisitor": {
+                  "column": "created_by_visitor"
+                },
+                "grossPaise": {
+                  "column": "gross_paise"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "isSample": {
+                  "column": "is_sample"
+                },
+                "payoutPaise": {
+                  "column": "payout_paise"
+                },
+                "periodStart": {
+                  "column": "period_start"
+                },
+                "sellerId": {
+                  "column": "seller_id"
+                },
+                "status": {
+                  "column": "status"
+                }
+              },
+              "namespaceId": "public",
+              "table": "settlements"
+            }
+          },
+          "Shipment": {
+            "fields": {
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
+              },
+              "createdByVisitor": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/uuid@1",
+                  "kind": "scalar"
+                }
+              },
+              "isSample": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
+              "status": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "subOrderId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/uuid@1",
+                  "kind": "scalar"
+                }
+              },
+              "trackingNumber": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "subOrder": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "subOrderId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "SubOrder",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "createdAt": {
+                  "column": "created_at"
+                },
+                "createdByVisitor": {
+                  "column": "created_by_visitor"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "isSample": {
+                  "column": "is_sample"
+                },
+                "status": {
+                  "column": "status"
+                },
+                "subOrderId": {
+                  "column": "sub_order_id"
+                },
+                "trackingNumber": {
+                  "column": "tracking_number"
+                }
+              },
+              "namespaceId": "public",
+              "table": "shipments"
             }
           },
           "SubOrder": {
@@ -1762,6 +2011,22 @@
                 },
                 "to": {
                   "model": "Seller",
+                  "namespace": "public"
+                }
+              },
+              "shipment": {
+                "cardinality": "1:1",
+                "nullable": true,
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "subOrderId"
+                  ]
+                },
+                "to": {
+                  "model": "Shipment",
                   "namespace": "public"
                 }
               }
@@ -3476,6 +3741,208 @@
                 }
               ]
             },
+            "settlements": {
+              "columns": {
+                "commission_paise": {
+                  "codecId": "pg/int4@1",
+                  "dataType": "pg/int4",
+                  "nullable": false
+                },
+                "created_at": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "dataType": "pg/timestamptz",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nullable": false
+                },
+                "created_by_visitor": {
+                  "codecId": "pg/bool@1",
+                  "dataType": "pg/bool",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
+                  "nullable": false
+                },
+                "gross_paise": {
+                  "codecId": "pg/int4@1",
+                  "dataType": "pg/int4",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/uuid@1",
+                  "dataType": "pg/uuid",
+                  "nullable": false
+                },
+                "is_sample": {
+                  "codecId": "pg/bool@1",
+                  "dataType": "pg/bool",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
+                  "nullable": false
+                },
+                "payout_paise": {
+                  "codecId": "pg/int4@1",
+                  "dataType": "pg/int4",
+                  "nullable": false
+                },
+                "period_start": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "dataType": "pg/timestamptz",
+                  "nullable": false
+                },
+                "seller_id": {
+                  "codecId": "pg/uuid@1",
+                  "dataType": "pg/uuid",
+                  "nullable": false
+                },
+                "status": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [
+                {
+                  "index": {
+                    "name": "settlements_seller_id_idx_de05cd59"
+                  },
+                  "source": {
+                    "columns": [
+                      "seller_id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "settlements"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "sellers"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "seller_id"
+                  ],
+                  "name": "settlements_seller_id_idx_de05cd59",
+                  "prefix": "settlements_seller_id_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": [
+                {
+                  "columns": [
+                    "seller_id",
+                    "period_start"
+                  ]
+                }
+              ]
+            },
+            "shipments": {
+              "columns": {
+                "created_at": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "dataType": "pg/timestamptz",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nullable": false
+                },
+                "created_by_visitor": {
+                  "codecId": "pg/bool@1",
+                  "dataType": "pg/bool",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/uuid@1",
+                  "dataType": "pg/uuid",
+                  "nullable": false
+                },
+                "is_sample": {
+                  "codecId": "pg/bool@1",
+                  "dataType": "pg/bool",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
+                  "nullable": false
+                },
+                "status": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                },
+                "sub_order_id": {
+                  "codecId": "pg/uuid@1",
+                  "dataType": "pg/uuid",
+                  "nullable": false
+                },
+                "tracking_number": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": true
+                }
+              },
+              "foreignKeys": [
+                {
+                  "index": {
+                    "unique": [
+                      "sub_order_id"
+                    ]
+                  },
+                  "source": {
+                    "columns": [
+                      "sub_order_id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "shipments"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "sub_orders"
+                  }
+                }
+              ],
+              "indexes": [],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": [
+                {
+                  "columns": [
+                    "sub_order_id"
+                  ]
+                },
+                {
+                  "columns": [
+                    "tracking_number"
+                  ]
+                }
+              ]
+            },
             "sub_orders": {
               "columns": {
                 "created_by_visitor": {
@@ -3762,10 +4229,10 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "40f484bbb505460eb9121406018b3da597b04056792619f64e86d1d3ada3c834"
+    "storageHash": "234f16198a81fd1d570b5dda184e7a201a7d2635b8c132d6a0d1611d77f01ba7"
   },
   "execution": {
-    "executionHash": "e6b4dd36515dbd41b412b6ac6939b7831ce8737686f071d2a5272343cdee5762",
+    "executionHash": "8aada8589fe3a293e5e15cac930fc563ff8308f09361c90e282fe1944d514aab",
     "mutations": {
       "defaults": [
         {
@@ -3907,6 +4374,28 @@
           },
           "ref": {
             "entry": "sellers",
+            "field": "id",
+            "namespace": "public"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "uuidv4",
+            "kind": "generator"
+          },
+          "ref": {
+            "entry": "settlements",
+            "field": "id",
+            "namespace": "public"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "uuidv4",
+            "kind": "generator"
+          },
+          "ref": {
+            "entry": "shipments",
             "field": "id",
             "namespace": "public"
           }
