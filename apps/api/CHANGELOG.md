@@ -1,5 +1,20 @@
 # @manasbal/api
 
+## 0.4.0
+
+### Minor Changes
+
+- 523f076: Addresses no longer have a phone number: it is not stored, accepted or returned.
+
+### Patch Changes
+
+- 813c8af: Adds the shipments and settlements tables, so the demo data can hold deliveries and sellers' monthly payouts.
+- 529247b: Describe every API endpoint and lint the API description with Spectral in CI.
+- Updated dependencies [529247b]
+- Updated dependencies [523f076]
+- Updated dependencies [f0d897e]
+  - @manasbal/types@0.2.0
+
 ## 0.3.0
 
 ### Minor Changes

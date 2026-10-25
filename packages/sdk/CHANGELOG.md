@@ -1,5 +1,14 @@
 # @manasbal/sdk
 
+## 0.1.1
+
+### Patch Changes
+
+- Updated dependencies [529247b]
+- Updated dependencies [523f076]
+- Updated dependencies [f0d897e]
+  - @manasbal/types@0.2.0
+
 ## 0.1.0
 
 ### Minor Changes
