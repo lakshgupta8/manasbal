@@ -14,7 +14,6 @@ const address = {
   city: "Sampleton",
   state: "Example State",
   pincode: "190006",
-  phone: "9800000000",
 };
 
 // Needs Docker: a throwaway Postgres with the migrations applied.

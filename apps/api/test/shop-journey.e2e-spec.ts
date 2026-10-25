@@ -93,7 +93,6 @@ describe("shop journey (e2e)", () => {
         city: "Pune",
         state: "MH",
         pincode: "411001",
-        phone: "9000000000",
       });
     const buyerUser = await user("asha@example.test", "Asha Rao");
     buyer = buyerUser.id;

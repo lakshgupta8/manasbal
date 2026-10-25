@@ -46,6 +46,10 @@ jobs:
           pnpm api-types
           git diff --exit-code -- packages/types             || { echo "::error::packages/types is out of date. Run 'pnpm api-types' and commit the result."; exit 1; }
 
+      # The same description /docs-json serves, written by `pnpm api-types` above.
+      - name: API description style (Spectral)
+        run: pnpm lint:openapi
+
       - name: Legal guardrails (brands, licences)
         run: |
           pnpm check:brands
@@ -68,7 +72,7 @@ jobs:
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
           token: ${{ env.CODECOV_TOKEN }}
-          files: apps/api/coverage/lcov.info,packages/ui/coverage/lcov.info,packages/sdk/coverage/lcov.info,apps/web/coverage/lcov.info
+          files: apps/api/coverage/lcov.info,packages/ui/coverage/lcov.info,packages/sdk/coverage/lcov.info,packages/types/coverage/lcov.info,apps/web/coverage/lcov.info
           fail_ci_if_error: true
 
   lighthouse:

@@ -11,7 +11,6 @@ const input = {
   city: "Sampleton",
   state: "Example State",
   pincode: "190006",
-  phone: "9800000000",
 };
 
 // A stand-in for one ORM collection: the chain methods record their filters and return the

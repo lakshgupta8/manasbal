@@ -1,0 +1,3 @@
+# Style rules for the API description (packages/types/openapi.json, the same document /docs-json
+# serves). Run with `pnpm lint:openapi`; CI fails on warnings too.
+extends: ["spectral:oas"]

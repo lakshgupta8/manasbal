@@ -1,0 +1,329 @@
+[
+  {
+    "id": "table.settlements",
+    "label": "Create table \"settlements\"",
+    "summary": "Creates table \"settlements\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "settlements"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"settlements\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"settlements\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"settlements\"",
+        "sql": "CREATE TABLE \"public\".\"settlements\" (\n  \"commission_paise\" int4 NOT NULL,\n  \"created_at\" timestamptz DEFAULT (now()) NOT NULL,\n  \"created_by_visitor\" bool DEFAULT false NOT NULL,\n  \"gross_paise\" int4 NOT NULL,\n  \"id\" uuid NOT NULL,\n  \"is_sample\" bool DEFAULT false NOT NULL,\n  \"payout_paise\" int4 NOT NULL,\n  \"period_start\" timestamptz NOT NULL,\n  \"seller_id\" uuid NOT NULL,\n  \"status\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"settlements\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"settlements\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.shipments",
+    "label": "Create table \"shipments\"",
+    "summary": "Creates table \"shipments\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "shipments"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"shipments\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"shipments\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"shipments\"",
+        "sql": "CREATE TABLE \"public\".\"shipments\" (\n  \"created_at\" timestamptz DEFAULT (now()) NOT NULL,\n  \"created_by_visitor\" bool DEFAULT false NOT NULL,\n  \"id\" uuid NOT NULL,\n  \"is_sample\" bool DEFAULT false NOT NULL,\n  \"status\" text NOT NULL,\n  \"sub_order_id\" uuid NOT NULL,\n  \"tracking_number\" text,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"shipments\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"shipments\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.settlements.settlements_seller_id_period_start_key",
+    "label": "Add unique constraint on \"settlements\" (seller_id, period_start)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "settlements_seller_id_period_start_key",
+        "table": "settlements"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"settlements_seller_id_period_start_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "settlements_seller_id_period_start_key",
+          "public",
+          "\"public\".\"settlements\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"settlements_seller_id_period_start_key\"",
+        "sql": "ALTER TABLE \"public\".\"settlements\" ADD CONSTRAINT \"settlements_seller_id_period_start_key\" UNIQUE (\"seller_id\", \"period_start\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"settlements_seller_id_period_start_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "settlements_seller_id_period_start_key",
+          "public",
+          "\"public\".\"settlements\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.shipments.shipments_sub_order_id_key",
+    "label": "Add unique constraint on \"shipments\" (sub_order_id)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "shipments_sub_order_id_key",
+        "table": "shipments"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"shipments_sub_order_id_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "shipments_sub_order_id_key",
+          "public",
+          "\"public\".\"shipments\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"shipments_sub_order_id_key\"",
+        "sql": "ALTER TABLE \"public\".\"shipments\" ADD CONSTRAINT \"shipments_sub_order_id_key\" UNIQUE (\"sub_order_id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"shipments_sub_order_id_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "shipments_sub_order_id_key",
+          "public",
+          "\"public\".\"shipments\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.shipments.shipments_tracking_number_key",
+    "label": "Add unique constraint on \"shipments\" (tracking_number)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "shipments_tracking_number_key",
+        "table": "shipments"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"shipments_tracking_number_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "shipments_tracking_number_key",
+          "public",
+          "\"public\".\"shipments\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"shipments_tracking_number_key\"",
+        "sql": "ALTER TABLE \"public\".\"shipments\" ADD CONSTRAINT \"shipments_tracking_number_key\" UNIQUE (\"tracking_number\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"shipments_tracking_number_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "shipments_tracking_number_key",
+          "public",
+          "\"public\".\"shipments\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.settlements.settlements_seller_id_idx_de05cd59",
+    "label": "Create index \"settlements_seller_id_idx_de05cd59\" on \"settlements\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "settlements_seller_id_idx_de05cd59",
+        "table": "settlements"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"settlements_seller_id_idx_de05cd59\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"settlements_seller_id_idx_de05cd59\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"settlements_seller_id_idx_de05cd59\"",
+        "sql": "CREATE INDEX \"settlements_seller_id_idx_de05cd59\" ON \"public\".\"settlements\" (\"seller_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"settlements_seller_id_idx_de05cd59\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"settlements_seller_id_idx_de05cd59\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.settlements.settlements_seller_id_fkey",
+    "label": "Add foreign key \"settlements_seller_id_fkey\" on \"settlements\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "settlements_seller_id_fkey",
+        "table": "settlements"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"settlements_seller_id_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "settlements_seller_id_fkey",
+          "public",
+          "\"public\".\"settlements\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"settlements_seller_id_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"settlements\"\nADD CONSTRAINT \"settlements_seller_id_fkey\"\nFOREIGN KEY (\"seller_id\")\nREFERENCES \"public\".\"sellers\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"settlements_seller_id_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "settlements_seller_id_fkey",
+          "public",
+          "\"public\".\"settlements\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.shipments.shipments_sub_order_id_fkey",
+    "label": "Add foreign key \"shipments_sub_order_id_fkey\" on \"shipments\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "shipments_sub_order_id_fkey",
+        "table": "shipments"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"shipments_sub_order_id_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "shipments_sub_order_id_fkey",
+          "public",
+          "\"public\".\"shipments\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"shipments_sub_order_id_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"shipments\"\nADD CONSTRAINT \"shipments_sub_order_id_fkey\"\nFOREIGN KEY (\"sub_order_id\")\nREFERENCES \"public\".\"sub_orders\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"shipments_sub_order_id_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "shipments_sub_order_id_fkey",
+          "public",
+          "\"public\".\"shipments\""
+        ]
+      }
+    ]
+  }
+]

@@ -5,6 +5,7 @@ import {
   ApiOkResponse,
   ApiProperty,
   ApiQuery,
+  ApiOperation,
   ApiTags,
 } from "@nestjs/swagger";
 import type { ReviewPage as ReviewPageShape } from "@manasbal/types";
@@ -48,6 +49,10 @@ export class ReviewsController {
   constructor(private readonly reviews: ReviewsService) {}
 
   // One page of a product's reviews, newest first.
+  @ApiOperation({
+    summary: "List a product's reviews",
+    description: "One page of reviews for a product. Only the reviewer's first name is shown.",
+  })
   @Get("products/:slug/reviews")
   @ApiQuery({ name: "cursor", required: false, description: "nextCursor from the previous page" })
   @ApiQuery({

@@ -13,7 +13,7 @@ export interface AuditTarget {
 }
 
 // Writes one row to audit_logs. It stores who did what to which record, never the request body or
-// any field values: addresses hold names and phone numbers.
+// any field values: addresses hold names and where people live.
 @Injectable()
 export class AuditService {
   // Pass the transaction's orm so the audit row is saved or rolled back together with the change

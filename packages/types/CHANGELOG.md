@@ -1,5 +1,16 @@
 # @manasbal/types
 
+## 0.2.0
+
+### Minor Changes
+
+- 523f076: Addresses no longer have a phone number: it is not stored, accepted or returned.
+- f0d897e: Adds DEMO- checks for PAN, GSTIN and bank account numbers, so only fake ones are accepted.
+
+### Patch Changes
+
+- 529247b: Describe every API endpoint and lint the API description with Spectral in CI.
+
 ## 0.1.0
 
 ### Minor Changes

@@ -65,6 +65,7 @@ model Seller {
   user      User      @relation(fields: [userId], references: [id])
   products  Product[]
   subOrders SubOrder[]
+  settlements Settlement[]
 
   @@map("sellers")
 }
@@ -107,7 +108,6 @@ model Address {
   city             String
   state            String
   pincode          String
-  phone            String
   isDefault        Boolean @default(false) @map("is_default")
   createdByVisitor Boolean @default(false) @map("created_by_visitor")
   isSample         Boolean @default(false) @map("is_sample")
@@ -159,8 +159,24 @@ model SubOrder {
   order         Order       @relation(fields: [orderId], references: [id])
   seller        Seller      @relation(fields: [sellerId], references: [id])
   items         OrderItem[]
+  shipment      Shipment?
 
   @@map("sub_orders")
+}
+
+// One per sub-order: each seller ships their part on its own. The courier is simulated (Phase 9),
+// so the tracking number is a made-up reference.
+model Shipment {
+  id               Uuid     @id @default(uuid())
+  subOrderId       Uuid     @unique @map("sub_order_id")
+  status           String
+  trackingNumber   String?  @unique @map("tracking_number")
+  isSample         Boolean  @default(false) @map("is_sample")
+  createdByVisitor Boolean  @default(false) @map("created_by_visitor")
+  createdAt        DateTime @default(now()) @map("created_at")
+  subOrder         SubOrder @relation(fields: [subOrderId], references: [id])
+
+  @@map("shipments")
 }
 
 model OrderItem {
@@ -190,6 +206,25 @@ model Payment {
   order       Order    @relation(fields: [orderId], references: [id])
 
   @@map("payments")
+}
+
+// A seller's earnings for one month, derived from their sub-orders. Simulated: no money moves.
+// payout_paise = gross_paise - commission_paise.
+model Settlement {
+  id               Uuid     @id @default(uuid())
+  sellerId         Uuid     @map("seller_id")
+  periodStart      DateTime @map("period_start")
+  grossPaise       Int      @map("gross_paise")
+  commissionPaise  Int      @map("commission_paise")
+  payoutPaise      Int      @map("payout_paise")
+  status           String
+  isSample         Boolean  @default(false) @map("is_sample")
+  createdByVisitor Boolean  @default(false) @map("created_by_visitor")
+  createdAt        DateTime @default(now()) @map("created_at")
+  seller           Seller   @relation(fields: [sellerId], references: [id])
+
+  @@unique([sellerId, periodStart])
+  @@map("settlements")
 }
 
 model Review {

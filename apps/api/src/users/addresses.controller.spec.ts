@@ -28,7 +28,6 @@ const requests: InjectOptions[] = [
       city: "Sampleton",
       state: "Example State",
       pincode: "190006",
-      phone: "9800000000",
     },
   },
   { method: "PATCH", url: `/me/addresses/${ADDRESS_ID}`, payload: { city: "Othertown" } },
