@@ -12,3 +12,4 @@ Each significant decision gets one short record: the context, the decision, and 
 | [0007](0007-prisma-8-release-candidate.md)                  | Prisma ORM 8 (release candidate)            | Accepted |
 | [0008](0008-vercel-previews-only-for-storefront-changes.md) | Vercel previews only for storefront changes | Accepted |
 | [0009](0009-previews-only-for-pull-requests-into-main.md)   | Previews only for pull requests into main   | Accepted |
+| [0010](0010-data-model.md)                                  | Data model of the application               | Accepted |
