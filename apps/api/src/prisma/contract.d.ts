@@ -18,7 +18,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'10e8d873027979987593d52a34d690342367c2036eec90f86b90fce0d6087ac1'>;
+  StorageHashBase<'40f484bbb505460eb9121406018b3da597b04056792619f64e86d1d3ada3c834'>;
 export type ExecutionHash =
   ExecutionHashBase<'e6b4dd36515dbd41b412b6ac6939b7831ce8737686f071d2a5272343cdee5762'>;
 export type ProfileHash =
@@ -242,7 +242,6 @@ export type FieldOutputTypes = {
       readonly isSample: CodecTypes['pg/bool@1']['output'];
       readonly line1: CodecTypes['pg/text@1']['output'];
       readonly name: CodecTypes['pg/text@1']['output'];
-      readonly phone: CodecTypes['pg/text@1']['output'];
       readonly pincode: CodecTypes['pg/text@1']['output'];
       readonly state: CodecTypes['pg/text@1']['output'];
       readonly userId: CodecTypes['pg/uuid@1']['output'];
@@ -397,7 +396,6 @@ export type FieldInputTypes = {
       readonly isSample: CodecTypes['pg/bool@1']['input'];
       readonly line1: CodecTypes['pg/text@1']['input'];
       readonly name: CodecTypes['pg/text@1']['input'];
-      readonly phone: CodecTypes['pg/text@1']['input'];
       readonly pincode: CodecTypes['pg/text@1']['input'];
       readonly state: CodecTypes['pg/text@1']['input'];
       readonly userId: CodecTypes['pg/uuid@1']['input'];
@@ -552,7 +550,6 @@ export type StorageColumnTypes = {
       readonly is_sample: CodecTypes['pg/bool@1']['output'];
       readonly line1: CodecTypes['pg/text@1']['output'];
       readonly name: CodecTypes['pg/text@1']['output'];
-      readonly phone: CodecTypes['pg/text@1']['output'];
       readonly pincode: CodecTypes['pg/text@1']['output'];
       readonly state: CodecTypes['pg/text@1']['output'];
       readonly user_id: CodecTypes['pg/uuid@1']['output'];
@@ -707,7 +704,6 @@ export type StorageColumnInputTypes = {
       readonly is_sample: CodecTypes['pg/bool@1']['input'];
       readonly line1: CodecTypes['pg/text@1']['input'];
       readonly name: CodecTypes['pg/text@1']['input'];
-      readonly phone: CodecTypes['pg/text@1']['input'];
       readonly pincode: CodecTypes['pg/text@1']['input'];
       readonly state: CodecTypes['pg/text@1']['input'];
       readonly user_id: CodecTypes['pg/uuid@1']['input'];
@@ -862,7 +858,6 @@ export namespace Models {
     isSample: CodecTypes['pg/bool@1']['output'];
     line1: CodecTypes['pg/text@1']['output'];
     name: CodecTypes['pg/text@1']['output'];
-    phone: CodecTypes['pg/text@1']['output'];
     pincode: CodecTypes['pg/text@1']['output'];
     state: CodecTypes['pg/text@1']['output'];
     userId: CodecTypes['pg/uuid@1']['output'];
@@ -1157,12 +1152,6 @@ type ContractBase = Omit<
                   readonly many: false;
                 };
                 readonly name: {
-                  readonly dataType: 'pg/text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: false;
-                  readonly many: false;
-                };
-                readonly phone: {
                   readonly dataType: 'pg/text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
@@ -2557,10 +2546,6 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
-              readonly phone: {
-                readonly nullable: false;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
-              };
               readonly pincode: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
@@ -2607,7 +2592,6 @@ type ContractBase = Omit<
                 readonly isSample: { readonly column: 'is_sample' };
                 readonly line1: { readonly column: 'line1' };
                 readonly name: { readonly column: 'name' };
-                readonly phone: { readonly column: 'phone' };
                 readonly pincode: { readonly column: 'pincode' };
                 readonly state: { readonly column: 'state' };
                 readonly userId: { readonly column: 'user_id' };

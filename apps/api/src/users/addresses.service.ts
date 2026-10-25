@@ -5,7 +5,7 @@ import { getDb } from "../prisma/db.js";
 import type { Actor } from "./demo-user.guard.js";
 
 // What the API shows of an address: never the owner or the demo-reset flag.
-const FIELDS = ["id", "name", "line1", "city", "state", "pincode", "phone", "isDefault"] as const;
+const FIELDS = ["id", "name", "line1", "city", "state", "pincode", "isDefault"] as const;
 
 const CREATE = "address.create";
 const UPDATE = "address.update";

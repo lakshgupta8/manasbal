@@ -60,9 +60,6 @@ export class Address {
   @ApiProperty({ example: "190006" })
   pincode: string;
 
-  @ApiProperty({ example: "9800000000" })
-  phone: string;
-
   @ApiProperty()
   isDefault: boolean;
 }

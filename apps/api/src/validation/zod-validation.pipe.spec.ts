@@ -8,7 +8,6 @@ const address = {
   city: "Sampleton",
   state: "Example State",
   pincode: "190006",
-  phone: "9800000000",
 };
 
 // The messages of the 400 the pipe throws.
@@ -32,12 +31,12 @@ describe("ZodValidationPipe", () => {
 
   it("names the field of every problem", () => {
     const messages = messagesOf(() =>
-      input.transform({ ...address, pincode: "012345", phone: "1" }),
+      input.transform({ ...address, name: " ", pincode: "012345" }),
     );
 
     expect(messages).toEqual([
+      "name: Too small: expected string to have >=1 characters",
       "pincode: Enter a 6-digit PIN code",
-      "phone: Enter a 10-digit mobile number",
     ]);
   });
 
