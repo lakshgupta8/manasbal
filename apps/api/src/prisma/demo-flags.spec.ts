@@ -15,6 +15,8 @@ const DEMO_TABLES = [
   "sub_orders",
   "order_items",
   "payments",
+  "shipments",
+  "settlements",
   "reviews",
   "audit_logs",
 ];
