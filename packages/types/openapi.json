@@ -103,15 +103,11 @@
                     "type": "string",
                     "pattern": "^[1-9]\\d{5}$"
                   },
-                  "phone": {
-                    "type": "string",
-                    "pattern": "^[6-9]\\d{9}$"
-                  },
                   "isDefault": {
                     "type": "boolean"
                   }
                 },
-                "required": ["name", "line1", "city", "state", "pincode", "phone"],
+                "required": ["name", "line1", "city", "state", "pincode"],
                 "additionalProperties": false
               }
             }
@@ -189,10 +185,6 @@
                   "pincode": {
                     "type": "string",
                     "pattern": "^[1-9]\\d{5}$"
-                  },
-                  "phone": {
-                    "type": "string",
-                    "pattern": "^[6-9]\\d{9}$"
                   },
                   "isDefault": {
                     "type": "boolean"
@@ -802,15 +794,11 @@
             "type": "string",
             "example": "190006"
           },
-          "phone": {
-            "type": "string",
-            "example": "9800000000"
-          },
           "isDefault": {
             "type": "boolean"
           }
         },
-        "required": ["id", "name", "line1", "city", "state", "pincode", "phone", "isDefault"]
+        "required": ["id", "name", "line1", "city", "state", "pincode", "isDefault"]
       },
       "Category": {
         "type": "object",

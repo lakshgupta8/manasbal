@@ -107,7 +107,6 @@ model Address {
   city             String
   state            String
   pincode          String
-  phone            String
   isDefault        Boolean @default(false) @map("is_default")
   createdByVisitor Boolean @default(false) @map("created_by_visitor")
   isSample         Boolean @default(false) @map("is_sample")

@@ -71,7 +71,6 @@ describe("GET /products/:slug/reviews (e2e)", () => {
       city: "Pune",
       state: "MH",
       pincode: "411001",
-      phone: "9000000000",
     });
     const order = await orm.Order.select("id").create({
       userId: buyer.id,

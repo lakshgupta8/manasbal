@@ -33,7 +33,6 @@ describe("GET /orders (e2e)", () => {
       city: "Pune",
       state: "MH",
       pincode: "411001",
-      phone: "9000000000",
     });
     return { id: user.id, addressId: address.id };
   }

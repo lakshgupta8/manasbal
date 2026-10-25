@@ -293,8 +293,6 @@ export interface components {
       state: string;
       /** @example 190006 */
       pincode: string;
-      /** @example 9800000000 */
-      phone: string;
       isDefault: boolean;
     };
     Category: {
@@ -532,7 +530,6 @@ export interface operations {
           city: string;
           state: string;
           pincode: string;
-          phone: string;
           isDefault?: boolean;
         };
       };
@@ -618,7 +615,6 @@ export interface operations {
           city?: string;
           state?: string;
           pincode?: string;
-          phone?: string;
           isDefault?: boolean;
         };
       };
