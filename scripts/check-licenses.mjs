@@ -10,8 +10,10 @@ const EXCEPTIONS = {};
 
 const pnpm = process.env.npm_execpath;
 if (!pnpm) throw new Error("Run this through pnpm: pnpm check:licenses");
+// pnpm 12 is a native binary; older versions are a JavaScript file that Node has to run.
+const [command, ...prefix] = /\.[cm]?js$/.test(pnpm) ? [process.execPath, pnpm] : [pnpm];
 const report = JSON.parse(
-  execFileSync(process.execPath, [pnpm, "licenses", "list", "--prod", "--json", "--recursive"], {
+  execFileSync(command, [...prefix, "licenses", "list", "--prod", "--json", "--recursive"], {
     encoding: "utf8",
   }),
 );
