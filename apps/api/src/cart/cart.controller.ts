@@ -6,6 +6,7 @@ import {
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiProperty,
+  ApiOperation,
   ApiTags,
   ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
@@ -58,6 +59,11 @@ export class Cart {
 export class CartController {
   constructor(private readonly cart: CartService) {}
 
+  // get
+  @ApiOperation({
+    summary: "Get my cart",
+    description: "The demo user's cart with its lines and total, in whole paise.",
+  })
   @Get()
   @ApiOkResponse({ type: Cart })
   get(@CurrentUserId() userId: string): Promise<CartShape> {
@@ -65,6 +71,13 @@ export class CartController {
   }
 
   // Adding a variant that is already in the cart raises the quantity of its line.
+
+  // addItem
+  @ApiOperation({
+    summary: "Add to my cart",
+    description:
+      "Adds a variant to the cart. If it is already there, its quantity goes up. Send an Idempotency-Key header so that retrying the request doesn't add the item twice.",
+  })
   @Post("items")
   @ApiHeader({
     name: "Idempotency-Key",

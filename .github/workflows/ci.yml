@@ -46,6 +46,10 @@ jobs:
           pnpm api-types
           git diff --exit-code -- packages/types             || { echo "::error::packages/types is out of date. Run 'pnpm api-types' and commit the result."; exit 1; }
 
+      # The same description /docs-json serves, written by `pnpm api-types` above.
+      - name: API description style (Spectral)
+        run: pnpm lint:openapi
+
       - name: Legal guardrails (brands, licences)
         run: |
           pnpm check:brands

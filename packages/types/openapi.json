@@ -3,6 +3,7 @@
   "paths": {
     "/health": {
       "get": {
+        "description": "Returns ok, the service name and the running version. Not rate-limited.",
         "operationId": "HealthController_check",
         "parameters": [],
         "responses": {
@@ -17,11 +18,13 @@
             }
           }
         },
+        "summary": "Check the API is up",
         "tags": ["Health"]
       }
     },
     "/me/addresses": {
       "get": {
+        "description": "Every delivery address the demo user has saved, sorted by name.",
         "operationId": "AddressesController_list",
         "parameters": [
           {
@@ -52,9 +55,11 @@
             "description": "No user, or the API runs in production"
           }
         },
+        "summary": "List my addresses",
         "tags": ["Addresses"]
       },
       "post": {
+        "description": "Saves a new delivery address for the demo user. The change is written to the audit log.",
         "operationId": "AddressesController_create",
         "parameters": [
           {
@@ -127,11 +132,13 @@
             "description": "No user, or the API runs in production"
           }
         },
+        "summary": "Add an address",
         "tags": ["Addresses"]
       }
     },
     "/me/addresses/{id}": {
       "patch": {
+        "description": "Updates only the fields sent. The change is written to the audit log.",
         "operationId": "AddressesController_update",
         "parameters": [
           {
@@ -214,9 +221,11 @@
             "description": "The user has no address with this id"
           }
         },
+        "summary": "Change an address",
         "tags": ["Addresses"]
       },
       "delete": {
+        "description": "Deletes one of the demo user's addresses. An address an order was sent to cannot be deleted. The change is written to the audit log.",
         "operationId": "AddressesController_remove",
         "parameters": [
           {
@@ -251,11 +260,13 @@
             "description": "An order was sent to this address"
           }
         },
+        "summary": "Delete an address",
         "tags": ["Addresses"]
       }
     },
     "/categories": {
       "get": {
+        "description": "The whole category tree, each level sorted by name.",
         "operationId": "CategoriesController_list",
         "parameters": [],
         "responses": {
@@ -273,11 +284,13 @@
             }
           }
         },
+        "summary": "List categories",
         "tags": ["Catalog"]
       }
     },
     "/products": {
       "get": {
+        "description": "One page of products, optionally in one category. Pass nextCursor to get the next page.",
         "operationId": "ProductsController_list",
         "parameters": [
           {
@@ -323,11 +336,13 @@
             "description": "The cursor or limit is not valid"
           }
         },
+        "summary": "List products",
         "tags": ["Catalog"]
       }
     },
     "/products/{id}/stock": {
       "get": {
+        "description": "How many of each variant of the product are in stock right now.",
         "operationId": "ProductsController_stock",
         "parameters": [
           {
@@ -357,11 +372,13 @@
             "description": "No such product"
           }
         },
+        "summary": "Get a product's stock",
         "tags": ["Catalog"]
       }
     },
     "/products/{slug}": {
       "get": {
+        "description": "A product by its slug, with its category, seller and variants. Prices are whole paise.",
         "operationId": "ProductsController_detail",
         "parameters": [
           {
@@ -388,11 +405,13 @@
             "description": "No such product"
           }
         },
+        "summary": "Get a product",
         "tags": ["Catalog"]
       }
     },
     "/sellers/{slug}": {
       "get": {
+        "description": "An approved seller's store by its slug, with how many products it lists.",
         "operationId": "SellersController_store",
         "parameters": [
           {
@@ -419,11 +438,13 @@
             "description": "No such store, or it is not approved yet"
           }
         },
+        "summary": "Get a seller's store",
         "tags": ["Sellers"]
       }
     },
     "/products/{slug}/reviews": {
       "get": {
+        "description": "One page of reviews for a product. Only the reviewer's first name is shown.",
         "operationId": "ReviewsController_list",
         "parameters": [
           {
@@ -471,11 +492,13 @@
             "description": "No such product"
           }
         },
+        "summary": "List a product's reviews",
         "tags": ["Catalog"]
       }
     },
     "/cart": {
       "get": {
+        "description": "The demo user's cart with its lines and total, in whole paise.",
         "operationId": "CartController_get",
         "parameters": [
           {
@@ -503,11 +526,13 @@
             "description": "No user, or the API runs in production"
           }
         },
+        "summary": "Get my cart",
         "tags": ["Cart"]
       }
     },
     "/cart/items": {
       "post": {
+        "description": "Adds a variant to the cart. If it is already there, its quantity goes up. Send an Idempotency-Key header so that retrying the request doesn't add the item twice.",
         "operationId": "CartController_addItem",
         "parameters": [
           {
@@ -574,11 +599,13 @@
             "description": "More than the stock"
           }
         },
+        "summary": "Add to my cart",
         "tags": ["Cart"]
       }
     },
     "/orders": {
       "get": {
+        "description": "One page of the demo user's orders, newest first. Totals are whole paise.",
         "operationId": "OrdersController_list",
         "parameters": [
           {
@@ -627,11 +654,13 @@
             "description": "No user, or the API runs in production"
           }
         },
+        "summary": "List my orders",
         "tags": ["Orders"]
       }
     },
     "/admin/audit-log": {
       "get": {
+        "description": "One page of recorded changes, newest first. Only admins can read it.",
         "operationId": "AdminController_list",
         "parameters": [
           {
@@ -683,6 +712,7 @@
             "description": "The user is not an admin"
           }
         },
+        "summary": "Read the audit log",
         "tags": ["Admin"]
       }
     }
@@ -693,8 +723,42 @@
     "version": "generated",
     "contact": {}
   },
-  "tags": [],
-  "servers": [],
+  "tags": [
+    {
+      "name": "Health",
+      "description": "Whether the API is up, and which version is running"
+    },
+    {
+      "name": "Catalog",
+      "description": "Categories, products, stock and reviews"
+    },
+    {
+      "name": "Sellers",
+      "description": "Seller storefronts"
+    },
+    {
+      "name": "Cart",
+      "description": "The demo user's cart"
+    },
+    {
+      "name": "Orders",
+      "description": "The demo user's orders"
+    },
+    {
+      "name": "Addresses",
+      "description": "The demo user's delivery addresses"
+    },
+    {
+      "name": "Admin",
+      "description": "Admin-only views, such as the audit log"
+    }
+  ],
+  "servers": [
+    {
+      "url": "/",
+      "description": "The server that serves these docs"
+    }
+  ],
   "components": {
     "schemas": {
       "HealthStatus": {
