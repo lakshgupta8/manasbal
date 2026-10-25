@@ -72,7 +72,7 @@ jobs:
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
           token: ${{ env.CODECOV_TOKEN }}
-          files: apps/api/coverage/lcov.info,packages/ui/coverage/lcov.info,packages/sdk/coverage/lcov.info,apps/web/coverage/lcov.info
+          files: apps/api/coverage/lcov.info,packages/ui/coverage/lcov.info,packages/sdk/coverage/lcov.info,packages/types/coverage/lcov.info,apps/web/coverage/lcov.info
           fail_ci_if_error: true
 
   lighthouse:

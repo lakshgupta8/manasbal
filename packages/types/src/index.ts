@@ -13,6 +13,7 @@ export * from "./cart.js";
 // Answer shapes, written by hand with Zod.
 export * from "./audit.js";
 export * from "./categories.js";
+export * from "./demo-ids.js";
 export * from "./orders.js";
 export * from "./products.js";
 export * from "./reviews.js";
