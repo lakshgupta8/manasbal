@@ -16,10 +16,18 @@ packageExtensions:
     peerDependencies:
       rxjs: ^7.1.0
 
-# Native helpers that ship prebuilt binaries; their install scripts aren't needed.
-ignoredBuiltDependencies:
-  - sharp
-  - unrs-resolver
+# pnpm 12 refuses to install while a dependency's build script is neither allowed nor denied.
+# pnpm 10 skipped all of them and everything worked: the native ones ship prebuilt binaries, and
+# @scarf/scarf only sends install analytics.
+allowBuilds:
+  "@scarf/scarf": false
+  cpu-features: false
+  esbuild: false
+  protobufjs: false
+  sharp: false
+  ssh2: false
+  unrs-resolver: false
+  workerd: false
 
 # Refuse to install on a Node older than package.json's engines: 24.22.1 is the October 2026
 # security release.
