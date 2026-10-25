@@ -4,6 +4,7 @@ import {
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiProperty,
+  ApiOperation,
   ApiQuery,
   ApiTags,
 } from "@nestjs/swagger";
@@ -163,6 +164,13 @@ export class ProductsController {
   constructor(private readonly products: ProductsService) {}
 
   // One page of products, sorted by id. A category slug keeps only that category's products.
+
+  // list
+  @ApiOperation({
+    summary: "List products",
+    description:
+      "One page of products, optionally in one category. Pass nextCursor to get the next page.",
+  })
   @Get("products")
   @ApiQuery({ name: "category", required: false, description: "Category slug" })
   @ApiQuery({ name: "cursor", required: false, description: "nextCursor from the previous page" })
@@ -182,6 +190,12 @@ export class ProductsController {
   }
 
   // How many of each variant of a product can be bought right now.
+
+  // stock
+  @ApiOperation({
+    summary: "Get a product's stock",
+    description: "How many of each variant of the product are in stock right now.",
+  })
   @Get("products/:id/stock")
   @ApiOkResponse({ type: ProductStock })
   @ApiBadRequestResponse({ description: "The id is not a uuid" })
@@ -191,6 +205,13 @@ export class ProductsController {
   }
 
   // One product with everything its page shows.
+
+  // detail
+  @ApiOperation({
+    summary: "Get a product",
+    description:
+      "A product by its slug, with its category, seller and variants. Prices are whole paise.",
+  })
   @Get("products/:slug")
   @ApiOkResponse({ type: ProductDetail })
   @ApiNotFoundResponse({ description: "No such product" })

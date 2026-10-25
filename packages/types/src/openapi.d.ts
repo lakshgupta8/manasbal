@@ -11,6 +11,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /**
+     * Check the API is up
+     * @description Returns ok, the service name and the running version. Not rate-limited.
+     */
     get: operations["HealthController_check"];
     put?: never;
     post?: never;
@@ -27,8 +31,16 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /**
+     * List my addresses
+     * @description Every delivery address the demo user has saved, sorted by name.
+     */
     get: operations["AddressesController_list"];
     put?: never;
+    /**
+     * Add an address
+     * @description Saves a new delivery address for the demo user. The change is written to the audit log.
+     */
     post: operations["AddressesController_create"];
     delete?: never;
     options?: never;
@@ -46,9 +58,17 @@ export interface paths {
     get?: never;
     put?: never;
     post?: never;
+    /**
+     * Delete an address
+     * @description Deletes one of the demo user's addresses. An address an order was sent to cannot be deleted. The change is written to the audit log.
+     */
     delete: operations["AddressesController_remove"];
     options?: never;
     head?: never;
+    /**
+     * Change an address
+     * @description Updates only the fields sent. The change is written to the audit log.
+     */
     patch: operations["AddressesController_update"];
     trace?: never;
   };
@@ -59,6 +79,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /**
+     * List categories
+     * @description The whole category tree, each level sorted by name.
+     */
     get: operations["CategoriesController_list"];
     put?: never;
     post?: never;
@@ -75,6 +99,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /**
+     * List products
+     * @description One page of products, optionally in one category. Pass nextCursor to get the next page.
+     */
     get: operations["ProductsController_list"];
     put?: never;
     post?: never;
@@ -91,6 +119,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /**
+     * Get a product's stock
+     * @description How many of each variant of the product are in stock right now.
+     */
     get: operations["ProductsController_stock"];
     put?: never;
     post?: never;
@@ -107,6 +139,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /**
+     * Get a product
+     * @description A product by its slug, with its category, seller and variants. Prices are whole paise.
+     */
     get: operations["ProductsController_detail"];
     put?: never;
     post?: never;
@@ -123,6 +159,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /**
+     * Get a seller's store
+     * @description An approved seller's store by its slug, with how many products it lists.
+     */
     get: operations["SellersController_store"];
     put?: never;
     post?: never;
@@ -139,6 +179,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /**
+     * List a product's reviews
+     * @description One page of reviews for a product. Only the reviewer's first name is shown.
+     */
     get: operations["ReviewsController_list"];
     put?: never;
     post?: never;
@@ -155,6 +199,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /**
+     * Get my cart
+     * @description The demo user's cart with its lines and total, in whole paise.
+     */
     get: operations["CartController_get"];
     put?: never;
     post?: never;
@@ -173,6 +221,10 @@ export interface paths {
     };
     get?: never;
     put?: never;
+    /**
+     * Add to my cart
+     * @description Adds a variant to the cart. If it is already there, its quantity goes up. Send an Idempotency-Key header so that retrying the request doesn't add the item twice.
+     */
     post: operations["CartController_addItem"];
     delete?: never;
     options?: never;
@@ -187,6 +239,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /**
+     * List my orders
+     * @description One page of the demo user's orders, newest first. Totals are whole paise.
+     */
     get: operations["OrdersController_list"];
     put?: never;
     post?: never;
@@ -203,6 +259,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /**
+     * Read the audit log
+     * @description One page of recorded changes, newest first. Only admins can read it.
+     */
     get: operations["AdminController_list"];
     put?: never;
     post?: never;

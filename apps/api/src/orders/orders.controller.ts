@@ -6,6 +6,7 @@ import {
   ApiProperty,
   ApiQuery,
   ApiTags,
+  ApiOperation,
   ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
 import type { OrderPage as OrderPageShape } from "@manasbal/types";
@@ -56,6 +57,10 @@ export class OrdersController {
   constructor(private readonly orders: OrdersService) {}
 
   // One page of the user's orders, newest first.
+  @ApiOperation({
+    summary: "List my orders",
+    description: "One page of the demo user's orders, newest first. Totals are whole paise.",
+  })
   @Get()
   @ApiQuery({ name: "cursor", required: false, description: "nextCursor from the previous page" })
   @ApiQuery({

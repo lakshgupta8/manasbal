@@ -7,6 +7,7 @@ import {
   ApiProperty,
   ApiQuery,
   ApiTags,
+  ApiOperation,
   ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
 import type { AuditPage as AuditPageShape } from "@manasbal/types";
@@ -68,6 +69,10 @@ export class AdminController {
   constructor(private readonly admin: AdminService) {}
 
   // One page of the audit log, newest first.
+  @ApiOperation({
+    summary: "Read the audit log",
+    description: "One page of recorded changes, newest first. Only admins can read it.",
+  })
   @Get("audit-log")
   @ApiQuery({ name: "cursor", required: false, description: "nextCursor from the previous page" })
   @ApiQuery({

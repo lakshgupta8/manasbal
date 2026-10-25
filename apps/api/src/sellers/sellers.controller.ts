@@ -1,5 +1,11 @@
 import { Controller, Get, Param } from "@nestjs/common";
-import { ApiNotFoundResponse, ApiOkResponse, ApiProperty, ApiTags } from "@nestjs/swagger";
+import {
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiProperty,
+  ApiTags,
+  ApiOperation,
+} from "@nestjs/swagger";
 import type { SellerStore as SellerStoreShape } from "@manasbal/types";
 import { SellersService } from "./sellers.service.js";
 
@@ -22,6 +28,10 @@ export class SellersController {
   constructor(private readonly sellers: SellersService) {}
 
   // A store's public page. Only approved stores are shown.
+  @ApiOperation({
+    summary: "Get a seller's store",
+    description: "An approved seller's store by its slug, with how many products it lists.",
+  })
   @Get("sellers/:slug")
   @ApiOkResponse({ type: SellerStore })
   @ApiNotFoundResponse({ description: "No such store, or it is not approved yet" })
