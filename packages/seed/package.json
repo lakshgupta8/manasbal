@@ -1,0 +1,22 @@
+{
+  "name": "@manasbal/seed",
+  "version": "0.0.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc",
+    "test": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^10.6.0",
+    "@prisma/orm-postgres": "8.0.0-rc.18"
+  },
+  "devDependencies": {
+    "@manasbal/tsconfig": "workspace:*",
+    "@types/node": "^24.19.2",
+    "@vitest/coverage-v8": "^4.1.11",
+    "typescript": "~6.0.3",
+    "vitest": "^4.1.11"
+  }
+}
