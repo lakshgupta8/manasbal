@@ -1,0 +1,764 @@
+{
+  "brands": [
+    "Loomsley",
+    "Sutra Weave",
+    "Cottonvale",
+    "Ranjani Looms",
+    "Tanabana",
+    "Hillcrest Loom",
+    "Dhaga House",
+    "Neelkamal Threads"
+  ],
+  "items": {
+    "clothing-men-shirts": [
+      {
+        "name": "Slim Fit Checked Shirt",
+        "description": "Made from soft cotton with a small black and blue check. It has a slim cut, a button-down collar and a curved hem for office or weekend wear.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Fits well across the shoulders and the check looks sharp. Cotton feels soft even after two washes."
+          },
+          {
+            "rating": 4,
+            "body": "Good shirt for the price. The sleeves are a little long for me but the rest is fine."
+          }
+        ]
+      },
+      {
+        "name": "Plain White Formal Shirt",
+        "description": "A cotton-blend shirt in plain white with a spread collar and full sleeves. The regular fit gives room to move and works well under a blazer.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Does not go see-through and the collar stays flat all day. Arrived neatly folded in a clear pack."
+          },
+          {
+            "rating": 4,
+            "body": "Nice crisp look for meetings. Needs a quick iron after washing, which is expected."
+          }
+        ]
+      },
+      {
+        "name": "Linen Blend Casual Shirt",
+        "description": "Cut from a linen and cotton blend in sand beige with a relaxed fit. The light weave suits warm weather and can be worn untucked.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Very airy in summer heat. The crumpled look is part of the style and I like it."
+          },
+          {
+            "rating": 3,
+            "body": "Fabric is good but it creases badly. Size ran slightly large, so order one down."
+          }
+        ]
+      },
+      {
+        "name": "Striped Oxford Shirt",
+        "description": "Woven in a thick oxford cotton with thin blue and white vertical stripes. It has a chest pocket and a regular fit with a sturdy collar.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Thick fabric feels durable and the stripes are even. Stitching on the pocket is neat."
+          },
+          {
+            "rating": 5,
+            "body": "Bought two for work and both fit the same. Delivery came a day early."
+          }
+        ]
+      },
+      {
+        "name": "Denim Western Shirt",
+        "description": "A mid-blue denim shirt with snap buttons and two flap pockets. The fabric is medium weight and the fit is straight through the body.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Looks great over a plain tee. Snap buttons are firm and have not loosened."
+          },
+          {
+            "rating": 4,
+            "body": "Denim is stiff at first but softens after a wash. Colour matches the photos."
+          }
+        ]
+      },
+      {
+        "name": "Printed Short Sleeve Shirt",
+        "description": "A short sleeve shirt in light viscose with a small leaf print on a navy base. It has a camp collar and a loose fit meant for holidays and warm days.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Light and drapes nicely. The print is subtle and not loud, which I wanted."
+          },
+          {
+            "rating": 3,
+            "body": "Colour is a bit darker than the picture and the hem is slightly uneven. Still wearable."
+          }
+        ]
+      }
+    ],
+    "clothing-men-t-shirts": [
+      {
+        "name": "Round Neck Cotton Tee",
+        "description": "An everyday t-shirt in combed cotton with a ribbed round neck. The regular fit and half sleeves make it easy to layer or wear alone.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Soft against the skin and the neck rib holds its shape. Bought three colours."
+          },
+          {
+            "rating": 4,
+            "body": "Good basic tee. Shrank a little in the first wash so size up if between sizes."
+          }
+        ]
+      },
+      {
+        "name": "Polo Collar T-Shirt",
+        "description": "A pique cotton polo with a two-button placket and a knit collar. It has a regular fit and short sleeves with ribbed cuffs.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Collar stays upright and the pique texture feels premium for the cost. Fits true to size."
+          },
+          {
+            "rating": 4,
+            "body": "Looks smart enough for casual Fridays. Packaging was a plain polybag, which is fine."
+          }
+        ]
+      },
+      {
+        "name": "Oversized Graphic Tee",
+        "description": "A heavy cotton t-shirt with dropped shoulders and a loose body. The back carries a printed line drawing of mountains in off-white ink.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Thick fabric and the drop shoulder fit is exactly what I wanted. Print has not cracked yet."
+          },
+          {
+            "rating": 3,
+            "body": "Fit is good but the sleeves are very wide. The print feels a little stiff."
+          }
+        ]
+      },
+      {
+        "name": "Full Sleeve Henley",
+        "description": "A henley in soft cotton jersey with a three-button front and full sleeves. The slim fit suits cooler evenings under a light jacket.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Buttons are sewn on firmly and the jersey is smooth. Wore it all through the winter months."
+          },
+          {
+            "rating": 5,
+            "body": "Sleeves are the right length and the grey shade looks the same as shown."
+          }
+        ]
+      },
+      {
+        "name": "Striped Crew Neck Tee",
+        "description": "A crew neck tee with horizontal navy and white stripes in lightweight cotton. It has a regular fit and a clean tape finish at the neck.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Stripes line up properly at the seams. Light enough for humid weather."
+          },
+          {
+            "rating": 4,
+            "body": "Comfortable and not clingy. The white parts are slightly thin but acceptable."
+          }
+        ]
+      },
+      {
+        "name": "Quick Dry Sports Tee",
+        "description": "A polyester mesh t-shirt with side vents and flat seams for gym or running. The fabric dries fast and the fit is close but not tight.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Dries within an hour after a sweaty run and no chafing at the seams."
+          },
+          {
+            "rating": 4,
+            "body": "Good for the gym. Fabric feels a bit plasticky at first but it is light."
+          }
+        ]
+      }
+    ],
+    "clothing-men-trousers": [
+      {
+        "name": "Slim Fit Chinos",
+        "description": "Stretch cotton chinos in khaki with a slim leg and a mid rise. They have slant pockets and a zip fly with a button closure.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Stretch is just right and the waist sits comfortably. The khaki shade is neutral and goes with most shirts."
+          },
+          {
+            "rating": 4,
+            "body": "Good fit at the thigh. Length needed a small hem for me but the stitching is clean."
+          }
+        ]
+      },
+      {
+        "name": "Formal Pleated Trousers",
+        "description": "Polyester viscose trousers in charcoal grey with a single front pleat. The straight cut and sewn crease suit office wear.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Holds its crease through the day and the fabric does not feel hot. Waistband is comfortable."
+          },
+          {
+            "rating": 5,
+            "body": "Looks like a much costlier pair. Came well packed with no marks."
+          }
+        ]
+      },
+      {
+        "name": "Cotton Cargo Pants",
+        "description": "Relaxed cotton cargo pants in olive with large side pockets and an elastic back waist. The tapered ankle keeps the leg tidy.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Pockets are deep enough for a phone and wallet. Fabric is tough and does not fade quickly."
+          },
+          {
+            "rating": 3,
+            "body": "Comfortable but a bit baggy at the thigh. I would suggest sizing down."
+          }
+        ]
+      },
+      {
+        "name": "Drawstring Linen Pants",
+        "description": "Light linen blend pants with a drawstring waist and straight legs. They are suited for beach trips and hot afternoons at home.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Very cool to wear and the drawstring is strong. Perfect for our Goa trip."
+          },
+          { "rating": 4, "body": "Soft and loose. Creases easily but that is part of linen." }
+        ]
+      },
+      {
+        "name": "Stretch Denim Jeans",
+        "description": "Dark blue jeans in cotton denim with a little elastane for stretch. The straight fit has five pockets and a mid rise.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Waist and seat fit perfectly and the colour has not bled onto other clothes."
+          },
+          {
+            "rating": 4,
+            "body": "Denim is a good weight and stretches enough to sit comfortably. Delivery took four days."
+          }
+        ]
+      },
+      {
+        "name": "Fleece Jogger Pants",
+        "description": "Brushed fleece joggers in dark grey with elastic cuffs and a drawstring waist. They have two side pockets and a relaxed fit for lounging or light exercise.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Warm and soft inside, great for winter nights. Cuffs hold well and do not sag."
+          },
+          {
+            "rating": 4,
+            "body": "Nice and cosy. A small amount of fluff came off in the first wash."
+          }
+        ]
+      }
+    ],
+    "clothing-women-kurtas": [
+      {
+        "name": "Straight Cotton Kurta",
+        "description": "A knee-length straight kurta in plain mustard cotton with a round neck and three-quarter sleeves. The fabric is soft and easy to wear through the day.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "The cotton is soft and not see-through. Fits true to size and the colour is as shown."
+          },
+          {
+            "rating": 4,
+            "body": "Simple and comfortable for daily use. Stitching at the side slits could be a little stronger."
+          }
+        ]
+      },
+      {
+        "name": "Block Print A-Line Kurta",
+        "description": "An A-line kurta with hand-style block prints in indigo and white on cotton. It has a flared hem and a mandarin collar with a short placket.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "The print is neat and the flare falls nicely. Gets many compliments at work."
+          },
+          {
+            "rating": 4,
+            "body": "Pretty design. Colour ran a bit in the first wash so wash it separately."
+          }
+        ]
+      },
+      {
+        "name": "Embroidered Anarkali Kurta",
+        "description": "A long Anarkali kurta in georgette with thread embroidery on the yoke. It has a fitted bodice, a full flare and a soft inner lining.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Wore it to a family function and the flare looked lovely. Embroidery is fine and well finished."
+          },
+          {
+            "rating": 3,
+            "body": "Pretty, but the lining is slightly short and the waist ran snug. Delivery was on time."
+          }
+        ]
+      },
+      {
+        "name": "Chikankari Style Kurta",
+        "description": "A pastel pink kurta in cotton with white chikankari-style embroidery on the front. The straight cut is breezy and works for summer outings.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Very light and the embroidery looks delicate. Good for hot days."
+          },
+          { "rating": 4, "body": "Lovely shade of pink. It needs gentle washing so I air dry it." }
+        ]
+      },
+      {
+        "name": "Rayon Printed Kurta",
+        "description": "A rayon kurta with a small floral print on a maroon base and side slits. It drapes smoothly and has a regular fit with a V neck.",
+        "reviews": [
+          { "rating": 4, "body": "Drapes well and feels smooth. Good value for everyday wear." },
+          {
+            "rating": 5,
+            "body": "The maroon is rich and the print is not overdone. Package arrived sealed and tidy."
+          }
+        ]
+      },
+      {
+        "name": "Festive Silk Blend Kurta",
+        "description": "A silk blend kurta in deep green with golden border work along the neck and hem. The straight fit and full sleeves suit festivals and weddings.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "The golden border gives a rich look without being heavy. Fabric has a nice sheen."
+          },
+          {
+            "rating": 4,
+            "body": "Fits well and looks festive. It is a little warm so better for evening events."
+          }
+        ]
+      }
+    ],
+    "clothing-women-sarees": [
+      {
+        "name": "Cotton Handloom Saree",
+        "description": "A handloom cotton saree in rust red with a woven temple-style border. It is soft, breathable and comes with an unstitched blouse piece.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Soft and easy to drape, and the border is woven well. Perfect for daily office wear."
+          },
+          {
+            "rating": 4,
+            "body": "Nice quality cotton. Blouse piece was a bit short, but the saree itself is good."
+          }
+        ]
+      },
+      {
+        "name": "Banarasi Silk Blend Saree",
+        "description": "A silk blend saree in royal blue with woven gold motifs across the body and a rich pallu. It includes a matching blouse piece and suits weddings.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "The pallu looks grand and the weave is tight. Many relatives asked where it came from."
+          },
+          {
+            "rating": 3,
+            "body": "Looks good but it is heavier than I expected. The gold work colour is slightly lighter than the photo."
+          }
+        ]
+      },
+      {
+        "name": "Printed Georgette Saree",
+        "description": "A lightweight georgette saree with a floral print on a peach base and a plain border. It drapes easily and is meant for parties and outings.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Very light and falls nicely. Pleats stay in place with a few pins."
+          },
+          {
+            "rating": 5,
+            "body": "The peach shade is soft and pretty. Arrived in a neat box with no creases."
+          }
+        ]
+      },
+      {
+        "name": "Linen Saree with Zari Border",
+        "description": "A pure-feel linen saree in grey with a thin zari border and a plain pallu. The crisp fabric holds a clean drape for work and day events.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Crisp, holds pleats well and feels cool in summer. Looks classy and simple."
+          },
+          {
+            "rating": 4,
+            "body": "Good saree for the office. It does wrinkle a bit while travelling."
+          }
+        ]
+      },
+      {
+        "name": "Chiffon Ombre Saree",
+        "description": "A chiffon saree that shades from teal to light turquoise, with a narrow lace edge. The sheer fabric is airy and comes with a satin-feel blouse piece.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "The ombre effect is smooth and looks lovely in daylight. Very easy to carry."
+          },
+          {
+            "rating": 4,
+            "body": "Chiffon is slippery to drape, but once pinned it was fine. Colours match the listing."
+          }
+        ]
+      },
+      {
+        "name": "Kantha Stitch Cotton Saree",
+        "description": "A cotton saree with running kantha stitch work in white thread on a dark brown base. It is soft, a little textured and suited to casual events.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "The stitch work looks handmade and the fabric is soft. Comfortable in a long day."
+          },
+          {
+            "rating": 3,
+            "body": "Pretty saree but a few loose threads were present on arrival. I trimmed them and it is fine."
+          }
+        ]
+      }
+    ],
+    "clothing-women-tops": [
+      {
+        "name": "Casual Cotton Top",
+        "description": "A short-sleeve top in plain cotton with a round neck and a relaxed fit. It sits at hip length and goes well with jeans or leggings.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Soft, easy to wash and the fit is neither tight nor too loose. Nice everyday top."
+          },
+          {
+            "rating": 4,
+            "body": "The fabric is good. Colour faded just a little after several washes."
+          }
+        ]
+      },
+      {
+        "name": "Ruffle Sleeve Top",
+        "description": "A polyester crepe top in dusty rose with frills at the sleeves and a keyhole back. It has a regular fit and suits brunch or office-casual days.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "The ruffles are neat and the colour is lovely. Falls well without clinging."
+          },
+          {
+            "rating": 4,
+            "body": "Pretty top. The neck is a little wide for me but I wear it with a camisole."
+          }
+        ]
+      },
+      {
+        "name": "Wrap Style Blouse Top",
+        "description": "A wrap-front blouse in soft rayon with a tie at the waist and full sleeves. The crossover neckline is adjustable with the side tie.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "The wrap stays closed and the tie lets me adjust the fit. Looks smart for meetings."
+          },
+          {
+            "rating": 3,
+            "body": "Fit is nice but the rayon wrinkles easily. Colour is slightly deeper than the picture."
+          }
+        ]
+      },
+      {
+        "name": "Striped Knit Crop Top",
+        "description": "A cropped knit top with black and cream stripes and a square neck. The stretch fabric holds its shape and pairs with high-waist bottoms.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Stretches well and the stripes look clean. Length is fairly short, as listed."
+          },
+          {
+            "rating": 5,
+            "body": "Fits snug in a good way and the knit is thick enough. Fast delivery too."
+          }
+        ]
+      },
+      {
+        "name": "Tie-Dye Tunic Top",
+        "description": "A long cotton tunic with a hand-dyed pattern in blue and white and side pockets. The loose cut and short sleeves make it a good beach or travel piece.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Each piece has a slightly different pattern, which I like. Pockets are a real plus."
+          },
+          {
+            "rating": 4,
+            "body": "Cool and roomy. The dye smelled a little at first but washed out."
+          }
+        ]
+      },
+      {
+        "name": "Embroidered Peasant Top",
+        "description": "A white cotton top with colourful floral embroidery at the neck and elastic cuffs. It has a loose body with a gathered neckline.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Embroidery is well stitched and the cotton is airy. Works with both jeans and skirts."
+          },
+          {
+            "rating": 4,
+            "body": "Cute and comfortable. White shows stains so I handle it with some care."
+          }
+        ]
+      }
+    ],
+    "clothing-kids-boys-clothing": [
+      {
+        "name": "Cotton Dinosaur Tee",
+        "description": "A soft cotton t-shirt for boys with a printed green dinosaur on the chest. It has a round neck, short sleeves and a relaxed fit for play.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "My son loves the dinosaur and wears it every other day. Print is intact after many washes."
+          },
+          {
+            "rating": 4,
+            "body": "Soft fabric and the size chart was accurate for my six year old."
+          }
+        ]
+      },
+      {
+        "name": "Denim Shorts with Elastic Waist",
+        "description": "Light blue denim shorts with an elastic back waist and two front pockets. The fabric is soft and the leg is cut to the knee for easy running around.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Elastic waist makes dressing quick and they do not dig in. Denim is soft enough for him."
+          },
+          {
+            "rating": 4,
+            "body": "Sturdy shorts that survived the playground. Slightly long on my younger boy."
+          }
+        ]
+      },
+      {
+        "name": "Checked Casual Shirt",
+        "description": "A cotton shirt for boys in red and navy check with a button front and chest pocket. It has a regular fit and is suited for school functions and outings.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Looks smart and the buttons are firmly stitched. He wore it to a birthday party."
+          },
+          {
+            "rating": 3,
+            "body": "Good shirt but the collar was a bit stiff at first. Softer after washing."
+          }
+        ]
+      },
+      {
+        "name": "Fleece Hooded Sweatshirt",
+        "description": "A fleece-lined hoodie in navy with a kangaroo pocket and ribbed cuffs. The drawcord hood keeps the head warm on cool mornings.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Warm and snug for winter school mornings. The zip-free design is good for younger kids."
+          },
+          { "rating": 4, "body": "Quality fleece. Runs a little large so there is room to grow." }
+        ]
+      },
+      {
+        "name": "Track Pants for Boys",
+        "description": "Polyester-cotton track pants in black with a white band down each side and an elastic drawstring waist. They are light and made for sports class and play.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Good for sports period at school and they dry quickly. Stitching is neat."
+          },
+          {
+            "rating": 5,
+            "body": "Waist is comfortable and the length was perfect. Bought a second pair."
+          }
+        ]
+      },
+      {
+        "name": "Cotton Kurta Pyjama Set",
+        "description": "A two-piece set with a cream cotton kurta and matching pyjama for boys. The kurta has a short placket and the pyjama has an elastic waist.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Perfect for Diwali. Fabric is light and he was comfortable all evening."
+          },
+          {
+            "rating": 4,
+            "body": "Nice set and well packed. The pyjama is a bit long, so I hemmed it."
+          }
+        ]
+      }
+    ],
+    "clothing-kids-girls-clothing": [
+      {
+        "name": "Floral Cotton Frock",
+        "description": "A sleeveless cotton frock for girls with a small floral print and a gathered skirt. It has a back zip and a soft cotton lining.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "My daughter twirls in it all day. The lining is soft and the zip is smooth."
+          },
+          {
+            "rating": 4,
+            "body": "Lovely print and good stitching. The skirt is slightly shorter than I thought."
+          }
+        ]
+      },
+      {
+        "name": "Party Net Dress",
+        "description": "A layered net dress in lilac with a satin waist band and a bow at the back. It is lined and meant for birthday parties and functions.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Looks like a proper party dress and the net is not scratchy inside. Photos came out beautifully."
+          },
+          {
+            "rating": 3,
+            "body": "Pretty but the bow came slightly loose. A quick stitch fixed it."
+          }
+        ]
+      },
+      {
+        "name": "Leggings and Top Set",
+        "description": "A two-piece set with a printed cotton top and plain stretch leggings in pink. Both pieces are soft and made for school holidays and play.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Leggings stretch well and stay up. The top print is cheerful and not rough."
+          },
+          { "rating": 4, "body": "Good set for the price. Colour is a little brighter than shown." }
+        ]
+      },
+      {
+        "name": "Denim Dungaree Dress",
+        "description": "A pinafore-style dress in soft denim with adjustable shoulder straps and two front pockets. It is worn over a tee and has a gentle A-line shape.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Straps adjust easily so it will last a while. She loves the pockets."
+          },
+          { "rating": 4, "body": "Denim is soft and not stiff. Looks cute with white sneakers." }
+        ]
+      },
+      {
+        "name": "Ethnic Lehenga Choli Set",
+        "description": "A three-piece set of lehenga, choli and dupatta in coral with gold trim for girls. The lehenga has an elastic waist and the choli is lined with cotton.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Wore it for a family wedding and she was comfortable the whole time. Trim is well attached."
+          },
+          { "rating": 4, "body": "Looks festive. The dupatta is thin but suits the outfit." }
+        ]
+      },
+      {
+        "name": "Cotton Pyjama Night Suit",
+        "description": "A night suit with a long sleeve top and matching pyjama in soft cotton, printed with small stars. It is loose enough for a comfortable sleep.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Very soft and the star print is sweet. Did not shrink after washing."
+          },
+          {
+            "rating": 4,
+            "body": "Comfortable night wear. Size ran slightly big, which gives room for growth."
+          }
+        ]
+      }
+    ],
+    "clothing-kids-baby-clothing": [
+      {
+        "name": "Cotton Bodysuit Pack",
+        "description": "A pack of three short sleeve bodysuits in soft cotton with snap buttons at the bottom. The envelope neck makes changing simple.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Very soft on my baby's skin and the snaps are easy to open. Good value for three pieces."
+          },
+          {
+            "rating": 4,
+            "body": "Fit well for newborn size. Colours are pastel and match the listing."
+          }
+        ]
+      },
+      {
+        "name": "Muslin Swaddle Wrap",
+        "description": "A large muslin cotton wrap in pale yellow with a fine weave. It can be used as a light blanket or to wrap a baby after a bath.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Breathable and gets softer with each wash. I use it in the pram too."
+          },
+          {
+            "rating": 4,
+            "body": "Good size and light. Edges needed a little trimming of loose threads."
+          }
+        ]
+      },
+      {
+        "name": "Front Open Sleepsuit",
+        "description": "A cotton sleepsuit with a front zip and fold-over mittens, in light grey with a small bear print. It covers feet and hands for cooler nights.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Zip has a cover at the chin so it does not touch the skin. Easy for night changes."
+          },
+          {
+            "rating": 3,
+            "body": "Nice and soft but the feet part is a little tight on my chubby baby."
+          }
+        ]
+      },
+      {
+        "name": "Knitted Baby Sweater",
+        "description": "A soft acrylic-cotton knit sweater in cream with a button shoulder opening. It has a gentle stretch and suits light winter days.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Not itchy at all and the shoulder buttons make it easy to put on. Looks adorable."
+          },
+          {
+            "rating": 4,
+            "body": "Warm enough for our mild winter. Hand washing keeps it in shape."
+          }
+        ]
+      },
+      {
+        "name": "Cotton Frock with Bloomer",
+        "description": "A small cotton frock with a matching bloomer for baby girls, in white with tiny red dots. The frock opens at the back with soft ties.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Ties are soft and not scratchy. Dress is cute for a first birthday photo."
+          },
+          { "rating": 4, "body": "Good quality cotton. The bloomer is snug, so go one size up." }
+        ]
+      },
+      {
+        "name": "Cap, Mitten and Bootie Set",
+        "description": "A four-piece set of knit cap, two mittens and booties in soft cotton for newborns. The elastic edges hold in place without feeling tight.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Perfect for the hospital trip. Everything stays on and feels gentle."
+          },
+          {
+            "rating": 4,
+            "body": "Soft and nicely made. Packed in a small gift box, which was a nice touch."
+          }
+        ]
+      }
+    ]
+  }
+}

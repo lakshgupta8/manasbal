@@ -1,0 +1,698 @@
+{
+  "brands": [
+    "Dhruvfit",
+    "Rannfield",
+    "Tejas Play",
+    "Ironleaf",
+    "Marutgear",
+    "Stridewell",
+    "Pavan Active",
+    "Veerlane"
+  ],
+  "items": {
+    "sports-fitness-fitness-yoga-mats": [
+      {
+        "name": "Non-slip Yoga Mat",
+        "description": "This 6 mm mat is made from closed-cell foam with a textured surface on both sides. It measures 183 x 61 cm and rolls up for storage.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "The textured top stays put on my tiled floor and my hands do not slide. Good thickness for everyday practice."
+          },
+          {
+            "rating": 4,
+            "body": "Arrived rolled tightly in a plastic sleeve. Smells a little at first but it faded after a day near the window."
+          }
+        ]
+      },
+      {
+        "name": "Folding Travel Yoga Mat",
+        "description": "A thin 1.5 mm mat that folds into a flat square and fits inside a standard backpack. It is made from natural rubber with a fine grip pattern.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Folds small enough for my gym bag and weighs almost nothing. I lay it over the hotel carpet and it works fine."
+          },
+          {
+            "rating": 3,
+            "body": "Very thin, so I put a towel under my knees. Fine for a travel mat but not for a hard floor every day."
+          }
+        ]
+      },
+      {
+        "name": "Extra Thick Exercise Mat",
+        "description": "This 15 mm mat is made from soft NBR foam and comes with an elastic carry strap. It measures 180 x 60 cm and is meant for floor exercises and stretching.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Really cushioned under the knees during floor work. The carry strap is a nice extra."
+          },
+          {
+            "rating": 4,
+            "body": "Quite bulky when rolled, so it does not fit in my cupboard easily. The foam has held its shape after a month."
+          }
+        ]
+      },
+      {
+        "name": "Cork Top Yoga Mat",
+        "description": "The top layer is natural cork bonded to a 5 mm rubber base. It measures 183 x 61 cm and can be wiped clean with a damp cloth.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Grip actually improves when my palms get damp. It looks quite nice on the floor too."
+          },
+          {
+            "rating": 5,
+            "body": "Solid build and the cork edges are neatly finished. Delivery was quick and the box was not dented."
+          }
+        ]
+      },
+      {
+        "name": "Natural Rubber Yoga Mat",
+        "description": "A 4 mm mat made from natural rubber with a suede-like top and a ridged underside. It measures 185 x 68 cm and weighs about 2.4 kg.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Heavy enough that it never curls at the corners. The underside grips the wooden floor well."
+          },
+          {
+            "rating": 4,
+            "body": "Has a rubber smell for the first week, then it settles. The size is generous for taller people."
+          }
+        ]
+      },
+      {
+        "name": "Kids Yoga Mat",
+        "description": "A 4 mm foam mat for juniors, measuring 120 x 50 cm, with a printed animal pattern on one side. The surface is smooth and easy to wipe.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "My daughter picked it herself because of the print. Right size for her and easy to roll without help."
+          },
+          {
+            "rating": 4,
+            "body": "Colours look just like the photos. Corners are a bit stiff to roll at first."
+          }
+        ]
+      },
+      {
+        "name": "Extra Long Wide Yoga Mat",
+        "description": "This 8 mm mat measures 200 x 80 cm and is made from dense TPE foam. The wide surface gives room for sprawling floor exercises.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Finally a mat where my feet and hands both fit. It is wide enough to share with my partner."
+          },
+          {
+            "rating": 4,
+            "body": "Takes up a lot of space in a small room. Material feels firm and does not stretch."
+          }
+        ]
+      },
+      {
+        "name": "Printed Yoga Mat with Strap",
+        "description": "A 6 mm PVC-free foam mat with a mandala print on the top face and a cotton carry strap included. It measures 183 x 61 cm.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "The print is sharp and has not rubbed off yet after many washes with a cloth. Strap is useful on the way to class."
+          },
+          {
+            "rating": 5,
+            "body": "Packed with care and arrived two days early. Good value for the thickness you get."
+          }
+        ]
+      }
+    ],
+    "sports-fitness-fitness-dumbbells": [
+      {
+        "name": "Rubber Hex Dumbbell 8 kg",
+        "description": "A single 8 kg dumbbell with a hexagonal rubber-coated head and a knurled steel handle. The flat sides stop it from rolling on the floor.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Does not roll anywhere and the rubber does not mark my floor. Knurling gives a firm hold without scratching."
+          },
+          {
+            "rating": 4,
+            "body": "Weight matches what is printed on it. Slight rubber smell when it arrived."
+          }
+        ]
+      },
+      {
+        "name": "Neoprene Dumbbell Pair 2 kg",
+        "description": "A pair of 2 kg dumbbells with a soft neoprene coating over cast iron. The coating is available in matching colours for easy identification.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Comfortable to hold and the colour is bright. Both dumbbells weigh the same on my kitchen scale."
+          },
+          {
+            "rating": 4,
+            "body": "Good for light routines at home. The coating feels a little sticky in the monsoon humidity."
+          }
+        ]
+      },
+      {
+        "name": "Adjustable Dumbbell 20 kg",
+        "description": "This set includes two handles, steel plates and spin-lock collars that together total 20 kg. Plates can be added or removed to change the weight.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Saves a lot of space compared with buying many pairs. Changing plates takes a minute, which is fine."
+          },
+          {
+            "rating": 5,
+            "body": "The collars tighten properly and nothing rattled. Came with a small spanner and clear packaging."
+          }
+        ]
+      },
+      {
+        "name": "Vinyl Dumbbell Set 1 kg",
+        "description": "Two 1 kg dumbbells coated in smooth vinyl with a rounded grip. They come with a small plastic stand for tidy storage.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Light and easy for beginners. The stand keeps them from rolling off the shelf."
+          },
+          {
+            "rating": 3,
+            "body": "Does the job but the vinyl feels thin and the stand is flimsy. Ordered it for my mother and she is fine with it."
+          }
+        ]
+      },
+      {
+        "name": "Cast Iron Dumbbell 10 kg",
+        "description": "A single 10 kg dumbbell cast in one piece of iron with a black painted finish. The handle has a diamond pattern for grip.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Feels like a proper piece of iron and there are no loose parts. The paint has stayed intact so far."
+          },
+          {
+            "rating": 4,
+            "body": "Handle is a bit thick for smaller hands. Courier brought it in a sturdy carton."
+          }
+        ]
+      },
+      {
+        "name": "Round Rubber Dumbbell 4 kg",
+        "description": "A pair of 4 kg dumbbells with round rubber heads and a chrome-plated handle. The round heads suit exercises where the weights are held upright.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Neat finish on the chrome and the heads are firmly attached. Good weight for my upper-body routine."
+          },
+          {
+            "rating": 4,
+            "body": "The pair arrived in separate boxes but both on the same day. Handles are smooth rather than rough."
+          }
+        ]
+      },
+      {
+        "name": "Hand Weight Pair with Strap",
+        "description": "Two 0.5 kg hand weights, each with an adjustable hook-and-loop strap over the back of the hand. They are filled with iron sand and covered in soft fabric.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "The strap holds on well during brisk walks. I forget I am wearing them after a few minutes."
+          },
+          {
+            "rating": 5,
+            "body": "Stitching is neat and the fabric is soft on my skin. Light enough to carry in a handbag."
+          }
+        ]
+      },
+      {
+        "name": "Chrome Handle Dumbbell 6 kg",
+        "description": "A single 6 kg dumbbell with a chrome-plated steel handle and two black rubber-coated ends. The handle is 12 cm long with a light knurled pattern.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Looks good and sits well in the palm. The ends are tight with no wobble when I lift it."
+          },
+          {
+            "rating": 4,
+            "body": "A bit pricey for one piece, but the build is better than the cheaper ones I tried."
+          }
+        ]
+      }
+    ],
+    "sports-fitness-fitness-resistance-bands": [
+      {
+        "name": "Loop Band Set of 5",
+        "description": "Five latex loop bands in different resistance levels, each 60 cm around. The set comes in a mesh pouch with a printed guide sheet.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "All five bands feel clearly different in tension. The mesh pouch keeps them together in my drawer."
+          },
+          {
+            "rating": 4,
+            "body": "No tears or sticky patches. The guide sheet is basic but easy to follow."
+          }
+        ]
+      },
+      {
+        "name": "Tube Band with Handles",
+        "description": "A 120 cm latex tube band with padded foam handles and metal clips at each end. It also includes a carry bag and two ankle straps.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Handles are comfortable and the clips snap firmly. Ankle straps were a pleasant surprise in the box."
+          },
+          {
+            "rating": 4,
+            "body": "Tension is a little stronger than the label suggests for me. Carry bag is handy for the park."
+          }
+        ]
+      },
+      {
+        "name": "Fabric Hip Band",
+        "description": "A wide band made of cotton and rubber thread, sized to fit around the thighs. The inner side has a grippy strip so it stays in place.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Does not roll up or slide down the way plain rubber ones do. Fabric feels soft against my legs."
+          },
+          {
+            "rating": 4,
+            "body": "Washes well in cold water and dries quickly. Size medium fit me perfectly."
+          }
+        ]
+      },
+      {
+        "name": "Long Pull-up Band",
+        "description": "A 104 cm closed-loop band made of thick natural latex, 4.5 cm wide. It can be anchored to a bar or used for stretching.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Feels very solid and thick. Wrapped around my pull-up bar without slipping."
+          },
+          {
+            "rating": 3,
+            "body": "Works but has a strong rubber smell and left a slight mark on my wall. Stretching it a few times helped."
+          }
+        ]
+      },
+      {
+        "name": "Mini Loop Band 30 cm",
+        "description": "A short 30 cm loop band in medium tension, made from a single piece of elastic latex. It is small enough to carry in a pocket.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Tiny and light, so it travels with me everywhere. Has not lost its stretch over several weeks."
+          },
+          {
+            "rating": 4,
+            "body": "Only one band in the pack, so check the quantity before you order. Quality is fine."
+          }
+        ]
+      },
+      {
+        "name": "Door Anchor Band Kit",
+        "description": "This kit has three tube bands, a door anchor, two handles and a storage bag. The anchor fits over a closed door of normal thickness.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "The door anchor held without damaging the paint. It gave me a lot of variety in a small room."
+          },
+          {
+            "rating": 4,
+            "body": "Instructions are very short, so I watched some videos. Parts feel sturdy for the price."
+          }
+        ]
+      },
+      {
+        "name": "Figure-8 Band",
+        "description": "A figure-8 shaped band with soft foam grips on both loops. It is 35 cm long and made of light tension latex.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Foam grips are comfortable and easy to hold. Good for light arm exercises in front of the TV."
+          },
+          {
+            "rating": 5,
+            "body": "Compact, well stitched at the joins and packed neatly. My father uses it every morning."
+          }
+        ]
+      },
+      {
+        "name": "Flat Latex Exercise Band",
+        "description": "A 150 cm long flat latex strip, 15 cm wide, sold in light tension. It can be cut to length or tied into a loop.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Length is generous and I tied it to a pillar for stretching. Rubber feels fresh and not brittle."
+          },
+          {
+            "rating": 4,
+            "body": "Slightly powdery when it arrived, so wipe it once. Otherwise exactly as described."
+          }
+        ]
+      }
+    ],
+    "sports-fitness-outdoor-play-cricket": [
+      {
+        "name": "Full Size Willow Bat",
+        "description": "A size 6 cricket bat made from willow with a cane handle and a rubber grip. It weighs about 1.2 kg and comes with a cover.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Balanced well and the pickup feels natural. Edges are cleanly finished and the cover is included."
+          },
+          {
+            "rating": 4,
+            "body": "Needed a bit of knocking in with a mallet before use. Handle grip feels firm."
+          }
+        ]
+      },
+      {
+        "name": "Junior Willow Bat Size 3",
+        "description": "A size 3 willow bat for juniors, around 800 g, with a short cane handle. It has a pre-applied anti-scuff sheet on the face.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "My son can swing it without struggling. The anti-scuff sheet is already stuck on neatly."
+          },
+          {
+            "rating": 4,
+            "body": "Looks good and light. I had to check the age chart carefully to pick the right size."
+          }
+        ]
+      },
+      {
+        "name": "Tennis Ball Cricket Bat",
+        "description": "A wide-blade bat made from poplar wood with a flat face, intended for use with soft tennis balls. It weighs around 1 kg and has a taped handle.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Perfect for gully cricket in the colony. The tape on the handle gives a good hold."
+          },
+          {
+            "rating": 5,
+            "body": "Strong enough to survive a whole summer of weekend matches. Reached me well wrapped."
+          }
+        ]
+      },
+      {
+        "name": "Leather Match Ball Red",
+        "description": "A 156 g four-piece cricket ball with a cork core and red dyed leather cover. The seam is hand-stitched.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Seam is raised and clearly visible, and the ball kept its shape through a full practice session."
+          },
+          {
+            "rating": 4,
+            "body": "Colour is a deep red and the weight matches the label. Slightly slippery when new."
+          }
+        ]
+      },
+      {
+        "name": "Tennis Cricket Ball Pack of 6",
+        "description": "Six medium-hard rubber balls wrapped in a tennis ball cover, each about 60 g. They are made for open grounds and street games.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Six balls at this price lasts our group a long while. They bounce evenly."
+          },
+          {
+            "rating": 4,
+            "body": "A couple of them lost their fuzz sooner than others. The pack was sealed properly."
+          }
+        ]
+      },
+      {
+        "name": "Batting Gloves",
+        "description": "Right-handed batting gloves with a cotton palm, foam-padded fingers and a hook-and-loop wrist strap. They are available in men's medium size.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Fingers are padded without being stiff, and the wrist strap is easy to adjust. Fit is true to size."
+          },
+          {
+            "rating": 5,
+            "body": "The palm is soft and the stitching held through nets sessions. Came with a small bag."
+          }
+        ]
+      },
+      {
+        "name": "Batting Pads Pair",
+        "description": "A pair of lightweight batting leg pads with a foam core, canvas cover and three buckle straps. They are sized for teenagers and smaller players.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Light enough to run in and the straps are long enough. Foam does not feel crumbly."
+          },
+          {
+            "rating": 4,
+            "body": "Good for club practice. The buckles needed a bit of effort to thread the first time."
+          }
+        ]
+      },
+      {
+        "name": "Wooden Stumps Set with Bails",
+        "description": "A set of three seasoned wooden stumps, two bails and a carry sleeve. Each stump is 71 cm tall and has a pointed steel-tipped base.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "The tips go into hard ground easily and the wood is smooth. Bails sit well on top of the stumps."
+          },
+          {
+            "rating": 3,
+            "body": "One stump had a small crack along the grain. Seller replied quickly but I kept it as the set still worked."
+          }
+        ]
+      }
+    ],
+    "sports-fitness-outdoor-play-badminton": [
+      {
+        "name": "Graphite Badminton Racket",
+        "description": "A 85 g racket with a graphite shaft and aluminium frame, strung at 22 lb. It comes with a full-length cover.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Very light in the hand and the strings feel tight. Cover is padded and zips fully."
+          },
+          {
+            "rating": 4,
+            "body": "Good for regular club play. The grip is a little thin, so I added an overgrip."
+          }
+        ]
+      },
+      {
+        "name": "Beginner Racket Pair",
+        "description": "Two aluminium rackets with a steel shaft, pre-strung and sold with three nylon shuttlecocks. They come in a shared carry bag.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Good set for the family to start with. Strings are fine, though not for hard smashes."
+          },
+          {
+            "rating": 5,
+            "body": "Everything in one bag and it was at our door in two days. The kids played on the very first evening."
+          }
+        ]
+      },
+      {
+        "name": "Feather Shuttlecock Tube",
+        "description": "A tube of 12 shuttlecocks with goose feathers and a cork base wrapped in thin leather. Speed rating is medium for indoor courts.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Flight is steady and they last longer than I expected for the price. Tube was sealed on arrival."
+          },
+          {
+            "rating": 4,
+            "body": "Feathers are neatly aligned. Slightly faster than my old ones in our cool hall."
+          }
+        ]
+      },
+      {
+        "name": "Nylon Shuttlecock Tube",
+        "description": "A tube of 10 nylon-skirt shuttlecocks with a cork head, intended for casual and outdoor play. The skirt is built to resist bending.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Handles a light breeze in our park better than feather ones. They survived many rallies."
+          },
+          {
+            "rating": 3,
+            "body": "Fine for casual games but two of the ten had an uneven head. They flew okay for practice."
+          }
+        ]
+      },
+      {
+        "name": "Racket Grip Tape Pack",
+        "description": "A pack of 10 overgrips made from a soft polyurethane layer with a tacky surface. Each strip is 110 cm long and comes in assorted colours.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Easy to wrap and the finish is tacky even when my hand is sweaty. Ten pieces will last me months."
+          },
+          {
+            "rating": 4,
+            "body": "Colours are mixed and you cannot choose them. Tape quality is the same as the pricier ones I bought before."
+          }
+        ]
+      },
+      {
+        "name": "Indoor Court Shoes",
+        "description": "Lightweight court shoes with a gum rubber sole and a breathable mesh upper. They are meant for use on wooden and synthetic indoor courts.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Sole grips the court without squeaking too much. I ordered one size larger as advised in the reviews."
+          },
+          {
+            "rating": 5,
+            "body": "Comfortable from the first game and the mesh stays cool. Box arrived intact."
+          }
+        ]
+      },
+      {
+        "name": "Racket Kit Bag 3-Compartment",
+        "description": "A polyester bag with three zipped compartments, a padded shoulder strap and room for up to six rackets. It also has a side pocket for a water bottle.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Plenty of room for rackets, shoes and a towel. Zips run smoothly and the strap does not dig in."
+          },
+          {
+            "rating": 4,
+            "body": "Stitching looks tidy. The colour is slightly darker than shown online."
+          }
+        ]
+      },
+      {
+        "name": "Portable Badminton Net Set",
+        "description": "A 3 m wide net with two adjustable steel poles, guy ropes and a carry bag. It sets up on grass, sand or a driveway in a few minutes.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "We set it up in our building compound in ten minutes. The poles stayed straight with the ropes pulled tight."
+          },
+          {
+            "rating": 4,
+            "body": "Net mesh is good and the bag is useful. Pegs could be a little longer for soft ground."
+          }
+        ]
+      }
+    ],
+    "sports-fitness-outdoor-play-cycling": [
+      {
+        "name": "Adjustable Cycling Helmet",
+        "description": "A lightweight helmet with an in-moulded foam shell, 18 vents and a rear dial for adjusting the fit. It fits head sizes from 54 to 60 cm.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "The dial makes it easy to adjust in seconds, and the vents keep my head cooler on long rides. Padding is soft."
+          },
+          {
+            "rating": 4,
+            "body": "Looks good and weighs very little. Chin strap took a few tries to set properly."
+          }
+        ]
+      },
+      {
+        "name": "Steel Water Bottle with Cage",
+        "description": "A 750 ml double-wall steel bottle with a push-pull cap and a matching aluminium cage. The cage mounts on standard frame bolts.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Cage holds the bottle firmly over rough roads. Screws were included in the box."
+          },
+          {
+            "rating": 4,
+            "body": "Keeps water cool for a couple of hours on my morning rides. A little heavy but sturdy."
+          }
+        ]
+      },
+      {
+        "name": "Floor Bike Pump",
+        "description": "A steel-barrel floor pump with a pressure gauge, wide base and a dual-head valve that fits both common valve types. Maximum pressure is 160 psi.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "The gauge is easy to read and the head locks on without hissing. Fills a tyre in under a minute."
+          },
+          {
+            "rating": 4,
+            "body": "Base is wide so it does not tip over. Handle is plastic but feels solid enough."
+          }
+        ]
+      },
+      {
+        "name": "Padded Cycling Gloves",
+        "description": "Half-finger gloves with gel padding in the palm, a breathable stretch back and a terry cloth patch on the thumb. They are sold in sizes M, L and XL.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "The palm padding is comfortable on longer rides and the fit is snug. Size L was right for me."
+          },
+          {
+            "rating": 5,
+            "body": "Stitching is neat and the velcro closure holds well. Thumb patch is useful on hot days."
+          }
+        ]
+      },
+      {
+        "name": "LED Bike Light Set",
+        "description": "A set of front and rear LED lights with three modes each, powered by rechargeable batteries through a USB cable. Both lights attach to the handlebar or seat post with silicone straps.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Bright enough for dark lanes and straps fit my handlebar without any tools. Charging cable was included."
+          },
+          {
+            "rating": 4,
+            "body": "Battery lasted about four hours on the steady mode. Rear light is easy to see from behind."
+          }
+        ]
+      },
+      {
+        "name": "Cable Bike Lock",
+        "description": "A 1.2 m braided steel cable lock with a combination of four digits and a vinyl outer coating. It is thin and light enough to coil around the seat post.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Easy to set the number and coils neatly under the saddle. Good for short stops outside a shop."
+          },
+          {
+            "rating": 5,
+            "body": "Coating protects my frame from scratches. The dials turn smoothly and the cable is thick."
+          }
+        ]
+      },
+      {
+        "name": "Gel Saddle Cover",
+        "description": "A stretchy cover with a gel layer, fitting most standard saddles up to 28 cm wide. It has a drawstring at the back and a non-slip underside.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Quick to fit with the drawstring and does not shift while pedalling. Much softer than the stock seat."
+          },
+          {
+            "rating": 3,
+            "body": "Comfortable, but it was a tight fit on my narrow saddle and sat a bit loose at the front. Works okay after tightening."
+          }
+        ]
+      },
+      {
+        "name": "Handlebar Phone Mount",
+        "description": "A rotating mount with adjustable spring arms for phones between 4.7 and 6.8 inches. It clamps on handlebars from 22 to 32 mm with a rubber lining.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Holds my phone steady on bumpy roads and the clamp is padded. Takes under a minute to fit."
+          },
+          {
+            "rating": 4,
+            "body": "Rotates easily to portrait or landscape. Packaging was minimal but nothing was damaged."
+          }
+        ]
+      }
+    ]
+  }
+}

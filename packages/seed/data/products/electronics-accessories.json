@@ -1,0 +1,677 @@
+{
+  "brands": [
+    "Tarang Labs",
+    "Zenvolt",
+    "Pehel Tech",
+    "Nilgiri Gear",
+    "Chaukor",
+    "Brightloop",
+    "Dhun Works",
+    "Ampwell"
+  ],
+  "items": {
+    "electronics-accessories-mobile-accessories-phone-cases": [
+      {
+        "name": "Clear Slim Phone Case",
+        "description": "A thin transparent case moulded from flexible polyurethane with raised edges around the screen and camera. It adds light protection while keeping the phone's original colour visible.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Fits snugly and the cutouts line up well with the buttons. Arrived in a neat paper box."
+          },
+          {
+            "rating": 4,
+            "body": "Barely adds any bulk to the phone. The clear back has stayed fairly clean after a month."
+          }
+        ]
+      },
+      {
+        "name": "Rugged Armor Case",
+        "description": "A two-layer case with a hard polycarbonate shell over a soft rubber inner frame. The corners are thickened to absorb knocks from everyday drops.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Feels very solid in the hand and the grip is good. It survived a fall on the kitchen floor without a mark."
+          },
+          {
+            "rating": 3,
+            "body": "Protects well but it is quite chunky and a little tight in my jeans pocket."
+          }
+        ]
+      },
+      {
+        "name": "Leather Flip Wallet Case",
+        "description": "A folding case with a faux leather cover and two inner slots for cards or folded notes. A magnetic clasp keeps the flap closed and the cover doubles as a simple stand.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "The stitching looks neat and the card slots hold my metro card and ID without sagging."
+          },
+          {
+            "rating": 4,
+            "body": "Magnet is firm enough to keep it shut in my bag. Smell of the material faded after a couple of days."
+          }
+        ]
+      },
+      {
+        "name": "Matte Silicone Case",
+        "description": "A soft silicone case with a matte finish and a microfibre lining to reduce scratches on the back of the phone. It is available in several solid colours.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Smooth, soft feel and it does not slip off the table. The colour matches the photo."
+          },
+          {
+            "rating": 4,
+            "body": "Good for daily use, though it picks up a bit of lint from my pockets."
+          }
+        ]
+      },
+      {
+        "name": "Shockproof Bumper Case",
+        "description": "A bumper-style frame in flexible TPU with air-cushion corners and an open back. The raised lip sits above the screen and camera glass when the phone is placed face down.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Easy to put on and take off. The raised lip keeps the camera off the desk."
+          },
+          {
+            "rating": 5,
+            "body": "Corner cushions feel reassuring and the phone still looks slim. Delivery came a day early."
+          }
+        ]
+      },
+      {
+        "name": "Magnetic Ring Stand Case",
+        "description": "A hard case with a built-in metal ring on the back that folds out to hold the phone upright or serves as a finger grip. It is made from polycarbonate with a soft-touch coating.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "The ring is sturdy and I use it every day to watch videos on the table. Hinge still feels tight."
+          },
+          {
+            "rating": 4,
+            "body": "Handy for one-handed typing. The coating feels pleasant but shows fingerprints on the dark colour."
+          }
+        ]
+      },
+      {
+        "name": "Floral Print Hard Case",
+        "description": "A slim hard case with a glossy printed floral pattern under a protective lacquer layer. The inside has a thin cushioned lining to keep the phone from rattling.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "The print is sharp and the colours look rich in daylight. Packaging was tidy with a small cloth."
+          },
+          {
+            "rating": 3,
+            "body": "Pretty design but the gloss scuffs a little where it touches my keys."
+          }
+        ]
+      },
+      {
+        "name": "Waterproof Pouch Case",
+        "description": "A sealed transparent pouch with a roll-down lock and an adjustable neck cord, made from thick PVC. It suits rainy commutes, beach days and shallow splashes.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Kept my phone dry during a heavy rain walk. The touchscreen works through the plastic, though a bit stiffly."
+          },
+          {
+            "rating": 4,
+            "body": "Cord length is comfortable and the lock clicks firmly. Fits a large phone with room to spare."
+          }
+        ]
+      }
+    ],
+    "electronics-accessories-mobile-accessories-chargers": [
+      {
+        "name": "20W Wall Charger",
+        "description": "A compact wall adapter with one USB-C port rated at 20 watts. It has a flame-retardant casing and folding-free pins for a standard Indian socket.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Small enough to leave plugged in the extension board without blocking other sockets. It stays only mildly warm."
+          },
+          {
+            "rating": 4,
+            "body": "Charges my phone to half in a reasonable time. The plastic feels a bit light but solid enough."
+          }
+        ]
+      },
+      {
+        "name": "Dual Port Wall Charger",
+        "description": "A wall charger with one USB-C and one USB-A port that share a total output of 30 watts. It lets two small devices charge from a single socket.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Handy at night when I charge my phone and a smartwatch together. Both ports work fine."
+          },
+          {
+            "rating": 5,
+            "body": "Good build, the pins sit firmly in the board. Box included a short instruction leaflet."
+          }
+        ]
+      },
+      {
+        "name": "65W Laptop Charger",
+        "description": "A higher-power adapter with two USB-C ports and a total rating of 65 watts, suited to thin laptops, tablets and phones. The casing is made from heat-resistant plastic with ventilation slots.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Runs my ultrabook without any warning on screen, and I can carry just one brick for everything."
+          },
+          {
+            "rating": 3,
+            "body": "Works well but it is bigger than I expected and blocks the neighbouring socket."
+          }
+        ]
+      },
+      {
+        "name": "Car Charger Adapter",
+        "description": "A small adapter that fits a vehicle's 12 volt socket and offers two USB ports with a combined 24 watts. A soft indicator light shows when it is powered.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Fits tightly in my car socket without wobbling. Phone charges while navigation is running."
+          },
+          {
+            "rating": 5,
+            "body": "Metal body feels well made and the light is not too bright at night."
+          }
+        ]
+      },
+      {
+        "name": "Wireless Charging Pad",
+        "description": "A round pad that charges compatible phones without a cable at up to 10 watts. It has a non-slip top surface and comes with a USB-C input cable.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Just drop the phone on top and it starts. Rubber surface keeps the phone in place on my bedside table."
+          },
+          {
+            "rating": 3,
+            "body": "Works, but charging pauses if my case is too thick. Fine with a thin cover."
+          }
+        ]
+      },
+      {
+        "name": "10000mAh Power Bank",
+        "description": "A portable battery pack with a 10000mAh lithium-polymer cell, one USB-C and one USB-A output. Four small lights show the remaining charge level.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Charged my phone about two times on a day trip. It is slim enough to slide into a jeans pocket."
+          },
+          {
+            "rating": 4,
+            "body": "Solid weight and neat finish. Takes a few hours to refill but that is normal for this size."
+          }
+        ]
+      },
+      {
+        "name": "Foldable Travel Charger",
+        "description": "A wall adapter with three USB ports and a cord-free body that includes fold-in pins, so it fits flat in a bag. Total output is shared at up to 18 watts.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Great for travel, the pins fold in properly and do not scratch other items in my pouch."
+          },
+          {
+            "rating": 5,
+            "body": "Three ports covered my phone, earbuds and a camera at the hotel. Plastic is matte and feels decent."
+          }
+        ]
+      },
+      {
+        "name": "Desktop Charging Station",
+        "description": "A flat four-port charging hub with a 40 watt total output, built to sit on a desk or shelf. It has a long attached cord with an Indian two-pin plug.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Keeps all our family phones in one spot on the shelf. The cord is long enough to reach the wall."
+          },
+          {
+            "rating": 4,
+            "body": "Ports are well spaced so thick plugs fit. Slightly warm after a long night but nothing worrying."
+          }
+        ]
+      }
+    ],
+    "electronics-accessories-mobile-accessories-cables": [
+      {
+        "name": "Braided USB-C Cable",
+        "description": "A one metre USB-C to USB-C cable wrapped in nylon braiding with reinforced connector ends. It supports charging up to 60 watts and basic data transfer.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Braiding feels tough and it does not tangle in my bag. Connectors click in firmly."
+          },
+          {
+            "rating": 4,
+            "body": "Charges my tablet and phone with the same cable. Colour looks slightly darker than the listing photo."
+          }
+        ]
+      },
+      {
+        "name": "Two Metre Charging Cable",
+        "description": "A long USB-A to USB-C cable with a flexible PVC jacket, meant for charging while the phone is used from a bed or sofa. Length is two metres.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Reaches from the wall to my bed with some slack. Cable is soft and bends easily."
+          },
+          {
+            "rating": 5,
+            "body": "Does what it says, and it arrived coiled neatly with a small tie."
+          }
+        ]
+      },
+      {
+        "name": "Short Pocket Cable",
+        "description": "A twenty-five centimetre USB-C cable with a thin rubber coat, sized for power banks and car ports. It is light and easy to coil into a pocket.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Perfect with my power bank because there is no extra length to deal with."
+          },
+          {
+            "rating": 4,
+            "body": "Very small and light. Only used for charging so far and it works without any problem."
+          }
+        ]
+      },
+      {
+        "name": "Right Angle Gaming Cable",
+        "description": "A USB-C cable with an L-shaped connector that sits flat against the phone when held sideways. The jacket is a flat tangle-resistant rubber and the length is 1.5 metres.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "The angled end keeps the cord out of my palm during long games. Quite sturdy near the bend."
+          },
+          {
+            "rating": 5,
+            "body": "Flat cable does not knot, which I appreciated. Fits cases with a deeper port opening too."
+          }
+        ]
+      },
+      {
+        "name": "Micro USB Charging Cable",
+        "description": "A one metre USB-A to micro USB cable for older phones, speakers and power banks. The moulded connectors have strain relief to reduce bending at the joint.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Still useful for my old speaker and a few gadgets. Plug is a snug fit."
+          },
+          {
+            "rating": 3,
+            "body": "Charging is slow compared with newer cables, which I expected, but it works fine as a spare."
+          }
+        ]
+      },
+      {
+        "name": "Three In One Cable",
+        "description": "A single cable with a USB-A plug and three interchangeable heads for USB-C, micro USB and a small proprietary phone connector. Total length is 1.2 metres.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Keeps one cable in my car for the whole family. Each head is labelled clearly."
+          },
+          {
+            "rating": 4,
+            "body": "Handy for guests with different phones. Only one head can be used at a time."
+          }
+        ]
+      },
+      {
+        "name": "Coiled Car Cable",
+        "description": "A spring-style coiled USB-C cable that stretches to about 1.2 metres and returns to a compact length. It is made with a durable TPE jacket suited to dashboards.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Stays tidy on my dashboard and does not hang down around the gear stick."
+          },
+          {
+            "rating": 5,
+            "body": "Coil is springy and the plugs feel tight. Good value for the price."
+          }
+        ]
+      },
+      {
+        "name": "Data Sync USB-C Cable",
+        "description": "A shielded USB-C to USB-A cable rated for fast file transfer between a phone and a computer. It has gold-plated contacts and a 1.5 metre braided sleeve.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Copied a folder of photos to my laptop without any drops in connection."
+          },
+          {
+            "rating": 4,
+            "body": "Thicker than my other cables, which makes it feel sturdy. Connector sizing is accurate."
+          }
+        ]
+      }
+    ],
+    "electronics-accessories-audio-headphones": [
+      {
+        "name": "Over-Ear Wired Headphones",
+        "description": "A pair of closed-back headphones with 40mm drivers and a detachable 3.5mm cable. Padded earcups and a steel-reinforced headband make them suited to long listening at a desk.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Earcups are comfortable for hours and the bass is clean for the price. Cable is long enough for my desktop."
+          },
+          {
+            "rating": 4,
+            "body": "Sturdy build. The headband clamps slightly at first but loosens after a week."
+          }
+        ]
+      },
+      {
+        "name": "Wireless Bluetooth Headphones",
+        "description": "Foldable over-ear headphones with Bluetooth 5 and a built-in microphone for calls. They run on a rechargeable battery that gives around twenty hours of playback.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Pairs quickly and the volume buttons are easy to find. Sound is balanced with clear vocals."
+          },
+          {
+            "rating": 5,
+            "body": "Folds flat into the included pouch. Battery has lasted through my whole week of commuting."
+          }
+        ]
+      },
+      {
+        "name": "Noise Reducing Headphones",
+        "description": "Wireless headphones with an electronic noise reduction mode that softens steady background sounds like fans and traffic. Soft protein-leather ear pads are fitted over memory foam.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Takes the edge off the train rumble. It does not remove all noise but makes travel calmer."
+          },
+          {
+            "rating": 3,
+            "body": "Comfortable, but the noise reduction makes a faint hiss in quiet rooms."
+          }
+        ]
+      },
+      {
+        "name": "Kids Volume Limited Headphones",
+        "description": "Lightweight on-ear headphones with a volume limiter set at a modest level, and a stretchy adjustable headband. A shared audio port lets two sets be linked for listening together.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "My daughter wears them for her online classes and the headband adjusts well for her small head."
+          },
+          {
+            "rating": 4,
+            "body": "Light and bright colours. The cable is a bit short but fine for a tablet."
+          }
+        ]
+      },
+      {
+        "name": "Gaming Headset With Mic",
+        "description": "A wired over-ear headset with a bendable boom microphone and a single 3.5mm plug for consoles and PCs. The earcups are padded and the inline control mutes the mic.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Teammates say my voice comes through clearly. Footsteps in games are easy to hear."
+          },
+          {
+            "rating": 4,
+            "body": "Comfortable for a few hours of play. The mic arm stays where I bend it."
+          }
+        ]
+      },
+      {
+        "name": "On-Ear Foldable Headphones",
+        "description": "Compact on-ear headphones with swivelling cups and a folding hinge, plus a 1.2 metre cable with a single-button microphone. They are meant for light travel use.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Pack down small in my backpack. Sound is bright and fine for podcasts."
+          },
+          {
+            "rating": 5,
+            "body": "Cable has a good thickness and the button answers calls reliably."
+          }
+        ]
+      },
+      {
+        "name": "Studio Monitor Headphones",
+        "description": "Closed-back wired headphones with 50mm drivers tuned for a flat sound, a coiled cable and a screw-on quarter-inch adapter. They suit basic home recording and editing.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Helpful for editing my videos because nothing sounds exaggerated. Build feels dependable."
+          },
+          {
+            "rating": 4,
+            "body": "Coiled cable is handy at the desk. The pads feel firm at first and then settle."
+          }
+        ]
+      },
+      {
+        "name": "Sports Neckband Headphones",
+        "description": "Wireless headphones joined by a flexible neckband, with ear hooks and a sweat-resistant coating. Magnetic ear tips snap together to pause music when not in use.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Stay on during my morning jog and the band is light on the neck."
+          },
+          {
+            "rating": 3,
+            "body": "Fine for workouts but the call quality is average in windy outdoor spots."
+          }
+        ]
+      }
+    ],
+    "electronics-accessories-audio-speakers": [
+      {
+        "name": "Pocket Bluetooth Speaker",
+        "description": "A palm-sized wireless speaker with a 5 watt driver and a rechargeable battery rated for around six hours of playback. It has a short wrist strap and a USB-C charging port.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Surprisingly loud in a small room and easy to carry with the strap."
+          },
+          { "rating": 5, "body": "Pairs in seconds and the casing has a pleasant rubbery feel." }
+        ]
+      },
+      {
+        "name": "Waterproof Outdoor Speaker",
+        "description": "A rugged cylinder speaker with an IPX6 splash-proof rating, 10 watt output and a carabiner loop. It is designed for balconies, picnics and camping.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Took it on a rainy trek and it kept playing. The clip on the bag is sturdy."
+          },
+          {
+            "rating": 4,
+            "body": "Sound is full outdoors, a bit boxy indoors. Charging port cover closes tightly."
+          }
+        ]
+      },
+      {
+        "name": "Soundbar For TV",
+        "description": "A 60 centimetre soundbar with 24 watts of output, connecting to a television by optical cable, AUX or Bluetooth. A small remote controls volume and input.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Dialogue in films is clearer than my TV speakers. Setup took just a few minutes."
+          },
+          { "rating": 5, "body": "Compact enough for my TV stand and the remote is simple to use." }
+        ]
+      },
+      {
+        "name": "Desktop Computer Speakers",
+        "description": "A pair of wired stereo speakers with a front volume knob and a USB power cable, using a 3.5mm input. The wooden-look cabinets help reduce vibration on a desk.",
+        "reviews": [
+          { "rating": 4, "body": "Good for music while I work. The knob has a nice smooth turn." },
+          {
+            "rating": 3,
+            "body": "Sound is decent but the cable between the two speakers is shorter than I wanted."
+          }
+        ]
+      },
+      {
+        "name": "Portable Party Speaker",
+        "description": "A larger floor speaker with a 40 watt output, a built-in handle and wheels, and a wired microphone input. It includes a rechargeable battery and a basic coloured light strip.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Filled our terrace during a family function with plenty of volume to spare."
+          },
+          {
+            "rating": 4,
+            "body": "Wheels roll smoothly. The mic input worked fine for a small speech."
+          }
+        ]
+      },
+      {
+        "name": "Smart Alarm Clock Speaker",
+        "description": "A bedside speaker with a digital clock display, two alarm settings and Bluetooth playback. The soft fabric cover and dimmable display make it suitable for a bedroom.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Looks tidy by my bed and the display can be dimmed to a faint glow."
+          },
+          {
+            "rating": 5,
+            "body": "Alarm is gentle but loud enough to wake me. Bluetooth reconnects on its own each night."
+          }
+        ]
+      },
+      {
+        "name": "Shower Suction Speaker",
+        "description": "A small splash-resistant speaker with a suction cup base that sticks to tiles or glass. It plays for about five hours per charge and connects over Bluetooth.",
+        "reviews": [
+          { "rating": 4, "body": "Sticks firmly to my bathroom tile and has held for weeks." },
+          { "rating": 5, "body": "Clear sound for the size. The charging flap is easy to seal." }
+        ]
+      },
+      {
+        "name": "Retro Wooden Speaker",
+        "description": "A tabletop Bluetooth speaker in a wooden cabinet with a metal grille and two rotary knobs for volume and bass. It also takes a wired 3.5mm input.",
+        "reviews": [
+          { "rating": 5, "body": "Looks lovely on the bookshelf and has a warm, round sound." },
+          {
+            "rating": 4,
+            "body": "Knobs feel solid. It is on the heavy side but stays put on the shelf."
+          }
+        ]
+      }
+    ],
+    "electronics-accessories-audio-earbuds": [
+      {
+        "name": "True Wireless Earbuds",
+        "description": "Compact in-ear earbuds with Bluetooth 5 and touch controls, supplied with a pocket charging case. The case adds about three further full charges to the earbuds.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Fit well with the medium tips and the touch controls respond quickly."
+          },
+          {
+            "rating": 5,
+            "body": "Case is small and snaps shut well. Sound has good clarity at normal volume."
+          }
+        ]
+      },
+      {
+        "name": "Wired In-Ear Earphones",
+        "description": "Classic earphones with a 1.2 metre cable, a 3.5mm plug and an inline microphone with one button. Three sizes of silicone tips are included.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Simple and reliable. No battery to worry about and the cable does not tangle much."
+          },
+          { "rating": 4, "body": "Good value for the price. The mic is clear on calls." }
+        ]
+      },
+      {
+        "name": "Neckband Earphones",
+        "description": "Wireless in-ear earphones connected by a soft silicone neckband housing the battery. Magnets hold the buds together and a vibrating motor signals incoming calls.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Easy to wear all day and the battery lasts through my office hours."
+          },
+          {
+            "rating": 3,
+            "body": "Comfortable but the bass is lighter than I would like for music."
+          }
+        ]
+      },
+      {
+        "name": "Gaming Low Latency Earbuds",
+        "description": "True wireless earbuds with a game mode that reduces audio delay and a small LED on the case. Each bud has a short stem for a firmer fit.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Audio matches the action on screen in the mobile game I play most."
+          },
+          {
+            "rating": 4,
+            "body": "Stems sit well in my ears. Game mode is easy to toggle with three taps."
+          }
+        ]
+      },
+      {
+        "name": "Clip-On Open Ear Earbuds",
+        "description": "Open-style earbuds that hang over each ear with a small speaker pointing toward the ear canal. They leave the ear uncovered so surrounding sounds stay audible.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "I can hear my surroundings while walking to work, which suits me."
+          },
+          {
+            "rating": 5,
+            "body": "Very light and sit stably. Sound is thinner than in-ear types but fine for talks."
+          }
+        ]
+      },
+      {
+        "name": "USB-C Wired Earphones",
+        "description": "Earphones with a USB-C plug for phones that lack a headphone socket, built-in digital converter and an inline mic. The cable is 1.1 metres with a flat tangle-resistant design.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Plugged straight in and worked without any app. Sound is clean and detailed."
+          },
+          {
+            "rating": 4,
+            "body": "Cable is flat and tidy. The remote buttons are easy to press by feel."
+          }
+        ]
+      },
+      {
+        "name": "Mini Sleep Earbuds",
+        "description": "Very small wireless earbuds with a low-profile soft silicone body designed to stay comfortable while lying on a side. They pair over Bluetooth and come with a slim round charging case.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "They do not poke out of my ear when I lie down. Good for soft music or audiobooks at night."
+          },
+          {
+            "rating": 3,
+            "body": "Comfortable, though one bud dropped its connection twice during the first week."
+          }
+        ]
+      },
+      {
+        "name": "Earbuds With Case Display",
+        "description": "True wireless earbuds with a charging case that shows remaining battery as a number on a small screen. The buds are in-ear with a rubber seal and carry a splash-resistant rating.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Seeing the exact battery percentage on the case is very convenient."
+          },
+          {
+            "rating": 4,
+            "body": "Fit is firm on my morning walk. The case lid hinge feels well built."
+          }
+        ]
+      }
+    ]
+  }
+}

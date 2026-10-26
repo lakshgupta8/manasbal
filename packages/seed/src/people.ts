@@ -67,7 +67,7 @@ const STREETS = [
 const EMAIL_DOMAIN = "example.com";
 
 // Lower case, with anything but letters and digits turned into single hyphens.
-function slugify(text: string): string {
+export function slugify(text: string): string {
   return text
     .toLowerCase()
     .replaceAll(/[^a-z0-9]+/g, "-")
