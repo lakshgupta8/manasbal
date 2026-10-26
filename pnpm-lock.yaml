@@ -488,6 +488,9 @@ importers:
       '@prisma/orm-postgres':
         specifier: 8.0.0-rc.18
         version: 8.0.0-rc.18(@prisma/cli-engine@0.7.0(@prisma/management-api-sdk@1.84.0)(magicast@0.5.5))(magicast@0.5.5)(temporal-polyfill@1.0.6)(typanion@3.14.0)(typescript@6.0.3)(vite@8.3.4(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
+      temporal-polyfill:
+        specifier: ^1.0.6
+        version: 1.0.6
     devDependencies:
       '@manasbal/tsconfig':
         specifier: workspace:*
@@ -498,6 +501,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: ^4.1.11
         version: 4.1.11(vitest@4.1.11)
+      temporal-spec:
+        specifier: ^1.0.1
+        version: 1.0.1
       typescript:
         specifier: ~6.0.3
         version: 6.0.3
