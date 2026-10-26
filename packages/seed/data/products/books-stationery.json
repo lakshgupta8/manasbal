@@ -1,0 +1,593 @@
+{
+  "brands": [
+    "Mapleleaf Press",
+    "Quillmark",
+    "Bluefern Books",
+    "Tidewater Paper",
+    "Copperlark",
+    "Saffron Desk",
+    "Larkspur Ink",
+    "Northfold"
+  ],
+  "items": {
+    "books-stationery-books-fiction": [
+      {
+        "name": "The Lamp at Harrow Bend",
+        "description": "A made-up story about a lighthouse keeper's daughter who finds a letter hidden in the lamp room. Paperback with about 320 pages, suited to readers who enjoy slow mysteries.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "The setting felt real and I finished it over one weekend. The ending tied up every thread."
+          },
+          {
+            "rating": 4,
+            "body": "Gentle pacing, but the letter twist in the middle kept me turning pages."
+          }
+        ]
+      },
+      {
+        "name": "Salt Road Letters",
+        "description": "A made-up novel told through letters between two traders who travel opposite ends of a coastal route. Paperback of around 280 pages, written for readers who like historical settings.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "I liked the letter format, it made each chapter short enough for bus rides."
+          },
+          { "rating": 4, "body": "Some letters felt repeated, yet the final exchange was lovely." }
+        ]
+      },
+      {
+        "name": "A Winter in Kestrel Row",
+        "description": "A made-up story of neighbours in a hill town who share one cold season and one lost cat. Paperback with roughly 240 pages and a warm, quiet tone for relaxed evening reading.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Cosy without being silly. I kept thinking about the baker long after I closed it."
+          },
+          {
+            "rating": 3,
+            "body": "Pleasant enough, though not much happens and the middle drags a little."
+          }
+        ]
+      },
+      {
+        "name": "The Clockmaker's Second Door",
+        "description": "A made-up fantasy about a repair shop whose back door opens onto a different town each day. Paperback, about 360 pages, for readers who enjoy inventive worlds.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Every new town was a surprise and the shop felt like a place I wanted to visit."
+          },
+          {
+            "rating": 4,
+            "body": "Print is clear and the paper is thick. A few chapters ran long, but I enjoyed it."
+          }
+        ]
+      },
+      {
+        "name": "Rivers Under the Hill",
+        "description": "A made-up adventure story about three cousins who explore caves beneath their grandmother's village. Paperback with about 300 pages and short chapters for fast readers.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Bought it for a long train trip and it held my attention the whole way."
+          },
+          {
+            "rating": 5,
+            "body": "The cave scenes were tense and well described. The cousins argued like real family."
+          }
+        ]
+      },
+      {
+        "name": "Nine Windows East",
+        "description": "A made-up literary novel following one apartment building across nine different households. Paperback of around 340 pages for readers who prefer character studies.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Each household got its own voice, and I had my favourite by chapter three."
+          },
+          { "rating": 5, "body": "Quietly moving. I reread the sixth window twice." }
+        ]
+      },
+      {
+        "name": "The Quiet Ferry",
+        "description": "A made-up mystery set on a river ferry where passengers keep losing small belongings. Compact paperback with about 220 pages that fits easily in a bag.",
+        "reviews": [
+          {
+            "rating": 3,
+            "body": "I guessed the culprit early, but the river descriptions were nice."
+          },
+          { "rating": 5, "body": "Short, neat and clever. Finished it in two sittings." }
+        ]
+      },
+      {
+        "name": "Orchard of Small Storms",
+        "description": "A made-up family story about three sisters who inherit an apple orchard and disagree about its future. Paperback with about 380 pages, suited to readers who like long family sagas.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "I laughed and got a bit teary. The sisters felt like people I know."
+          },
+          { "rating": 4, "body": "Long but worth it, and the cover has a pleasant matte finish." }
+        ]
+      }
+    ],
+    "books-stationery-books-non-fiction": [
+      {
+        "name": "A Practical Guide to Kitchen Gardens",
+        "description": "A made-up guide to planting herbs and vegetables in balconies and small yards, with seasonal charts. Paperback of about 200 pages with line drawings, suited to first-time growers.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "The sowing chart on the inside cover is what I use most. Clear and easy to follow."
+          },
+          { "rating": 4, "body": "Good for small pots. I wish it had more on monsoon planting." }
+        ]
+      },
+      {
+        "name": "Reading Maps Without Apps",
+        "description": "A made-up handbook on reading paper maps, compass bearings and contour lines. Paperback with about 180 pages and fold-out diagrams, written for hikers and curious students.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "The contour line chapter finally made sense to me after years of confusion."
+          },
+          { "rating": 5, "body": "Small enough for a daypack and the diagrams are sharp." }
+        ]
+      },
+      {
+        "name": "Basics of Home Bookkeeping",
+        "description": "A made-up primer on keeping a simple household ledger with worked examples and blank templates. Paperback of about 160 pages for families who want tidy records.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "The templates at the back are useful and I photocopied a few for the month."
+          },
+          { "rating": 3, "body": "Fine for beginners, but the examples are quite basic for me." }
+        ]
+      },
+      {
+        "name": "Understanding Monsoon Weather",
+        "description": "A made-up explainer on how seasonal rains form, with maps and simple charts. Paperback with about 220 pages, suited to students and anyone curious about weather.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "My son read it before his geography project and could explain it back to me."
+          },
+          {
+            "rating": 4,
+            "body": "Readable and the colour maps are nice. The last chapter felt rushed."
+          }
+        ]
+      },
+      {
+        "name": "Wood Joints for Beginners",
+        "description": "A made-up workshop guide that explains ten basic wood joints with step-by-step drawings. Spiral-bound, about 140 pages, written for hobby carpenters.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "The spiral binding lies flat on the bench, which is exactly what I needed."
+          },
+          {
+            "rating": 4,
+            "body": "Drawings are clear. I would have liked a tool list for each joint."
+          }
+        ]
+      },
+      {
+        "name": "A Short History of Railway Stations",
+        "description": "A made-up illustrated history of station buildings, platforms and timetables across a fictional country. Hardcover with about 260 pages for readers who like travel and architecture.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Handsome hardcover with plenty of sketches. A nice coffee table book."
+          },
+          { "rating": 5, "body": "I read a chapter every night and learned something each time." }
+        ]
+      },
+      {
+        "name": "Walking Tours of Old Markets",
+        "description": "A made-up pocket guide with route maps for exploring old bazaars on foot. Paperback of about 190 pages, designed for casual travellers.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Routes are short and realistic. I used two of them on a weekend trip."
+          },
+          { "rating": 3, "body": "Useful sketches, though some maps are a bit small to read." }
+        ]
+      },
+      {
+        "name": "Birds of the Town Garden",
+        "description": "A made-up field guide to common garden birds, with colour plates and notes on their calls. Paperback with about 170 pages, suited to beginners and school groups.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "I now recognise three birds outside my window thanks to the plates."
+          },
+          {
+            "rating": 4,
+            "body": "Light enough to carry outdoors. The call descriptions are a bit hard to imagine."
+          }
+        ]
+      }
+    ],
+    "books-stationery-books-childrens-books": [
+      {
+        "name": "The Little Lantern Fox",
+        "description": "A made-up picture story about a small fox who carries a lantern to help friends find the way home. Hardcover with about 32 pages and large colour illustrations for young readers.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "My daughter asks for it every bedtime. The pictures are soft and bright."
+          },
+          {
+            "rating": 5,
+            "body": "Sturdy pages that survived a toddler. The story is short and sweet."
+          }
+        ]
+      },
+      {
+        "name": "Mira and the Moving Hill",
+        "description": "A made-up adventure about a girl who discovers that the hill behind her school walks at night. Paperback with about 96 pages and short chapters, for young readers learning to read alone.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Good chapter length for my seven year old, who read most of it herself."
+          },
+          { "rating": 5, "body": "Funny and imaginative. We laughed at the walking hill scene." }
+        ]
+      },
+      {
+        "name": "Pip Counts the Stars",
+        "description": "A made-up counting book where a small bird counts stars from one to twenty. Board book with about 20 thick pages and rounded corners for the youngest readers.",
+        "reviews": [
+          { "rating": 4, "body": "Thick pages and rounded corners are perfect for little hands." },
+          { "rating": 4, "body": "My nephew enjoys pointing at the stars as we count together." }
+        ]
+      },
+      {
+        "name": "The Day the Pond Sang",
+        "description": "A made-up rhyming story about frogs, ducks and a very musical pond. Paperback picture book of about 40 pages, suited to reading aloud.",
+        "reviews": [
+          { "rating": 5, "body": "The rhymes are fun to read aloud and we added our own sounds." },
+          {
+            "rating": 3,
+            "body": "Cute story, though the paperback cover bent after a week in the school bag."
+          }
+        ]
+      },
+      {
+        "name": "Captain Button's Paper Boat",
+        "description": "A made-up tale of a toy captain who sails a paper boat across a bathtub sea. Hardcover with about 48 pages and a folding instruction page at the end for young readers.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "We made the paper boat from the last page and floated it right away."
+          },
+          { "rating": 4, "body": "Lovely illustrations. A little short but a great bedtime read." }
+        ]
+      },
+      {
+        "name": "Seven Sleepy Elephants",
+        "description": "A made-up bedtime story about seven elephants who each find a different way to fall asleep. Padded hardcover with about 28 pages, written for young readers aged three to six.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "The padded cover feels nice and the elephants are drawn with a lot of charm."
+          },
+          { "rating": 4, "body": "Works well as a wind-down book before lights out." }
+        ]
+      },
+      {
+        "name": "The Rainy Day Parade",
+        "description": "A made-up story about children who hold a parade with umbrellas and homemade drums during a heavy shower. Paperback of about 36 pages with bold colour pictures for young readers.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "We read it during the first rain of the season and the kids loved it."
+          },
+          {
+            "rating": 5,
+            "body": "Bright pictures and a happy ending. Worth buying for the umbrella spread alone."
+          }
+        ]
+      },
+      {
+        "name": "Tara and the Tiny Train",
+        "description": "A made-up early reader about a girl who rides a toy-sized train through her grandfather's garden. Paperback with about 64 pages, large print and simple sentences for new readers.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Large print made it easy for my son to read without getting tired."
+          },
+          {
+            "rating": 4,
+            "body": "Simple words and a nice story. He wants a second book about the train."
+          }
+        ]
+      }
+    ],
+    "books-stationery-stationery-notebooks": [
+      {
+        "name": "A5 Ruled Notebook",
+        "description": "A softcover A5 notebook with 160 ruled pages of 70 gsm paper and a stitched spine. Suited to class notes and daily journaling.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "The stitched spine has held up in my bag for two months. Lines are even and light."
+          },
+          {
+            "rating": 4,
+            "body": "Good value for the page count. Fountain pen ink shows through slightly."
+          }
+        ]
+      },
+      {
+        "name": "A4 Spiral Notebook",
+        "description": "A large A4 notebook with a double metal spiral and 200 ruled pages. Intended for college lectures and office meetings.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "The spiral does not snag and the pages tear out cleanly along the perforation."
+          },
+          { "rating": 4, "body": "Big and light enough to carry to every lecture." }
+        ]
+      },
+      {
+        "name": "Pocket Dotted Journal",
+        "description": "A small pocket journal with 96 dotted pages, a ribbon marker and an elastic closure. Made for sketching ideas, lists and travel notes.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Fits in my jeans pocket and the elastic keeps it shut. The dots are very faint, which I like."
+          },
+          { "rating": 3, "body": "Nice size, but there are fewer pages than I expected." }
+        ]
+      },
+      {
+        "name": "Hardcover Graph Notebook",
+        "description": "A hardcover notebook with 144 pages of 5 mm square grid on cream paper. Useful for maths, engineering drawings and planning layouts.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "The grid is crisp and printed straight, which matters for my drawings."
+          },
+          { "rating": 4, "body": "Solid cover, though a little heavy to carry daily." }
+        ]
+      },
+      {
+        "name": "Weekly Planner Notebook",
+        "description": "An undated planner notebook with a two-page spread per week and a notes column. Softcover, A5 size, designed for students and busy households.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Being undated means I could start mid-month without wasting pages."
+          },
+          { "rating": 5, "body": "The notes column is the best part. I use it for shopping lists." }
+        ]
+      },
+      {
+        "name": "Index Tab Notebook",
+        "description": "A spiral notebook with five coloured divider tabs and 180 ruled pages. Handy for keeping several subjects or projects in one book.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Five tabs cover all my subjects and I no longer carry a pile of books."
+          },
+          { "rating": 4, "body": "Tabs are firm and the colours are easy to tell apart." }
+        ]
+      },
+      {
+        "name": "Recycled Paper Notepad",
+        "description": "A top-bound notepad of 100 sheets made from recycled paper, with a thin card back. Sized A6 for desk lists, phone messages and quick sums.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Sits next to my phone and gets used daily. Paper has a slightly rough, pleasant feel."
+          },
+          { "rating": 3, "body": "Works well with pencil, but gel pens bleed a little." }
+        ]
+      },
+      {
+        "name": "Plain Sketch Notebook",
+        "description": "A softcover notebook with 120 plain pages of 100 gsm paper in A5 size. Chosen by people who like to draw, doodle or write without lines.",
+        "reviews": [
+          { "rating": 5, "body": "Thick paper that takes pencil and light ink without trouble." },
+          {
+            "rating": 4,
+            "body": "Lies reasonably flat after a few days. A good everyday sketch book."
+          }
+        ]
+      }
+    ],
+    "books-stationery-stationery-pens": [
+      {
+        "name": "Blue Gel Pen Set",
+        "description": "A set of ten blue gel pens with 0.5 mm tips and rubber grips. Meant for school notes and exam writing.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Smooth from the first line and none of the ten dried out in a month."
+          },
+          {
+            "rating": 4,
+            "body": "The grip is comfortable for long writing. Ink takes a second to dry for left-handers."
+          }
+        ]
+      },
+      {
+        "name": "Black Fine Liner Pack",
+        "description": "A pack of six black fine liner pens in assorted widths from 0.1 mm to 0.8 mm. Used for drawing, lettering and neat technical notes.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "The widths are accurate and the lines stay sharp on cartridge paper."
+          },
+          { "rating": 4, "body": "Great for outlining. The thinnest one needs a gentle hand." }
+        ]
+      },
+      {
+        "name": "Classic Ballpoint Box",
+        "description": "A box of twenty blue ballpoint pens with a clear barrel and a 1.0 mm tip. Everyday pens for offices, shops and classrooms.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Cheap and reliable. We keep them at the front desk and rarely run out."
+          },
+          { "rating": 3, "body": "Writes well, but two pens in my box skipped at the start." }
+        ]
+      },
+      {
+        "name": "Fountain Pen Starter Set",
+        "description": "A beginner fountain pen with a steel nib, six ink cartridges and a converter. Made for people learning to write with ink.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "My handwriting looks better already. The nib is smooth and not scratchy."
+          },
+          {
+            "rating": 4,
+            "body": "Good first pen. The converter fits snugly and the cap clicks shut."
+          }
+        ]
+      },
+      {
+        "name": "Mechanical Pencil Set",
+        "description": "A set of three 0.7 mm mechanical pencils with a spare lead tube and two erasers. Fits students, draughtsmen and anyone who dislikes sharpening.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "The click is firm and lead rarely snaps. The eraser tip is tiny but works."
+          },
+          { "rating": 5, "body": "Balanced weight and a metal tip that does not wobble." }
+        ]
+      },
+      {
+        "name": "Pastel Highlighter Set",
+        "description": "A set of six chisel-tip highlighters in soft pastel shades with quick-drying ink. Suited to marking textbooks and planner pages.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "The colours are easy on the eyes and do not smear the text underneath."
+          },
+          { "rating": 4, "body": "Good set. The pink is a bit faint on yellowish paper." }
+        ]
+      },
+      {
+        "name": "Brush Tip Marker Set",
+        "description": "A set of twelve water-based markers with flexible brush tips in assorted colours. Made for hand lettering, cards and colouring.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "The brush tips bend nicely and give thick and thin strokes with little effort."
+          },
+          {
+            "rating": 3,
+            "body": "Colours are vibrant, but the lighter shades dry out sooner than the dark ones."
+          }
+        ]
+      },
+      {
+        "name": "Navy Roller Pen",
+        "description": "A single roller pen with navy ink, a metal barrel and a 0.7 mm tip. A refillable pen that suits signing documents and desk use.",
+        "reviews": [
+          { "rating": 4, "body": "Feels solid and the navy ink looks formal on letters." },
+          { "rating": 5, "body": "Refill slid in easily. This is now the pen I carry to meetings." }
+        ]
+      }
+    ],
+    "books-stationery-stationery-art-supplies": [
+      {
+        "name": "Watercolour Paint Set",
+        "description": "A tin of twenty-four watercolour half pans with a folding palette and one round brush. A practical starter kit for beginners and hobby painters.",
+        "reviews": [
+          { "rating": 5, "body": "The colours blend well and the tin is easy to take outdoors." },
+          {
+            "rating": 4,
+            "body": "Good pigments for the price. The included brush is basic, so I added a better one."
+          }
+        ]
+      },
+      {
+        "name": "Graphite Sketching Pencil Set",
+        "description": "A set of twelve graphite pencils ranging from 6B to 4H, packed in a card sleeve with a sharpener. Made for sketching, shading and technical drawing.",
+        "reviews": [
+          { "rating": 5, "body": "Good range of darkness and the leads are smooth without grit." },
+          {
+            "rating": 4,
+            "body": "Pencils are evenly sharpened out of the box. The sleeve is a bit flimsy."
+          }
+        ]
+      },
+      {
+        "name": "Acrylic Paint Tubes",
+        "description": "A box of twelve acrylic paint tubes, 12 ml each, in assorted colours. Opaque and quick drying, they suit canvas, wood and paper.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Covers well in two coats and cleans off brushes easily with water."
+          },
+          {
+            "rating": 5,
+            "body": "Strong colours and the tube caps close tightly. I painted a small wooden box with them."
+          }
+        ]
+      },
+      {
+        "name": "Oil Pastel Box",
+        "description": "A box of thirty-six soft oil pastels in a hinged cardboard case. Suitable for school art, colour layering and bold drawings.",
+        "reviews": [
+          { "rating": 4, "body": "Bright and creamy. They do get messy, so keep wipes nearby." },
+          { "rating": 3, "body": "Lovely colours but a few sticks arrived broken in the box." }
+        ]
+      },
+      {
+        "name": "Canvas Panel Pack",
+        "description": "A pack of five primed canvas panels, each 20 by 25 cm, mounted on stiff board. A flat, affordable surface for acrylic and oil practice.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Primed evenly and no warping. Great for trying out new ideas without cost worries."
+          },
+          { "rating": 4, "body": "The surface has a gentle texture that holds paint well." }
+        ]
+      },
+      {
+        "name": "Round Brush Set",
+        "description": "A set of eight round brushes in sizes 0 to 12 with synthetic bristles and short wooden handles. For watercolour, gouache and acrylic work.",
+        "reviews": [
+          { "rating": 5, "body": "Tips come to a fine point and keep their shape after washing." },
+          {
+            "rating": 4,
+            "body": "Good set for the price. The largest brush sheds a hair or two at first."
+          }
+        ]
+      },
+      {
+        "name": "Charcoal Drawing Kit",
+        "description": "A kit with willow charcoal sticks, compressed charcoal pencils, a kneaded eraser and a blending stump. Made for figure studies and tonal drawing.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "The kneaded eraser is the star of the kit. Charcoal is soft and dark."
+          },
+          {
+            "rating": 5,
+            "body": "Everything I needed for a first charcoal session was in one box."
+          }
+        ]
+      },
+      {
+        "name": "Cartridge Paper Pad",
+        "description": "A glued pad of thirty A3 sheets of 150 gsm cartridge paper with a smooth finish. Used for pencil, ink and light colour work.",
+        "reviews": [
+          { "rating": 5, "body": "Sheets come off the pad cleanly and take ink without buckling." },
+          {
+            "rating": 4,
+            "body": "Good weight for pencil and fine liners. Not thick enough for heavy watercolour."
+          }
+        ]
+      }
+    ]
+  }
+}

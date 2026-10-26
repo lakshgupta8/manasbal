@@ -1,0 +1,695 @@
+{
+  "brands": [
+    "Rasoi Lane",
+    "Nivasa",
+    "Cedarwick",
+    "Dehri Home",
+    "Amberloom",
+    "Kothi Living",
+    "Sutra Nest",
+    "Olivane"
+  ],
+  "items": {
+    "home-kitchen-kitchenware-cookware": [
+      {
+        "name": "Hard-anodised Frying Pan",
+        "description": "A 24 cm frying pan with a hard-anodised aluminium body and a stay-cool handle. Wash by hand with a soft sponge and use wooden or silicone tools.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Heats evenly and eggs slide off easily. The handle stays cool on a medium flame."
+          },
+          {
+            "rating": 4,
+            "body": "Good weight and finish. Arrived well wrapped, though the box was slightly dented."
+          }
+        ]
+      },
+      {
+        "name": "Stainless Steel Pressure Cooker",
+        "description": "A 5 litre stainless steel pressure cooker with a flat induction-ready base and a lid with a safety valve. Check the rubber gasket regularly and wash the lid by hand.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Whistles properly and cooks dal in minutes. The base works fine on our induction plate."
+          },
+          {
+            "rating": 4,
+            "body": "Sturdy build and easy to clean. Wish the handles were a little longer."
+          }
+        ]
+      },
+      {
+        "name": "Cast Iron Tawa",
+        "description": "A 28 cm pre-seasoned cast iron tawa with a long handle for rotis and parathas. Dry it fully after washing and rub with a little oil before storing.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Rotis puff up nicely and the tawa holds heat for a long time. Quite heavy but that is expected."
+          },
+          {
+            "rating": 3,
+            "body": "Works well, but the surface was a bit rough at first and needed a few rounds of oiling."
+          }
+        ]
+      },
+      {
+        "name": "Tri-ply Kadai with Lid",
+        "description": "A 3 litre tri-ply stainless steel kadai with a glass lid and two riveted side handles. Suitable for gas and induction, and safe to wash with regular dish soap.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Perfect size for family sabzi and deep frying. Nothing sticks if the oil is hot first."
+          },
+          { "rating": 4, "body": "Looks smart and feels solid. The glass lid fits snugly." }
+        ]
+      },
+      {
+        "name": "Non-stick Idli Maker",
+        "description": "A four-tier idli stand with a non-stick coated base that makes sixteen idlis per batch. Fits a standard 4 litre pot, and the plates should be cleaned with a soft cloth.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Idlis come out soft and release without fuss. The stand is light and easy to lift."
+          },
+          {
+            "rating": 5,
+            "body": "Neat design and the handle is comfortable. Delivered in two days with good packaging."
+          }
+        ]
+      },
+      {
+        "name": "Aluminium Milk Pan",
+        "description": "A 1.5 litre aluminium milk pan with a pouring lip and a long heat-resistant handle. Small enough for daily tea and warming milk on a gas stove.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Handy for the morning chai. The pouring lip really does not drip."
+          },
+          { "rating": 5, "body": "Light, simple and good value. Cleans up easily with a scrub." }
+        ]
+      }
+    ],
+    "home-kitchen-kitchenware-dinnerware": [
+      {
+        "name": "Ceramic Dinner Set 18 Piece",
+        "description": "An 18 piece ceramic dinner set with plates, bowls and side plates in a plain glossy white finish. Dishwasher and microwave safe, serves six people.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Clean white look and the glaze is smooth. Every piece arrived intact in thick foam."
+          },
+          {
+            "rating": 4,
+            "body": "Nice set for the price. Plates are a little thinner than I expected."
+          }
+        ]
+      },
+      {
+        "name": "Stainless Steel Thali Set",
+        "description": "A six piece thali set with a large plate, four small katoris and a glass in polished stainless steel. Rust resistant and easy to wash by hand or in a dishwasher.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Solid steel with a mirror shine. Katori sizes are just right for dal and sabzi."
+          },
+          {
+            "rating": 4,
+            "body": "Looks traditional and feels sturdy. Edges are smooth and finished well."
+          }
+        ]
+      },
+      {
+        "name": "Melamine Kids Plate Set",
+        "description": "A four piece melamine set with a plate, bowl, cup and spoon in bright colours. Lightweight and hard to break, but not for use in a microwave.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "My son drops things all the time and these have survived so far. Colours are cheerful."
+          },
+          {
+            "rating": 4,
+            "body": "Light and the right size for a small child. Print is slightly less sharp than the photo."
+          }
+        ]
+      },
+      {
+        "name": "Hand-painted Serving Bowl",
+        "description": "A 24 cm stoneware serving bowl with a hand-painted blue floral pattern. Suitable for salads and curries, and best washed by hand to protect the design.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Each bowl has small brush variations, which gives it character. Great for serving at gatherings."
+          },
+          { "rating": 3, "body": "Pretty bowl but one side had a tiny glaze bubble. Still usable." }
+        ]
+      },
+      {
+        "name": "Borosilicate Glass Mug Set",
+        "description": "A set of six 300 ml borosilicate glass mugs that handle both hot and cold drinks. Clear and plain, and safe to wash in a dishwasher.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Crystal clear glass and comfortable handles. Wrapped individually so nothing cracked."
+          },
+          { "rating": 4, "body": "Good for tea and cold coffee alike. The size is generous." }
+        ]
+      },
+      {
+        "name": "Copper Water Bottle",
+        "description": "A 1 litre copper bottle with a screw cap and a hammered outer finish. Rinse with water after use and wipe dry, and do not put in a dishwasher.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Looks lovely on the table and the cap seals tightly with no leaks in my bag."
+          },
+          {
+            "rating": 5,
+            "body": "Well made with a nice hammered texture. Arrived polished and carefully packed."
+          }
+        ]
+      }
+    ],
+    "home-kitchen-kitchenware-storage-containers": [
+      {
+        "name": "Airtight Plastic Jar Set",
+        "description": "A set of six airtight jars in 500 ml, 750 ml and 1 litre sizes with clear walls and snap-on lids. Made from food-grade plastic, suitable for dry pantry items.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Lids click shut firmly and the stackable shape saves shelf space. Clear walls make it easy to see what is inside."
+          },
+          {
+            "rating": 4,
+            "body": "Good set for the pantry. Labels are not included so I added my own."
+          }
+        ]
+      },
+      {
+        "name": "Stainless Steel Lunch Box",
+        "description": "A three container stainless steel tiffin with a carry handle and a leak-resistant lid. Each container holds about 350 ml and can be washed by hand.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Carried it to the office all week with no spills. The steel feels thick and well finished."
+          },
+          {
+            "rating": 4,
+            "body": "Compact and tidy to pack. Handle clip is a little stiff at first."
+          }
+        ]
+      },
+      {
+        "name": "Glass Storage Containers",
+        "description": "A set of four borosilicate glass containers with bamboo-effect lids in 400 ml to 1 litre sizes. Oven and freezer safe without the lids.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Perfect for leftovers and reheating. The glass is thick and the lids fit snugly."
+          },
+          {
+            "rating": 4,
+            "body": "Looks premium and does not hold onto smells. Slightly heavy to carry around."
+          }
+        ]
+      },
+      {
+        "name": "Rotating Spice Rack",
+        "description": "A round rotating spice organiser with twelve small jars and a spoon holder. Sits on a counter and the jars can be rinsed under tap water.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Saves so much time while cooking, and all the masalas are within reach. Turns smoothly."
+          },
+          { "rating": 3, "body": "Handy, but the jar lids are a bit tight to open at first." }
+        ]
+      },
+      {
+        "name": "Bread Box with Bamboo Lid",
+        "description": "A large steel bread box with a sliding bamboo lid that fits a full loaf. Wipe clean with a damp cloth and keep away from direct water.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Looks tidy on the counter and the lid slides without catching. Fits our bigger loaf easily."
+          },
+          { "rating": 5, "body": "Neat finish and simple to clean. Arrived within three days." }
+        ]
+      },
+      {
+        "name": "Collapsible Silicone Container",
+        "description": "A 900 ml silicone food container that folds flat for storage, with a vented snap lid. Microwave and dishwasher safe, and handy for travel.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Folds down to almost nothing, so it takes no room in the bag. The lid seals well."
+          },
+          { "rating": 5, "body": "Clever design and easy to wash. We use it for picnics." }
+        ]
+      }
+    ],
+    "home-kitchen-home-decor-cushions": [
+      {
+        "name": "Cotton Cushion Cover Set",
+        "description": "A set of five 40 x 40 cm cushion covers in plain woven cotton with a hidden zip. Machine washable in cold water, inserts sold separately.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Soft fabric and the colours match the photos. Zips run smoothly."
+          },
+          {
+            "rating": 4,
+            "body": "Good value for five covers. Slight creases on arrival but they went after a wash."
+          }
+        ]
+      },
+      {
+        "name": "Velvet Floor Cushion",
+        "description": "A 60 x 60 cm floor cushion with a soft velvet cover and a firm fibre filling. Spot clean the cover and keep it away from damp areas.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Great for sitting on the living room floor. Plush feel and holds its shape."
+          },
+          { "rating": 4, "body": "Rich colour and well stitched. A bit bulky to move around." }
+        ]
+      },
+      {
+        "name": "Block Print Cushion Cover",
+        "description": "A 45 x 45 cm cushion cover with a hand block printed pattern on cotton canvas. Wash separately for the first time and iron on low heat.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "The print is crisp and looks handmade. Adds colour to our plain sofa."
+          },
+          { "rating": 4, "body": "Pretty pattern. The fabric is firm and the stitching is neat." }
+        ]
+      },
+      {
+        "name": "Boho Tassel Cushion",
+        "description": "A 40 cm square cushion with cotton tassels on all four corners and a woven geometric design. Comes with a filled insert and a removable cover.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Cute tassels and it comes already filled, so no extra buying. Good size for a bed."
+          },
+          { "rating": 5, "body": "Looks like it costs more than it does. Delivery was quick." }
+        ]
+      },
+      {
+        "name": "Round Jute Cushion",
+        "description": "A 45 cm round cushion with a natural jute cover and a soft polyester filling. Brush lightly to clean and avoid soaking.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Earthy look that suits our balcony chairs. The shape stays round."
+          },
+          {
+            "rating": 3,
+            "body": "Nice texture, but the jute feels a little scratchy against bare arms."
+          }
+        ]
+      },
+      {
+        "name": "Embroidered Bolster Cushion",
+        "description": "A 45 cm long cylindrical bolster with floral embroidery and a cotton cover. The insert is firm and the cover can be hand washed.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Embroidery is fine and neat. Great as a back rest on the diwan."
+          },
+          { "rating": 4, "body": "Looks traditional and elegant. Firmness is just right for me." }
+        ]
+      }
+    ],
+    "home-kitchen-home-decor-wall-art": [
+      {
+        "name": "Framed Abstract Canvas Print",
+        "description": "A 60 x 40 cm abstract canvas print in a slim wooden frame, ready to hang with a fitted hook. Wipe with a dry cloth and keep out of damp areas.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Colours are rich and the frame looks solid. Hung it in our hallway in five minutes."
+          },
+          {
+            "rating": 4,
+            "body": "Pretty print for the price. The packaging with cardboard corners worked well."
+          }
+        ]
+      },
+      {
+        "name": "Wooden Wall Shelf Set",
+        "description": "A set of three floating wall shelves in engineered wood with a matte walnut finish. Each shelf holds light decor items and comes with fixing screws.",
+        "reviews": [
+          { "rating": 5, "body": "Easy to fit and holds my plants well. Finish looks even." },
+          { "rating": 4, "body": "Clean design. Drill bit was not included so keep one ready." }
+        ]
+      },
+      {
+        "name": "Metal Wall Clock",
+        "description": "A 50 cm round wall clock with a black metal frame and bold numerals. Runs on one AA battery and has a quiet sweep movement.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Easy to read from across the room and no ticking sound at night."
+          },
+          { "rating": 4, "body": "Looks smart and keeps good time. Battery not included." }
+        ]
+      },
+      {
+        "name": "Macrame Wall Hanging",
+        "description": "A 70 cm long macrame wall hanging made of cotton cord on a wooden rod. Hangs with a jute loop, and dust can be brushed off lightly.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Handmade feel and tidy knots. Brightens up a blank wall behind my bed."
+          },
+          {
+            "rating": 3,
+            "body": "Looks nice, but it came a bit crushed and needed shaping by hand."
+          }
+        ]
+      },
+      {
+        "name": "Set of Three Botanical Prints",
+        "description": "Three 30 x 40 cm botanical prints on matte paper with black frames and plastic glass. Sold as a set, and each frame can hang upright or sideways.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Nice together as a trio on the stairway wall. Prints are sharp."
+          },
+          {
+            "rating": 5,
+            "body": "Frames feel better than expected. All three arrived without a scratch."
+          }
+        ]
+      },
+      {
+        "name": "Brass Mandala Wall Plate",
+        "description": "A 30 cm decorative wall plate in brass with an etched mandala pattern. Polish gently with a dry cloth to keep the shine.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Warm golden tone and the etching is detailed. Adds a festive touch to our entryway."
+          },
+          { "rating": 4, "body": "Good weight and finish. Hook at the back is firm." }
+        ]
+      }
+    ],
+    "home-kitchen-home-decor-lamps": [
+      {
+        "name": "Ceramic Table Lamp",
+        "description": "A 35 cm table lamp with a glazed ceramic base and a cream fabric shade. Takes a standard E27 bulb, sold separately.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Gives a soft glow in the bedroom. The base is heavy so it does not tip."
+          },
+          { "rating": 4, "body": "Elegant look and smooth switch. Cable is a little short." }
+        ]
+      },
+      {
+        "name": "Bamboo Floor Lamp",
+        "description": "A 150 cm floor lamp with a bamboo stand and a woven shade, with a foot switch. Needs assembly with the included screws.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Sets the mood in our reading corner. Assembly took ten minutes."
+          },
+          {
+            "rating": 4,
+            "body": "Looks great and stable. The shade came a touch dusty, but it wiped clean."
+          }
+        ]
+      },
+      {
+        "name": "Rechargeable Study Lamp",
+        "description": "A foldable LED desk lamp with three brightness levels and a USB charging cable. A full charge lasts several hours at the lowest setting.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Perfect for late homework sessions. Brightness levels are easy to switch."
+          },
+          { "rating": 4, "body": "Bright and light to move around. The arm holds position well." }
+        ]
+      },
+      {
+        "name": "Brass Diya Lamp",
+        "description": "A traditional 12 cm brass diya with a wide base and a small handle for use with oil and cotton wicks. Wash with warm water and a mild soap after cooling.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Good heavy brass and a lovely shine. We use it every evening for pooja."
+          },
+          { "rating": 4, "body": "Nicely made and stable. Came in a neat gift box." }
+        ]
+      },
+      {
+        "name": "Rattan Pendant Light",
+        "description": "A 40 cm hanging pendant shade woven from natural rattan, with a 1.2 metre cord. The bulb holder is included and the bulb is not.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Casts beautiful patterns on the ceiling at night. Weave is neat and even."
+          },
+          {
+            "rating": 3,
+            "body": "Lovely shade but the cord was shorter than I hoped for our high ceiling."
+          }
+        ]
+      },
+      {
+        "name": "Solar Garden String Lights",
+        "description": "A 10 metre string of warm white LED lights with a small solar panel and a battery pack. Turns on at dusk and is meant for balconies and gardens.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Looks pretty on our balcony railing. The solar panel charges well on a sunny day."
+          },
+          {
+            "rating": 5,
+            "body": "Easy to put up and bright enough for the evening. Packed neatly without tangles."
+          }
+        ]
+      }
+    ],
+    "home-kitchen-bedding-bedsheets": [
+      {
+        "name": "Cotton Double Bedsheet Set",
+        "description": "A double bedsheet set with one flat sheet and two pillow covers in 144 thread count cotton. Machine wash at 30 degrees and iron on medium heat.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Soft after the first wash and the print has not faded. Fits our double bed well."
+          },
+          {
+            "rating": 4,
+            "body": "Good everyday sheet. Pillow covers are a bit snug on large pillows."
+          }
+        ]
+      },
+      {
+        "name": "Fitted Sheet King Size",
+        "description": "A king size fitted sheet in brushed microfibre with deep elastic corners for mattresses up to 10 inches thick. Machine washable and quick to dry.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Stays tight all night and does not slip off the corners. Smooth to touch."
+          },
+          {
+            "rating": 4,
+            "body": "Fits our thick mattress properly. The colour is a shade lighter than shown."
+          }
+        ]
+      },
+      {
+        "name": "Single Bed Kids Bedsheet",
+        "description": "A single bedsheet with one pillow cover in cotton blend with a printed animal design. Machine washable, and the bright colours should be washed separately.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "My daughter loves the print and it is soft enough for her. Washes well."
+          },
+          { "rating": 4, "body": "Good size for a single bed. Delivery was on time." }
+        ]
+      },
+      {
+        "name": "Jaipuri Print Bedsheet",
+        "description": "A double bedsheet with two pillow covers in cotton with a traditional hand-block style floral print. Wash in cold water the first time to keep the dye in place.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Beautiful print and it feels cool in summer. Many compliments from guests."
+          },
+          {
+            "rating": 3,
+            "body": "Lovely design, though a little dye came out in the first wash. Fine after that."
+          }
+        ]
+      },
+      {
+        "name": "Satin Finish Bedsheet",
+        "description": "A queen size bedsheet with two pillow covers in smooth satin-finish polyester. Wash on a gentle cycle and iron on a low setting.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Has a nice sheen and feels smooth. A bit slippery on the mattress at first."
+          },
+          { "rating": 5, "body": "Looks luxurious and arrived neatly folded in a zip bag." }
+        ]
+      },
+      {
+        "name": "Linen Blend Bedsheet",
+        "description": "A queen size flat sheet and two pillow covers in a cotton and linen blend with a relaxed textured weave. Gets softer with each wash.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Breathable and airy. The natural texture looks great in our bedroom."
+          },
+          { "rating": 4, "body": "Wrinkles easily, but that is part of the look. Well stitched." }
+        ]
+      }
+    ],
+    "home-kitchen-bedding-blankets": [
+      {
+        "name": "Fleece Throw Blanket",
+        "description": "A 130 x 180 cm throw blanket in soft polyester fleece with finished edges. Machine washable and quick to dry.",
+        "reviews": [
+          { "rating": 5, "body": "Very soft and light. Perfect for the sofa on cool evenings." },
+          {
+            "rating": 4,
+            "body": "Nice colour and no shedding after washing. Slightly thinner than expected."
+          }
+        ]
+      },
+      {
+        "name": "Reversible Cotton Dohar",
+        "description": "A double size dohar in two layers of cotton with a different print on each side. Light enough for mild nights and washable at home.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Just right for the AC season. Two designs in one blanket is a nice touch."
+          },
+          {
+            "rating": 4,
+            "body": "Soft and well stitched. It shrank a tiny bit after the first wash."
+          }
+        ]
+      },
+      {
+        "name": "Quilted Winter Razai",
+        "description": "A double bed razai with a quilted cotton cover and a thick polyester fill. Air it in the sun now and then and dry clean when needed.",
+        "reviews": [
+          { "rating": 5, "body": "Warm and cosy through the Delhi winter, yet not too heavy." },
+          {
+            "rating": 4,
+            "body": "Pattern is attractive and stitching is even. Arrived compressed but fluffed up in a day."
+          }
+        ]
+      },
+      {
+        "name": "Woollen Blend Blanket",
+        "description": "A double size blanket in a wool and acrylic blend with a plain weave and a satin border. Dry clean or hand wash gently in cool water.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Dense weave and good for chilly nights. The border looks smart."
+          },
+          {
+            "rating": 3,
+            "body": "Warm enough, but it has a mild odour for the first few days until aired."
+          }
+        ]
+      },
+      {
+        "name": "Muslin Baby Blanket",
+        "description": "A 100 x 100 cm baby blanket in four layers of soft muslin cotton. Pre-washed, and suitable for gentle machine washing.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Very soft and gets softer with washing. We use it for carrying outside too."
+          },
+          { "rating": 5, "body": "Lovely pastel shade and a good size. Came in a cute cloth bag." }
+        ]
+      },
+      {
+        "name": "Travel Blanket with Pouch",
+        "description": "A lightweight 120 x 150 cm blanket that folds into a small zip pouch with a carry loop. Made of polyester and easy to wash.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Packs small and fits in my backpack. Handy on trains and flights."
+          },
+          { "rating": 5, "body": "Compact and soft enough. The pouch zip works smoothly." }
+        ]
+      }
+    ],
+    "home-kitchen-bedding-pillows": [
+      {
+        "name": "Microfibre Bed Pillow",
+        "description": "A standard 45 x 70 cm pillow with a soft microfibre fill and a cotton cover. Fluff daily and wash the cover separately.",
+        "reviews": [
+          { "rating": 5, "body": "Soft but holds shape through the night. Good value for a pair." },
+          { "rating": 4, "body": "Comfortable and not too flat. Took a day to fully puff up." }
+        ]
+      },
+      {
+        "name": "Memory Foam Pillow",
+        "description": "A contoured pillow made of memory foam with a removable cotton cover. The cover can be machine washed, and the foam should be wiped clean.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Firm and supportive shape. There is a slight smell at first that fades in a day."
+          },
+          {
+            "rating": 5,
+            "body": "Cover feels nice and the pillow keeps its shape. Delivered on time."
+          }
+        ]
+      },
+      {
+        "name": "Cotton Filled Pillow",
+        "description": "A traditional pillow filled with soft cotton and stitched in a striped cotton cover. Sun it every few weeks to keep it fresh.",
+        "reviews": [
+          { "rating": 5, "body": "Reminds me of the old home-made ones, firm and cosy." },
+          { "rating": 4, "body": "Good stitching and decent weight. A little firm for my taste." }
+        ]
+      },
+      {
+        "name": "Neck Roll Pillow",
+        "description": "A 40 cm cylindrical neck roll with a polyester fill and a zippered cotton cover. Can be used as a travel or sofa cushion.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Compact and handy for travel. The zip cover is easy to take off."
+          },
+          { "rating": 5, "body": "Firm roll that stays in place on the bed. Good build." }
+        ]
+      },
+      {
+        "name": "Kids Cartoon Pillow",
+        "description": "A small 30 x 40 cm pillow with a printed cartoon cover and a soft hollow fibre fill. Light and easy to wash by machine.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "My kid took it to bed the same day. Print is bright and the size is perfect."
+          },
+          {
+            "rating": 3,
+            "body": "Cute design, but it is smaller than I imagined from the picture."
+          }
+        ]
+      },
+      {
+        "name": "Hotel Style Gel Fibre Pillow",
+        "description": "A plush 50 x 75 cm pillow with a gel fibre filling and a smooth cotton shell. Fluffy and soft, and should be dried fully after washing.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Plump and fluffy like the ones in a nice stay. Looks great on the bed."
+          },
+          { "rating": 4, "body": "Cover is soft and stitching is tidy. Good size for a king bed." }
+        ]
+      }
+    ]
+  }
+}
