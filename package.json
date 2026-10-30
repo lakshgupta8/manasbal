@@ -20,6 +20,7 @@
     "api-types": "pnpm turbo run build --filter=@manasbal/api && pnpm --filter @manasbal/api openapi && pnpm --filter @manasbal/types generate",
     "lint:openapi": "spectral lint packages/types/openapi.json --fail-severity warn",
     "check:brands": "node scripts/check-brands.mjs",
+    "seed:reset": "pnpm --filter @manasbal/seed seed:reset",
     "check:licenses": "node scripts/check-licenses.mjs",
     "size": "size-limit",
     "lighthouse": "pnpm dlx @lhci/cli@0.15.1 autorun"

@@ -3,6 +3,7 @@ import type { Faker } from "@faker-js/faker";
 import "temporal-polyfill/global";
 import sales from "../data/sales.json" with { type: "json" };
 import { insertInBatches } from "./batches.ts";
+import { discountFor, type CouponRow } from "./coupons.ts";
 import type { createDb } from "./db.ts";
 import { assertAllowed } from "./guardrails.ts";
 import type { People } from "./people.ts";
@@ -15,11 +16,12 @@ type Orm = ReturnType<typeof createDb>["orm"];
 
 export type OrderStatus = "placed" | "shipped" | "delivered" | "cancelled" | "returned";
 
-// No coupon (Friday) and no shipment: neither is seeded yet.
+// No shipment: shipments aren't seeded yet.
 export interface OrderRow {
   id: string;
   userId: string;
   addressId: string;
+  couponId: string | null;
   status: OrderStatus;
   totalPaise: number;
   idempotencyKey: string;
@@ -67,6 +69,8 @@ export interface ReviewRow {
 }
 
 export interface Orders {
+  // The coupons, with each limited code's limit cut down to the orders that used it.
+  coupons: CouponRow[];
   orders: OrderRow[];
   subOrders: SubOrderRow[];
   orderItems: OrderItemRow[];
@@ -85,6 +89,7 @@ const RECENT_DAYS = 7;
 const REVIEW_SHARE = 0.2;
 // Texts rated 4 or 5 are picked this many times as often as the rest.
 const GOOD_REVIEW_WEIGHT = 4;
+const COUPON_SHARE = 0.1;
 
 // Sale names are checked like every other text, so a real store's sale name can't slip in.
 for (const sale of sales) {
@@ -156,12 +161,37 @@ export function generateOrders(
   profile: SeedProfile,
   people: People,
   catalog: Catalog,
+  coupons: CouponRow[],
 ): Orders {
   const days = weightedDays();
   const addressesByUser = groupBy(people.addresses, (address) => address.userId);
   const variants = new Map(catalog.variants.map((variant) => [variant.id, variant]));
   const products = new Map(catalog.products.map((product) => [product.id, product]));
-  const result: Orders = { orders: [], subOrders: [], orderItems: [], payments: [], reviews: [] };
+  const uses = new Map(coupons.map((coupon) => [coupon.id, 0]));
+  const result: Orders = {
+    coupons: [],
+    orders: [],
+    subOrders: [],
+    orderItems: [],
+    payments: [],
+    reviews: [],
+  };
+
+  // About 10% of orders use a code that was still valid on the order's day, isn't used up and
+  // takes less than the whole subtotal off.
+  const pickCoupon = (createdMs: number, subtotalPaise: number): CouponRow | null => {
+    if (!faker.datatype.boolean({ probability: COUPON_SHARE })) return null;
+    const usable = coupons.filter(
+      (coupon) =>
+        createdMs < coupon.validUntil.epochMilliseconds &&
+        (coupon.maxUses === null || uses.get(coupon.id)! < coupon.maxUses) &&
+        discountFor(coupon, subtotalPaise) < subtotalPaise,
+    );
+    if (usable.length === 0) return null;
+    const coupon = faker.helpers.arrayElement(usable);
+    uses.set(coupon.id, uses.get(coupon.id)! + 1);
+    return coupon;
+  };
 
   const bundles = Array.from({ length: profile.orders }, () => {
     const createdMs =
@@ -201,12 +231,15 @@ export function generateOrders(
       });
     }
 
-    // Once coupons arrive (Friday), the total is the subtotals minus the discount.
-    const totalPaise = sum(subOrders.map((subOrder) => subOrder.subtotalPaise));
+    // Sellers are paid on the full subtotals; the shop pays for the discount.
+    const subtotalPaise = sum(subOrders.map((subOrder) => subOrder.subtotalPaise));
+    const coupon = pickCoupon(createdMs, subtotalPaise);
+    const totalPaise = subtotalPaise - (coupon ? discountFor(coupon, subtotalPaise) : 0);
     const order: OrderRow = {
       id: orderId,
       userId: buyer.id,
       addressId: address.id,
+      couponId: coupon?.id ?? null,
       status,
       totalPaise,
       idempotencyKey: `seed_${faker.string.uuid()}`,
@@ -254,12 +287,17 @@ export function generateOrders(
     result.payments.push(bundle.payment);
     result.reviews.push(...bundle.reviews);
   }
+  result.coupons = coupons.map((coupon) =>
+    coupon.maxUses === null ? coupon : { ...coupon, maxUses: uses.get(coupon.id)! },
+  );
   return result;
 }
 
-// Orders first, because everything else points at them; reviews last, because they point at items.
+// Coupons first, because orders point at them; then orders, because everything else points at
+// them; reviews last, because they point at items.
 export async function insertOrders(orm: Orm, data: Orders): Promise<void> {
   const db = orm.public;
+  await insertInBatches(data.coupons, (batch) => db.Coupon.createAndCount(batch));
   await insertInBatches(data.orders, (batch) => db.Order.createAndCount(batch));
   await insertInBatches(data.subOrders, (batch) => db.SubOrder.createAndCount(batch));
   await insertInBatches(data.orderItems, (batch) => db.OrderItem.createAndCount(batch));

@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import sales from "../data/sales.json" with { type: "json" };
+import { discountFor, generateCoupons } from "./coupons.ts";
 import { generateOrders, insertOrders, type OrderRow, type Orders } from "./orders.ts";
 import { generatePeople } from "./people.ts";
 import { generateCatalog } from "./products.ts";
@@ -10,7 +11,8 @@ function demoData() {
   const faker = createRandom();
   const people = generatePeople(faker, PROFILES.demo);
   const catalog = generateCatalog(faker, PROFILES.demo, people.sellers);
-  return { people, catalog, data: generateOrders(faker, PROFILES.demo, people, catalog) };
+  const coupons = generateCoupons(faker);
+  return { people, catalog, data: generateOrders(faker, PROFILES.demo, people, catalog, coupons) };
 }
 
 const { people, catalog, data } = demoData();
@@ -29,9 +31,13 @@ const itemsBySubOrder = groupBy(data.orderItems, (item) => item.subOrderId);
 const subOrdersByOrder = groupBy(data.subOrders, (subOrder) => subOrder.orderId);
 const variants = new Map(catalog.variants.map((variant) => [variant.id, variant]));
 const products = new Map(catalog.products.map((product) => [product.id, product]));
-// The order total the seed should write. When coupons arrive, subtract the discount here.
-const expectedTotal = (order: OrderRow) =>
-  sum(subOrdersByOrder.get(order.id)!.map((s) => s.subtotalPaise));
+const coupons = new Map(data.coupons.map((coupon) => [coupon.id, coupon]));
+// The order total the seed should write: the subtotals, less the coupon's discount.
+const expectedTotal = (order: OrderRow) => {
+  const subtotal = sum(subOrdersByOrder.get(order.id)!.map((s) => s.subtotalPaise));
+  const coupon = order.couponId === null ? undefined : coupons.get(order.couponId);
+  return subtotal - (coupon ? discountFor(coupon, subtotal) : 0);
+};
 const orders = new Map(data.orders.map((order) => [order.id, order]));
 const subOrders = new Map(data.subOrders.map((subOrder) => [subOrder.id, subOrder]));
 const orderOfItem = new Map(
@@ -175,8 +181,48 @@ describe("generateOrders", () => {
   });
 });
 
+describe("coupons on orders", () => {
+  const withCoupon = data.orders.filter((order) => order.couponId !== null);
+
+  it("gives about 10% of orders a coupon", () => {
+    expect(Math.abs(withCoupon.length / data.orders.length - 0.1)).toBeLessThanOrEqual(0.02);
+  });
+
+  it("only uses a code that was valid on the order's day, and never more than its limit", () => {
+    const uses = new Map<string, number>();
+    for (const order of withCoupon) {
+      const coupon = coupons.get(order.couponId!)!;
+      expect(order.createdAt.epochMilliseconds).toBeLessThan(coupon.validUntil.epochMilliseconds);
+      uses.set(coupon.id, (uses.get(coupon.id) ?? 0) + 1);
+    }
+    for (const coupon of data.coupons) {
+      if (coupon.maxUses === null) continue;
+      expect(uses.get(coupon.id) ?? 0).toBe(coupon.maxUses);
+    }
+  });
+
+  it("always leaves something to pay", () => {
+    expect(withCoupon.every((order) => order.totalPaise > 0)).toBe(true);
+  });
+
+  it("skips the coupon when no code is usable", () => {
+    const faker = createRandom();
+    const few = { ...PROFILES.minimal, orders: 200 };
+    const p = generatePeople(faker, few);
+    const c = generateCatalog(faker, few, p.sellers);
+    const expired = generateCoupons(faker).map((coupon) => ({
+      ...coupon,
+      validUntil: Temporal.Instant.fromEpochMilliseconds(0),
+    }));
+
+    const result = generateOrders(faker, few, p, c, expired);
+
+    expect(result.orders.every((order) => order.couponId === null)).toBe(true);
+  });
+});
+
 describe("insertOrders", () => {
-  it("inserts orders, sub-orders, items, payments and reviews in that order, in batches of 500", async () => {
+  it("inserts coupons, orders, sub-orders, items, payments and reviews in that order, in batches of 500", async () => {
     const calls: [string, number][] = [];
     const table = (name: string) => ({
       createAndCount: vi.fn(async (batch: unknown[]) => {
@@ -186,6 +232,7 @@ describe("insertOrders", () => {
     });
     const orm = {
       public: {
+        Coupon: table("Coupon"),
         Order: table("Order"),
         SubOrder: table("SubOrder"),
         OrderItem: table("OrderItem"),
@@ -197,7 +244,7 @@ describe("insertOrders", () => {
     await insertOrders(orm as unknown as Parameters<typeof insertOrders>[0], data as Orders);
 
     const order = calls.map(([name]) => name);
-    const tables = ["Order", "SubOrder", "OrderItem", "Payment", "Review"];
+    const tables = ["Coupon", "Order", "SubOrder", "OrderItem", "Payment", "Review"];
     for (let i = 1; i < tables.length; i++) {
       expect(order.indexOf(tables[i]!)).toBeGreaterThan(order.lastIndexOf(tables[i - 1]!));
     }
