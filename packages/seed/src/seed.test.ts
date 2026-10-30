@@ -1,7 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { insertPeople } from "./people.ts";
+import { insertOrders } from "./orders.ts";
 import { insertCatalog } from "./products.ts";
 import { seed } from "./seed.ts";
+
+vi.mock("./orders.ts", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("./orders.ts")>()),
+  insertOrders: vi.fn(async () => undefined),
+}));
 
 vi.mock("./products.ts", async (importOriginal) => ({
   ...(await importOriginal<typeof import("./products.ts")>()),
@@ -48,10 +54,15 @@ describe("seed", () => {
       expect.objectContaining({ products: expect.any(Array) }),
     );
     expect(vi.mocked(insertCatalog).mock.calls[0]![1].products).toHaveLength(10);
+    expect(insertOrders).toHaveBeenCalledWith(
+      db.tx.orm,
+      expect.objectContaining({ orders: expect.any(Array) }),
+    );
+    expect(vi.mocked(insertOrders).mock.calls[0]![1].orders).toHaveLength(5);
     expect(db.close).toHaveBeenCalled();
     expect(console.log).toHaveBeenCalledWith(
       expect.stringMatching(
-        /^Seeded "minimal": 3 customers, 2 sellers, 4 addresses, 10 products, \d+ variants$/,
+        /^Seeded "minimal": 3 customers, 2 sellers, 4 addresses, 10 products, \d+ variants, 5 orders, \d+ reviews$/,
       ),
     );
   });
