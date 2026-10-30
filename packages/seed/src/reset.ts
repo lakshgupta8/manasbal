@@ -35,7 +35,9 @@ export function migrateDatabase(run: typeof execFileSync = execFileSync): void {
 // Every table in the API's contract, so a table added later is never left out of the reset.
 // Prisma keeps its own migration records outside the contract, so they are never touched.
 export function contractTables(): string[] {
-  return Object.keys(contractJson.storage.namespaces.public.entries.table).sort();
+  return Object.keys(contractJson.storage.namespaces.public.entries.table).sort((a, b) =>
+    a.localeCompare(b),
+  );
 }
 
 export function truncateSql(tables = contractTables()): string {

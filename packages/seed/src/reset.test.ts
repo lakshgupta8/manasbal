@@ -127,7 +127,9 @@ describe("reset", () => {
 describe("the table list", () => {
   it("is every table in the API's contract", () => {
     expect(contractTables()).toEqual(
-      Object.keys(contractJson.storage.namespaces.public.entries.table).sort(),
+      Object.keys(contractJson.storage.namespaces.public.entries.table).sort((a, b) =>
+        a.localeCompare(b),
+      ),
     );
     expect(contractTables()).toContain("_demo_marker");
   });

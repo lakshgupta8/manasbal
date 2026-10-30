@@ -45,9 +45,9 @@ const instantAt = (ms: number) => Temporal.Instant.fromEpochMilliseconds(ms);
 // here: once the orders are made, it is cut down to the number of orders that used the code.
 export function generateCoupons(faker: Faker): CouponRow[] {
   const kinds = [
-    ...Array<"active">(ACTIVE).fill("active"),
-    ...Array<"expired">(EXPIRED).fill("expired"),
-    ...Array<"used-up">(USED_UP).fill("used-up"),
+    ...Array.from({ length: ACTIVE }, () => "active"),
+    ...Array.from({ length: EXPIRED }, () => "expired"),
+    ...Array.from({ length: USED_UP }, () => "used-up"),
   ];
   const words = faker.helpers.shuffle(WORDS);
   return kinds.map((kind, i) => {
