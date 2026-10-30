@@ -1,5 +1,6 @@
 import { parseArgs } from "node:util";
 import type { createDb } from "./db.ts";
+import { generateOrders, insertOrders } from "./orders.ts";
 import { generatePeople, insertPeople } from "./people.ts";
 import { getProfile } from "./profiles.ts";
 import { generateCatalog, insertCatalog } from "./products.ts";
@@ -17,13 +18,15 @@ export async function seed(args: string[], db: ReturnType<typeof createDb>): Pro
     const faker = createRandom();
     const people = generatePeople(faker, profile);
     const catalog = generateCatalog(faker, profile, people.sellers);
+    const orders = generateOrders(faker, profile, people, catalog);
 
     await db.transaction(async (tx) => {
       await insertPeople(tx.orm, people);
       await insertCatalog(tx.orm, catalog);
+      await insertOrders(tx.orm, orders);
     });
     console.log(
-      `Seeded "${values.profile}": ${people.customers.length} customers, ${people.sellers.length} sellers, ${people.addresses.length} addresses, ${catalog.products.length} products, ${catalog.variants.length} variants`,
+      `Seeded "${values.profile}": ${people.customers.length} customers, ${people.sellers.length} sellers, ${people.addresses.length} addresses, ${catalog.products.length} products, ${catalog.variants.length} variants, ${orders.orders.length} orders, ${orders.reviews.length} reviews`,
     );
   } finally {
     await db.close();
