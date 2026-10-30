@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "seed": "node --env-file-if-exists=../../apps/api/.env src/cli.ts",
+    "seed:reset": "node --env-file-if-exists=../../apps/api/.env src/reset-cli.ts",
     "typecheck": "tsc",
     "test": "vitest run --coverage"
   },

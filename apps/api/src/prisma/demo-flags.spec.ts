@@ -20,8 +20,8 @@ const DEMO_TABLES = [
   "reviews",
   "audit_logs",
 ];
-// Written only by the seed or an admin.
-const SEED_ONLY = ["categories", "coupons"];
+// Written only by the seed or an admin. The marker is the seed's own: it lets the reset run.
+const SEED_ONLY = ["categories", "coupons", "_demo_marker"];
 
 const tables: Record<string, { columns: Record<string, unknown> }> =
   contract.storage.namespaces.public.entries.table;

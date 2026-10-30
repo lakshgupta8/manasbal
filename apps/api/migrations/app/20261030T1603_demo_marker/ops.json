@@ -1,0 +1,125 @@
+[
+  {
+    "id": "table._demo_marker",
+    "label": "Create table \"_demo_marker\"",
+    "summary": "Creates table \"_demo_marker\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "_demo_marker"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"_demo_marker\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"_demo_marker\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"_demo_marker\"",
+        "sql": "CREATE TABLE \"public\".\"_demo_marker\" (\n  \"created_at\" timestamptz NOT NULL,\n  \"id\" uuid NOT NULL,\n  \"name\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"_demo_marker\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"_demo_marker\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.coupons.is_sample",
+    "label": "Add column \"is_sample\" to \"coupons\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "is_sample",
+        "table": "coupons"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"is_sample\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "coupons",
+          "is_sample"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"is_sample\"",
+        "sql": "ALTER TABLE \"public\".\"coupons\" ADD COLUMN \"is_sample\" bool DEFAULT false NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"is_sample\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "coupons",
+          "is_sample"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.coupons.max_uses",
+    "label": "Add column \"max_uses\" to \"coupons\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "max_uses",
+        "table": "coupons"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"max_uses\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "coupons",
+          "max_uses"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"max_uses\"",
+        "sql": "ALTER TABLE \"public\".\"coupons\" ADD COLUMN \"max_uses\" int4"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"max_uses\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "coupons",
+          "max_uses"
+        ]
+      }
+    ]
+  }
+]

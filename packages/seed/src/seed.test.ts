@@ -1,22 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { insertPeople } from "./people.ts";
-import { insertOrders } from "./orders.ts";
-import { insertCatalog } from "./products.ts";
+import { insertDataset } from "./dataset.ts";
 import { seed } from "./seed.ts";
 
-vi.mock("./orders.ts", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("./orders.ts")>()),
-  insertOrders: vi.fn(async () => undefined),
-}));
-
-vi.mock("./products.ts", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("./products.ts")>()),
-  insertCatalog: vi.fn(async () => undefined),
-}));
-
-vi.mock("./people.ts", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("./people.ts")>()),
-  insertPeople: vi.fn(async () => undefined),
+vi.mock("./dataset.ts", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("./dataset.ts")>()),
+  insertDataset: vi.fn(async () => undefined),
 }));
 
 function fakeDb() {
@@ -44,25 +32,18 @@ describe("seed", () => {
 
     await seed([], db as unknown as Db);
 
-    expect(insertPeople).toHaveBeenCalledWith(
+    expect(insertDataset).toHaveBeenCalledWith(
       db.tx.orm,
-      expect.objectContaining({ customers: expect.any(Array) }),
+      expect.objectContaining({ marker: expect.objectContaining({ name: "manasbal-demo" }) }),
     );
-    expect(vi.mocked(insertPeople).mock.calls[0]![1].customers).toHaveLength(3);
-    expect(insertCatalog).toHaveBeenCalledWith(
-      db.tx.orm,
-      expect.objectContaining({ products: expect.any(Array) }),
-    );
-    expect(vi.mocked(insertCatalog).mock.calls[0]![1].products).toHaveLength(10);
-    expect(insertOrders).toHaveBeenCalledWith(
-      db.tx.orm,
-      expect.objectContaining({ orders: expect.any(Array) }),
-    );
-    expect(vi.mocked(insertOrders).mock.calls[0]![1].orders).toHaveLength(5);
+    const data = vi.mocked(insertDataset).mock.calls[0]![1];
+    expect(data.people.customers).toHaveLength(3);
+    expect(data.catalog.products).toHaveLength(10);
+    expect(data.orders.orders).toHaveLength(5);
     expect(db.close).toHaveBeenCalled();
     expect(console.log).toHaveBeenCalledWith(
       expect.stringMatching(
-        /^Seeded "minimal": 3 customers, 2 sellers, 4 addresses, 10 products, \d+ variants, 5 orders, \d+ reviews$/,
+        /^Seeded "minimal": 3 customers, 2 sellers, 4 addresses, 10 products, \d+ variants, 15 coupons, 5 orders, \d+ reviews, \d+ settlements$/,
       ),
     );
   });
@@ -70,7 +51,7 @@ describe("seed", () => {
   it("seeds the profile it is given", async () => {
     await seed(["--profile", "demo"], fakeDb() as unknown as Db);
 
-    expect(vi.mocked(insertPeople).mock.calls[0]![1].customers).toHaveLength(300);
+    expect(vi.mocked(insertDataset).mock.calls[0]![1].people.customers).toHaveLength(300);
   });
 
   it("still closes the client when the profile doesn't exist", async () => {
