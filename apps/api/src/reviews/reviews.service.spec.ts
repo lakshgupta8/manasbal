@@ -6,6 +6,7 @@ interface ReviewRow {
   id: string;
   rating: number;
   body: string;
+  isSample: boolean;
   createdAt: { toString(): string };
   user: { name: string } | null;
 }
@@ -57,6 +58,7 @@ function row(id: string, createdAt: string, name: string | null = "Asha Rao"): R
     id,
     rating: 4,
     body: `Review ${id.slice(-1)}`,
+    isSample: true,
     createdAt: { toString: () => createdAt },
     user: name === null ? null : { name },
   };
@@ -89,9 +91,18 @@ describe("ReviewsService", () => {
     expect(reviews.cursor).not.toHaveBeenCalled();
     // One row more than the limit, to tell whether another page exists.
     expect(reviews.limit).toHaveBeenCalledWith(2);
-    expect(reviews.select).toHaveBeenCalledWith("id", "rating", "body", "createdAt");
+    expect(reviews.select).toHaveBeenCalledWith("id", "rating", "body", "isSample", "createdAt");
     expect(page).toEqual({
-      items: [{ id: SECOND, rating: 4, body: "Review 2", authorName: "Asha", createdAt: WHEN }],
+      items: [
+        {
+          id: SECOND,
+          rating: 4,
+          body: "Review 2",
+          authorName: "Asha",
+          isSample: true,
+          createdAt: WHEN,
+        },
+      ],
       nextCursor: encodeCursor(`${WHEN}|${SECOND}`),
     });
   });

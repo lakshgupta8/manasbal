@@ -101,6 +101,8 @@ describe("GET /products/:slug/reviews (e2e)", () => {
         productId: product.id,
         rating: n + 1,
         body: `Review ${n}`,
+        // Only the first review is one the demo seed wrote; the others take the default.
+        ...(n === 1 ? { isSample: true } : {}),
       });
       ids.push(review.id);
       await new Promise((resolve) => setTimeout(resolve, 20));
@@ -141,6 +143,12 @@ describe("GET /products/:slug/reviews (e2e)", () => {
     expect(new Set(seen.map((r) => r.id)).size).toBe(3);
     // The oldest review is the one that is alone at its timestamp, and it comes last.
     expect(seen.at(-1)?.body).toBe("Review 1");
+    // Only the seeded review says it is a sample.
+    expect(seen.map((r) => [r.body, r.isSample]).sort()).toEqual([
+      ["Review 1", true],
+      ["Review 2", false],
+      ["Review 3", false],
+    ]);
     const times = seen.map((r) => r.createdAt);
     expect(times).toEqual([...times].sort().reverse());
   });

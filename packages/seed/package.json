@@ -8,7 +8,8 @@
     "seed": "node --env-file-if-exists=../../apps/api/.env src/cli.ts",
     "seed:reset": "node --env-file-if-exists=../../apps/api/.env src/reset-cli.ts",
     "typecheck": "tsc",
-    "test": "vitest run --coverage"
+    "test": "vitest run --coverage",
+    "test:db": "vitest run --config ./vitest.config.db.ts"
   },
   "dependencies": {
     "@faker-js/faker": "^10.6.0",
@@ -17,9 +18,11 @@
   },
   "devDependencies": {
     "@manasbal/tsconfig": "workspace:*",
+    "@testcontainers/postgresql": "^12.2.1",
     "@types/node": "^24.19.2",
     "@vitest/coverage-v8": "^4.1.11",
     "temporal-spec": "^1.0.1",
+    "testcontainers": "^12.2.1",
     "typescript": "~6.0.3",
     "vitest": "^4.1.11"
   }

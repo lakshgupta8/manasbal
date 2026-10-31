@@ -17,6 +17,9 @@ runtime:
       operator: isArray
     - expression: res.body.items[0].authorName
       operator: isString
+    - expression: res.body.items[0].isSample
+      operator: eq
+      value: "true"
 
 settings:
   encodeUrl: true

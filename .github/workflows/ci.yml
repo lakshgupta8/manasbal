@@ -40,6 +40,9 @@ jobs:
       - name: API end-to-end tests
         run: pnpm test:e2e
 
+      - name: Seed the minimal profile into a throwaway Postgres (counts + determinism)
+        run: pnpm --filter @manasbal/seed test:db
+
       # packages/types is generated from the API; regenerate it and fail if the committed copy differs.
       - name: Generated API types are up to date
         run: |
