@@ -1,5 +1,16 @@
 # @manasbal/api
 
+## 0.5.0
+
+### Minor Changes
+
+- 217df11: Reviews say whether they are samples.
+
+### Patch Changes
+
+- Updated dependencies [217df11]
+  - @manasbal/types@0.3.0
+
 ## 0.4.0
 
 ### Minor Changes

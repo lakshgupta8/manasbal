@@ -40,6 +40,9 @@ jobs:
       - name: API end-to-end tests
         run: pnpm test:e2e
 
+      - name: Seed the minimal profile into a throwaway Postgres (counts + determinism)
+        run: pnpm --filter @manasbal/seed test:db
+
       # packages/types is generated from the API; regenerate it and fail if the committed copy differs.
       - name: Generated API types are up to date
         run: |
@@ -72,7 +75,7 @@ jobs:
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
           token: ${{ env.CODECOV_TOKEN }}
-          files: apps/api/coverage/lcov.info,packages/ui/coverage/lcov.info,packages/sdk/coverage/lcov.info,packages/types/coverage/lcov.info,apps/web/coverage/lcov.info
+          files: apps/api/coverage/lcov.info,packages/ui/coverage/lcov.info,packages/sdk/coverage/lcov.info,packages/types/coverage/lcov.info,packages/seed/coverage/lcov.info,apps/web/coverage/lcov.info
           fail_ci_if_error: true
 
   lighthouse:

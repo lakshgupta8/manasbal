@@ -1,0 +1,74 @@
+[
+  { "state": "Delhi", "cities": ["New Delhi", "Dwarka", "Rohini"], "pincodePrefixes": [110] },
+  {
+    "state": "Haryana",
+    "cities": ["Gurugram", "Faridabad", "Panipat"],
+    "pincodePrefixes": [121, 122, 132]
+  },
+  {
+    "state": "Jammu and Kashmir",
+    "cities": ["Srinagar", "Jammu", "Anantnag"],
+    "pincodePrefixes": [180, 190, 192]
+  },
+  {
+    "state": "Uttar Pradesh",
+    "cities": ["Lucknow", "Kanpur", "Varanasi"],
+    "pincodePrefixes": [208, 221, 226]
+  },
+  {
+    "state": "Rajasthan",
+    "cities": ["Jaipur", "Udaipur", "Jodhpur"],
+    "pincodePrefixes": [302, 313, 342]
+  },
+  {
+    "state": "Gujarat",
+    "cities": ["Ahmedabad", "Surat", "Vadodara"],
+    "pincodePrefixes": [380, 390, 395]
+  },
+  {
+    "state": "Maharashtra",
+    "cities": ["Mumbai", "Pune", "Nagpur"],
+    "pincodePrefixes": [400, 411, 440]
+  },
+  {
+    "state": "Madhya Pradesh",
+    "cities": ["Bhopal", "Indore", "Gwalior"],
+    "pincodePrefixes": [452, 462, 474]
+  },
+  {
+    "state": "Telangana",
+    "cities": ["Hyderabad", "Warangal", "Karimnagar"],
+    "pincodePrefixes": [500, 505, 506]
+  },
+  {
+    "state": "Karnataka",
+    "cities": ["Bengaluru", "Mysuru", "Mangaluru"],
+    "pincodePrefixes": [560, 570, 575]
+  },
+  {
+    "state": "Tamil Nadu",
+    "cities": ["Chennai", "Coimbatore", "Madurai"],
+    "pincodePrefixes": [600, 625, 641]
+  },
+  {
+    "state": "Kerala",
+    "cities": ["Kochi", "Thiruvananthapuram", "Kozhikode"],
+    "pincodePrefixes": [673, 682, 695]
+  },
+  {
+    "state": "West Bengal",
+    "cities": ["Kolkata", "Siliguri", "Durgapur"],
+    "pincodePrefixes": [700, 713, 734]
+  },
+  {
+    "state": "Odisha",
+    "cities": ["Bhubaneswar", "Cuttack", "Puri"],
+    "pincodePrefixes": [751, 752, 753]
+  },
+  {
+    "state": "Assam",
+    "cities": ["Guwahati", "Dibrugarh", "Silchar"],
+    "pincodePrefixes": [781, 786, 788]
+  },
+  { "state": "Bihar", "cities": ["Patna", "Gaya", "Bhagalpur"], "pincodePrefixes": [800, 812, 823] }
+]

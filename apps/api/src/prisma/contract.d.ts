@@ -18,9 +18,9 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'234f16198a81fd1d570b5dda184e7a201a7d2635b8c132d6a0d1611d77f01ba7'>;
+  StorageHashBase<'560de3260c04c1aa6afc23a1bf145367f6b9ece136eeaee420628ffb939df313'>;
 export type ExecutionHash =
-  ExecutionHashBase<'8aada8589fe3a293e5e15cac930fc563ff8308f09361c90e282fe1944d514aab'>;
+  ExecutionHashBase<'90205bb8784e8fa954190000a03b299a22c28550e1114f42e604b201b542ed2d'>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
 
@@ -281,8 +281,15 @@ export type FieldOutputTypes = {
       readonly amountOffPaise: CodecTypes['pg/int4@1']['output'] | null;
       readonly code: CodecTypes['pg/text@1']['output'];
       readonly id: CodecTypes['pg/uuid@1']['output'];
+      readonly isSample: CodecTypes['pg/bool@1']['output'];
+      readonly maxUses: CodecTypes['pg/int4@1']['output'] | null;
       readonly percentOff: CodecTypes['pg/int4@1']['output'] | null;
       readonly validUntil: CodecTypes['pg/timestamptz-temporal@1']['output'];
+    };
+    readonly DemoMarker: {
+      readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
+      readonly id: CodecTypes['pg/uuid@1']['output'];
+      readonly name: CodecTypes['pg/text@1']['output'];
     };
     readonly Inventory: {
       readonly createdByVisitor: CodecTypes['pg/bool@1']['output'];
@@ -456,8 +463,15 @@ export type FieldInputTypes = {
       readonly amountOffPaise: CodecTypes['pg/int4@1']['input'] | null;
       readonly code: CodecTypes['pg/text@1']['input'];
       readonly id: CodecTypes['pg/uuid@1']['input'];
+      readonly isSample: CodecTypes['pg/bool@1']['input'];
+      readonly maxUses: CodecTypes['pg/int4@1']['input'] | null;
       readonly percentOff: CodecTypes['pg/int4@1']['input'] | null;
       readonly validUntil: CodecTypes['pg/timestamptz-temporal@1']['input'];
+    };
+    readonly DemoMarker: {
+      readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
+      readonly id: CodecTypes['pg/uuid@1']['input'];
+      readonly name: CodecTypes['pg/text@1']['input'];
     };
     readonly Inventory: {
       readonly createdByVisitor: CodecTypes['pg/bool@1']['input'];
@@ -584,6 +598,11 @@ export type FieldInputTypes = {
 };
 export type StorageColumnTypes = {
   readonly public: {
+    readonly _demo_marker: {
+      readonly created_at: CodecTypes['pg/timestamptz-temporal@1']['output'];
+      readonly id: CodecTypes['pg/uuid@1']['output'];
+      readonly name: CodecTypes['pg/text@1']['output'];
+    };
     readonly addresses: {
       readonly city: CodecTypes['pg/text@1']['output'];
       readonly created_by_visitor: CodecTypes['pg/bool@1']['output'];
@@ -631,6 +650,8 @@ export type StorageColumnTypes = {
       readonly amount_off_paise: CodecTypes['pg/int4@1']['output'] | null;
       readonly code: CodecTypes['pg/text@1']['output'];
       readonly id: CodecTypes['pg/uuid@1']['output'];
+      readonly is_sample: CodecTypes['pg/bool@1']['output'];
+      readonly max_uses: CodecTypes['pg/int4@1']['output'] | null;
       readonly percent_off: CodecTypes['pg/int4@1']['output'] | null;
       readonly valid_until: CodecTypes['pg/timestamptz-temporal@1']['output'];
     };
@@ -759,6 +780,11 @@ export type StorageColumnTypes = {
 };
 export type StorageColumnInputTypes = {
   readonly public: {
+    readonly _demo_marker: {
+      readonly created_at: CodecTypes['pg/timestamptz-temporal@1']['input'];
+      readonly id: CodecTypes['pg/uuid@1']['input'];
+      readonly name: CodecTypes['pg/text@1']['input'];
+    };
     readonly addresses: {
       readonly city: CodecTypes['pg/text@1']['input'];
       readonly created_by_visitor: CodecTypes['pg/bool@1']['input'];
@@ -806,6 +832,8 @@ export type StorageColumnInputTypes = {
       readonly amount_off_paise: CodecTypes['pg/int4@1']['input'] | null;
       readonly code: CodecTypes['pg/text@1']['input'];
       readonly id: CodecTypes['pg/uuid@1']['input'];
+      readonly is_sample: CodecTypes['pg/bool@1']['input'];
+      readonly max_uses: CodecTypes['pg/int4@1']['input'] | null;
       readonly percent_off: CodecTypes['pg/int4@1']['input'] | null;
       readonly valid_until: CodecTypes['pg/timestamptz-temporal@1']['input'];
     };
@@ -996,10 +1024,18 @@ export namespace Models {
     amountOffPaise: CodecTypes['pg/int4@1']['output'] | null;
     code: CodecTypes['pg/text@1']['output'];
     id: CodecTypes['pg/uuid@1']['output'];
+    isSample: CodecTypes['pg/bool@1']['output'];
+    maxUses: CodecTypes['pg/int4@1']['output'] | null;
     percentOff: CodecTypes['pg/int4@1']['output'] | null;
     validUntil: CodecTypes['pg/timestamptz-temporal@1']['output'];
     orders: public_Order[];
     readonly [RelationKeys]?: 'orders';
+  };
+  export type public_DemoMarker = {
+    createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
+    id: CodecTypes['pg/uuid@1']['output'];
+    name: CodecTypes['pg/text@1']['output'];
+    readonly [RelationKeys]?: never;
   };
   export type public_Inventory = {
     createdByVisitor: CodecTypes['pg/bool@1']['output'];
@@ -1181,6 +1217,7 @@ export declare const models: {
     CartItem: Models.public_CartItem;
     Category: Models.public_Category;
     Coupon: Models.public_Coupon;
+    DemoMarker: Models.public_DemoMarker;
     Inventory: Models.public_Inventory;
     Order: Models.public_Order;
     OrderItem: Models.public_OrderItem;
@@ -1214,6 +1251,32 @@ type ContractBase = Omit<
         readonly kind: 'postgres-schema';
         readonly entries: {
           readonly table: {
+            readonly _demo_marker: {
+              columns: {
+                readonly created_at: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly id: {
+                  readonly dataType: 'pg/uuid';
+                  readonly codecId: 'pg/uuid@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly name: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [];
+              indexes: readonly [];
+              foreignKeys: readonly [];
+            };
             readonly addresses: {
               columns: {
                 readonly city: {
@@ -1618,6 +1681,22 @@ type ContractBase = Omit<
                   readonly dataType: 'pg/uuid';
                   readonly codecId: 'pg/uuid@1';
                   readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly is_sample: {
+                  readonly dataType: 'pg/bool';
+                  readonly codecId: 'pg/bool@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/bool@1', false>;
+                  };
+                  readonly many: false;
+                };
+                readonly max_uses: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: true;
                   readonly many: false;
                 };
                 readonly percent_off: {
@@ -2777,6 +2856,10 @@ type ContractBase = Omit<
   readonly target: 'postgres';
   readonly targetFamily: 'sql';
   readonly roots: {
+    readonly _demo_marker: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'DemoMarker';
+    };
     readonly addresses: { readonly namespace: 'public' & NamespaceId; readonly model: 'Address' };
     readonly audit_logs: { readonly namespace: 'public' & NamespaceId; readonly model: 'AuditLog' };
     readonly cart_items: { readonly namespace: 'public' & NamespaceId; readonly model: 'CartItem' };
@@ -3152,6 +3235,14 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/uuid@1' };
               };
+              readonly isSample: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
+              };
+              readonly maxUses: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
               readonly percentOff: {
                 readonly nullable: true;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
@@ -3184,8 +3275,39 @@ type ContractBase = Omit<
                 readonly amountOffPaise: { readonly column: 'amount_off_paise' };
                 readonly code: { readonly column: 'code' };
                 readonly id: { readonly column: 'id' };
+                readonly isSample: { readonly column: 'is_sample' };
+                readonly maxUses: { readonly column: 'max_uses' };
                 readonly percentOff: { readonly column: 'percent_off' };
                 readonly validUntil: { readonly column: 'valid_until' };
+              };
+            };
+          };
+          readonly DemoMarker: {
+            readonly fields: {
+              readonly createdAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                };
+              };
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/uuid@1' };
+              };
+              readonly name: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+            };
+            readonly relations: Record<string, never>;
+            readonly storage: {
+              readonly table: '_demo_marker';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly createdAt: { readonly column: 'created_at' };
+                readonly id: { readonly column: 'id' };
+                readonly name: { readonly column: 'name' };
               };
             };
           };
@@ -4296,6 +4418,14 @@ type ContractBase = Omit<
     readonly executionHash: ExecutionHash;
     readonly mutations: {
       readonly defaults: readonly [
+        {
+          readonly onCreate: { readonly id: 'uuidv4'; readonly kind: 'generator' };
+          readonly ref: {
+            readonly entry: '_demo_marker';
+            readonly field: 'id';
+            readonly namespace: 'public';
+          };
+        },
         {
           readonly onCreate: { readonly id: 'uuidv4'; readonly kind: 'generator' };
           readonly ref: {

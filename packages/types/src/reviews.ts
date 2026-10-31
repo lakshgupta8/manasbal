@@ -7,6 +7,8 @@ export const reviewSchema = z.object({
   rating: z.number().int().min(1).max(5),
   body: z.string(),
   authorName: z.string(),
+  // True for a made-up review written by the demo seed.
+  isSample: z.boolean(),
   createdAt: z.iso.datetime(),
 });
 

@@ -1,0 +1,680 @@
+{
+  "brands": [
+    "Lanewalk",
+    "Kadamora",
+    "Ridgepace",
+    "Soleveda",
+    "Pathmora",
+    "Tanrik Soles",
+    "Halcyon Step",
+    "Dunepace"
+  ],
+  "items": {
+    "footwear-men-sports-shoes": [
+      {
+        "name": "Cushioned Running Shoes",
+        "description": "Breathable mesh upper with a foam midsole and a rubber outsole for road grip. Fits true to size and suits daily jogs and gym warm-ups.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Very light on the foot and the mesh keeps my feet cool on morning runs. Size 9 fit exactly as expected."
+          },
+          {
+            "rating": 4,
+            "body": "Good grip on wet tiles and the cushioning feels soft. Laces are a bit short but easy to swap."
+          }
+        ]
+      },
+      {
+        "name": "Lightweight Training Shoes",
+        "description": "Flat, flexible sole with a knit upper and a padded collar for gym sessions. Suited to weight training and short workouts.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Stable under heavy squats because the sole is flat and firm. Arrived in a sturdy box with no marks."
+          },
+          {
+            "rating": 4,
+            "body": "Snug around the heel in a good way. The knit looks a little loose after a few weeks of use."
+          }
+        ]
+      },
+      {
+        "name": "Trail Running Shoes",
+        "description": "Deep-lug rubber outsole with a reinforced toe cap and a water-resistant upper. Built for dirt paths and uneven ground.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Held well on muddy slopes near my town park. Slightly stiff at first but it softened in a week."
+          },
+          {
+            "rating": 5,
+            "body": "The toe cap saved me from a few rocks. Delivery came a day early."
+          }
+        ]
+      },
+      {
+        "name": "Court Badminton Shoes",
+        "description": "Non-marking gum rubber sole with a cushioned heel and side support panels. Designed for indoor courts and quick lateral moves.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Grips the wooden court without squeaking too much. Side panels feel strong during sharp turns."
+          },
+          {
+            "rating": 3,
+            "body": "Quality is decent but the shoe runs half a size small. Exchange took a few days."
+          }
+        ]
+      },
+      {
+        "name": "Walking Shoes With Memory Foam",
+        "description": "Soft memory foam insole with a flexible rubber sole and a stretch mesh upper. Made for long daily walks and light errands.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "I walk about five kilometres each evening and these feel comfortable the whole way. Wide toe box is a plus."
+          },
+          {
+            "rating": 4,
+            "body": "Easy to slip on and pretty light. The grey colour shows dust quickly."
+          }
+        ]
+      },
+      {
+        "name": "Football Turf Shoes",
+        "description": "Synthetic leather upper with a studded rubber sole made for artificial turf. Offers a close fit with a padded ankle.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Studs bite well on our local turf ground. Needed a couple of matches to break in."
+          },
+          {
+            "rating": 5,
+            "body": "Neat finish and the ankle padding is comfortable. Packaging had a dust bag inside, which I liked."
+          }
+        ]
+      },
+      {
+        "name": "Sock-Style Sports Shoes",
+        "description": "Stretch knit upper that wraps the foot, paired with a thin cushioned sole. Works for light jogging and casual wear.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Feels like wearing a sock with a sole under it. Sizing is a touch tight so I would go one up."
+          },
+          {
+            "rating": 5,
+            "body": "Pulls on in seconds and looks clean with shorts. Colour matched the photos."
+          }
+        ]
+      },
+      {
+        "name": "High-Top Basketball Shoes",
+        "description": "Padded high-top ankle collar with a thick rubber outsole and a cushioned heel. Intended for outdoor and indoor basketball.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Ankle area feels supported on jumps and landings. The outsole is thick and shows no wear after a month."
+          },
+          {
+            "rating": 4,
+            "body": "A little heavy compared with my old pair but very stable. Box came slightly dented, shoes were fine."
+          }
+        ]
+      }
+    ],
+    "footwear-men-formal-shoes": [
+      {
+        "name": "Leather Oxford Shoes",
+        "description": "Full-grain leather upper with a closed lacing system and a stitched leather sole. A classic shape for office and events.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Polished up nicely and looks sharp with my suit. The leather was firm at first and softened after a week."
+          },
+          {
+            "rating": 4,
+            "body": "Good build for the price. The sole is a bit slippery on smooth floors so I added a rubber patch."
+          }
+        ]
+      },
+      {
+        "name": "Slip-On Loafers",
+        "description": "Soft leather upper with a flat stitched vamp and a light rubber sole. Easy to wear for daily office hours.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Comfortable from the very first day and no heel bite. I wear them to work five days a week."
+          },
+          {
+            "rating": 4,
+            "body": "Looks good with chinos. Slightly roomy at the toe, so a thin sock helps."
+          }
+        ]
+      },
+      {
+        "name": "Brown Derby Shoes",
+        "description": "Burnished brown leather with an open lacing design and a cushioned insole. Pairs well with both trousers and smart jeans.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "The brown shade is rich and looks more expensive than it was. Laces were waxed and held tight."
+          },
+          {
+            "rating": 5,
+            "body": "Open lacing makes it easy to fit my high instep. Delivered in neat packaging with shoe bags."
+          }
+        ]
+      },
+      {
+        "name": "Black Monk Strap Shoes",
+        "description": "Smooth black leather with a double buckle strap closure and a hard-wearing sole. Suited to formal functions and meetings.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Buckles feel solid and the shine is excellent. Wore them for a wedding and got several compliments."
+          },
+          {
+            "rating": 3,
+            "body": "Looks great but the straps were tight over my foot on day one. Loosened up after some wear."
+          }
+        ]
+      },
+      {
+        "name": "Suede Formal Shoes",
+        "description": "Brushed suede upper with a lightly padded footbed and a flexible sole. Works for smart casual office days.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Soft texture and a nice navy shade. I keep a suede brush handy to keep it tidy."
+          },
+          {
+            "rating": 5,
+            "body": "Very light for formal shoes and comfortable for long hours at my desk."
+          }
+        ]
+      },
+      {
+        "name": "Cap-Toe Lace-Up Shoes",
+        "description": "Polished leather with a stitched cap at the toe and a durable rubber heel. A traditional pick for interviews and business wear.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Wore them to an interview and felt confident. The cap-toe stitching is neat and even."
+          },
+          {
+            "rating": 4,
+            "body": "Fit is regular and the heel is stable. Arrived two days after the promised date but in good shape."
+          }
+        ]
+      },
+      {
+        "name": "Patent Leather Party Shoes",
+        "description": "Glossy patent finish with a slim profile and a leather-lined interior. Meant for evening events and formal occasions.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "High gloss that wipes clean with a damp cloth. A bit narrow, so check the width before ordering."
+          },
+          {
+            "rating": 5,
+            "body": "Looked great at a reception and stayed comfortable until midnight."
+          }
+        ]
+      },
+      {
+        "name": "Wingtip Brogue Shoes",
+        "description": "Perforated wingtip leather design with a Goodyear-style welt look and a sturdy sole. Suitable for work and weekend outings.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "The brogue detailing is crisp and the sole feels thick enough for rainy days."
+          },
+          {
+            "rating": 4,
+            "body": "Heavier than my loafers but well made. Shoe tree would be a nice add-on in the box."
+          }
+        ]
+      }
+    ],
+    "footwear-men-sandals": [
+      {
+        "name": "Velcro Strap Sandals",
+        "description": "Three adjustable hook-and-loop straps over a contoured footbed with a grippy rubber sole. Good for travel and everyday wear.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Straps adjust easily so the fit is just right. Wore them through a long trip and my feet stayed comfortable."
+          },
+          {
+            "rating": 4,
+            "body": "Sturdy and dries fast after rain. The velcro makes a slight noise when opening."
+          }
+        ]
+      },
+      {
+        "name": "Leather Kolhapuri-Style Sandals",
+        "description": "Hand-stitched look in tan leather with a flat sole and an open toe loop. Inspired by traditional Indian craft styles.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Looks authentic and goes well with kurtas. Stiff for the first two days and then it moulds to the foot."
+          },
+          {
+            "rating": 4,
+            "body": "Good value and a strong tan shade. Sole is thin, so I use them mostly indoors and at events."
+          }
+        ]
+      },
+      {
+        "name": "Sports Floater Sandals",
+        "description": "Cushioned EVA footbed with a quick-dry strap and a patterned outsole. Built for light trekking and wet surfaces.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Handled a rainy weekend trip without trouble. The toe strap needed a few wears to settle."
+          },
+          {
+            "rating": 5,
+            "body": "Very light and the footbed has a bit of bounce. Delivered in a clean polybag with a tag."
+          }
+        ]
+      },
+      {
+        "name": "Rubber Slide Sandals",
+        "description": "One-piece moulded upper with a textured footbed and a flat rubber base. A simple option for home and the bathroom.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Perfect for home use and washes clean with a quick rinse. Does not slip on wet floors."
+          },
+          {
+            "rating": 4,
+            "body": "Comfortable and cheap enough to keep a spare pair. Colour is slightly lighter than shown."
+          }
+        ]
+      },
+      {
+        "name": "Open-Toe Thong Sandals",
+        "description": "Soft padded thong strap with a firm footbed and a durable sole. Designed for casual wear and short walks.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "The strap is soft enough that there was no rubbing between my toes."
+          },
+          {
+            "rating": 3,
+            "body": "Fine for short walks but the footbed felt a little flat for me. Delivery was quick."
+          }
+        ]
+      },
+      {
+        "name": "Braided Leather Sandals",
+        "description": "Woven leather straps across the front with a buckle at the ankle and a cushioned insole. Gives a smart casual look.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Weave pattern looks neat and the buckle holds firmly. Good for summer evenings out."
+          },
+          {
+            "rating": 4,
+            "body": "True to size and soft inside. Straps are tight at first, then relax."
+          }
+        ]
+      },
+      {
+        "name": "Adjustable Buckle Sandals",
+        "description": "Dual buckle straps over a padded footbed with a rubber outsole and a heel cup. Offers an easy custom fit.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Two buckles let me set the fit for my wide feet. Sole has good traction on gravel."
+          },
+          {
+            "rating": 4,
+            "body": "Solid build and the heel cup keeps the foot centred. Box was a bit crushed on arrival."
+          }
+        ]
+      },
+      {
+        "name": "Cork Footbed Sandals",
+        "description": "Cork-textured footbed with a suede-lined strap and a light rubber sole. Suited to relaxed daily use.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Footbed shaped to my foot after about a week and now it feels custom."
+          },
+          {
+            "rating": 4,
+            "body": "Natural look and quite light. Straps could be a little wider, but overall happy."
+          }
+        ]
+      }
+    ],
+    "footwear-women-flats": [
+      {
+        "name": "Pointed Toe Ballet Flats",
+        "description": "Soft synthetic upper with a pointed toe and a cushioned insole on a thin flexible sole. A neat option for office and outings.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Pretty shape and they did not pinch at all. I wore them all day at work."
+          },
+          {
+            "rating": 4,
+            "body": "Runs true to size and the black is deep. Heel lining is thin but fine for me."
+          }
+        ]
+      },
+      {
+        "name": "Embroidered Jutti Flats",
+        "description": "Cloth upper with colourful thread embroidery and a soft lining on a flat leather-look sole. Matches ethnic outfits and festive wear.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Embroidery is bright and neat, and I wore them with a lehenga for a family function."
+          },
+          { "rating": 4, "body": "Light and easy to dance in. The back was snug on day one." }
+        ]
+      },
+      {
+        "name": "Bow Detail Flats",
+        "description": "Round-toe flats with a small fabric bow on the vamp and a padded footbed. Lightweight and easy for daily use.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Cute bow that stays in place. I went up half a size for a roomier fit."
+          },
+          {
+            "rating": 5,
+            "body": "Goes well with dresses and jeans alike. Delivered in a nice box with tissue."
+          }
+        ]
+      },
+      {
+        "name": "Slip-On Loafer Flats",
+        "description": "Smooth faux leather upper with a low heel and a flexible rubber sole. Practical for commuting and long days on your feet.",
+        "reviews": [
+          { "rating": 5, "body": "Good for my metro commute since the sole has decent grip." },
+          {
+            "rating": 4,
+            "body": "Easy to slip on and the cushioning is good. A little loose at the heel until I added a pad."
+          }
+        ]
+      },
+      {
+        "name": "T-Strap Flat Sandals",
+        "description": "Slim T-shaped strap in synthetic leather with an ankle buckle and a cushioned insole. Works for summer outings and casual wear.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Elegant and snug on the ankle. They stayed put even when I walked fast."
+          },
+          {
+            "rating": 3,
+            "body": "Nice look but the buckle strap was a little stiff. Customer support helped with sizing advice."
+          }
+        ]
+      },
+      {
+        "name": "Mesh Cutout Flats",
+        "description": "Breathable mesh panels over a soft lining with a rounded toe and a light sole. A cool choice for warm weather.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Airy and light, and my feet did not get sweaty in the afternoon heat."
+          },
+          { "rating": 5, "body": "Soft lining, so no blisters. Colour beige matches many outfits." }
+        ]
+      },
+      {
+        "name": "Metallic Flat Slippers",
+        "description": "Shimmering metallic finish with a padded insole and a non-slip sole. Suited to parties and festive evenings.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Catches the light nicely and the gold shade looked great at a wedding."
+          },
+          {
+            "rating": 4,
+            "body": "Comfortable for hours of standing. The shine may fade slightly with heavy use."
+          }
+        ]
+      },
+      {
+        "name": "Wide Fit Comfort Flats",
+        "description": "Extra roomy toe box with a stretch-panel upper and a soft foam insole. Made for wider feet and all-day use.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Finally a flat that fits my wide feet without squeezing. Stretch panels adjust well."
+          },
+          {
+            "rating": 4,
+            "body": "Great width and very soft inside. Would like more colour options."
+          }
+        ]
+      }
+    ],
+    "footwear-women-heels": [
+      {
+        "name": "Block Heel Pumps",
+        "description": "Closed-toe pumps with a wide block heel of about two inches and a padded footbed. Steady enough for long office hours.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Wide heel gives real stability and I can walk the whole day. Looks professional with formal wear."
+          },
+          {
+            "rating": 4,
+            "body": "Good padding at the ball of the foot. I ordered a size up because my toes felt tight."
+          }
+        ]
+      },
+      {
+        "name": "Stiletto Party Heels",
+        "description": "Slim three-inch heel with a pointed toe and a satin-finish upper. Intended for evening events and short wear.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Beautiful finish for a party night. Best for a few hours rather than a whole day."
+          },
+          {
+            "rating": 3,
+            "body": "Looks lovely but the toe is narrow for me. Heel itself felt firm and well attached."
+          }
+        ]
+      },
+      {
+        "name": "Ankle Strap Block Sandals",
+        "description": "Open-toe sandals with an adjustable ankle strap and a chunky heel of about three inches. Pairs well with dresses and ethnic wear.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Ankle strap holds my foot in well and the chunky heel feels safe on uneven roads."
+          },
+          {
+            "rating": 4,
+            "body": "Comfortable and the buckle is easy to fasten. Colour is a touch brighter than the photo."
+          }
+        ]
+      },
+      {
+        "name": "Kitten Heel Slingbacks",
+        "description": "Low kitten heel with a slingback strap and a pointed toe in faux leather. Gives a smart look without much height.",
+        "reviews": [
+          { "rating": 5, "body": "Low heel that is easy to walk in and still looks dressy." },
+          {
+            "rating": 4,
+            "body": "Strap has an elastic part so it stays snug. Packaging was careful and the pair had no scuffs."
+          }
+        ]
+      },
+      {
+        "name": "Platform Wedge Sandals",
+        "description": "Jute-wrapped wedge platform with a cushioned footbed and a crossed front strap. Provides height with an even base.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Wedge is much easier on my feet than a thin heel. Jute texture looks great with summer outfits."
+          },
+          {
+            "rating": 5,
+            "body": "Light for a wedge and the strap is soft. Used them for a day trip without trouble."
+          }
+        ]
+      },
+      {
+        "name": "Embellished Bridal Heels",
+        "description": "Stone and bead detailing across the front with a two-and-a-half inch heel and a padded insole. Designed for weddings and receptions.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "The sparkle photographs well and the heel was manageable for the ceremony."
+          },
+          {
+            "rating": 4,
+            "body": "Beautiful work and fits as expected. A few stones felt loose, so handle with care."
+          }
+        ]
+      },
+      {
+        "name": "Velvet Pointed Heels",
+        "description": "Soft velvet upper with a pointed toe and a medium heel on a cushioned footbed. A rich choice for winter occasions.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Deep maroon colour looks rich and the velvet feels soft to touch."
+          },
+          {
+            "rating": 4,
+            "body": "Good comfort for a medium heel. Keep them away from water, since velvet marks easily."
+          }
+        ]
+      },
+      {
+        "name": "Peep Toe Court Heels",
+        "description": "Peep-toe design with a closed back and a three-inch heel on a lightly padded insole. Suits both work and dinner plans.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Classic shape and the nude shade goes with everything in my wardrobe."
+          },
+          {
+            "rating": 5,
+            "body": "Footbed padding is better than I expected at this price. Arrived on time."
+          }
+        ]
+      }
+    ],
+    "footwear-women-sneakers": [
+      {
+        "name": "White Canvas Sneakers",
+        "description": "Plain white canvas upper with a vulcanised rubber sole and cotton laces. A simple everyday pair for college and weekends.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Clean white look and easy to match with anything. Washed well with mild soap."
+          },
+          {
+            "rating": 4,
+            "body": "Fits true to size and the sole is flexible. Insole is thin, so I added my own."
+          }
+        ]
+      },
+      {
+        "name": "Chunky Platform Sneakers",
+        "description": "Thick layered sole with a leather-look upper and padded tongue. Adds a couple of centimetres of height for casual outfits.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Lighter than they look and the sole gives a nice lift. Many friends asked where I got them."
+          },
+          {
+            "rating": 4,
+            "body": "Comfortable after the first day. The shoe is a bit wide, so I tied the laces snugly."
+          }
+        ]
+      },
+      {
+        "name": "Slip-On Knit Sneakers",
+        "description": "Stretch knit upper with an elastic collar and a cushioned rubber sole. Quick to wear without laces.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Easy to put on when I am rushing for the bus. Knit feels soft and breathable."
+          },
+          { "rating": 5, "body": "Very light and fits well. The grey shade hides dust nicely." }
+        ]
+      },
+      {
+        "name": "High-Top Canvas Sneakers",
+        "description": "Ankle-height canvas upper with metal eyelets and a thick rubber toe cap. Gives a retro casual look.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Retro style and good support around the ankle. Lacing is simple and holds."
+          },
+          {
+            "rating": 3,
+            "body": "Looks great but the canvas was stiff for the first week. Fit was right in the end."
+          }
+        ]
+      },
+      {
+        "name": "Pastel Daily Sneakers",
+        "description": "Soft pastel synthetic upper with a padded collar and a lightweight sole. Designed for casual days out.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "The mint colour is lovely and looks just like the listing. Very light to wear."
+          },
+          {
+            "rating": 4,
+            "body": "Good for walking around the mall. Sole is a little slick on polished floors."
+          }
+        ]
+      },
+      {
+        "name": "Glitter Accent Sneakers",
+        "description": "Low-top sneaker with a glitter panel on the side and a soft textile lining. Adds a bit of sparkle to everyday outfits.",
+        "reviews": [
+          {
+            "rating": 4,
+            "body": "Sparkle is subtle and does not flake. Lining is soft against the skin."
+          },
+          {
+            "rating": 5,
+            "body": "My daughter loves them and wore them to a trip right away. Packed with care."
+          }
+        ]
+      },
+      {
+        "name": "Velcro Walking Sneakers",
+        "description": "Hook-and-loop strap closure with a breathable mesh upper and a shock-absorbing sole. Made for easy wear and daily walks.",
+        "reviews": [
+          {
+            "rating": 5,
+            "body": "Strap closure is a big help for me and the fit stays firm on long walks."
+          },
+          {
+            "rating": 4,
+            "body": "Breathable and soft. Colour is slightly duller in person, but still nice."
+          }
+        ]
+      },
+      {
+        "name": "Retro Suede Sneakers",
+        "description": "Suede-look panels with contrast stripes and a gum rubber sole. A vintage-inspired shape for casual styling.",
+        "reviews": [
+          { "rating": 5, "body": "Vintage look is spot on and the gum sole gives good grip." },
+          {
+            "rating": 4,
+            "body": "Comfortable and well stitched. Runs half a size big, so check the size chart."
+          }
+        ]
+      }
+    ]
+  }
+}

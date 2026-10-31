@@ -1,0 +1,332 @@
+[
+  {
+    "name": "Clothing",
+    "slug": "clothing",
+    "children": [
+      {
+        "name": "Men",
+        "slug": "clothing-men",
+        "children": [
+          {
+            "name": "Shirts",
+            "slug": "clothing-men-shirts",
+            "children": []
+          },
+          {
+            "name": "T-shirts",
+            "slug": "clothing-men-t-shirts",
+            "children": []
+          },
+          {
+            "name": "Trousers",
+            "slug": "clothing-men-trousers",
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "Women",
+        "slug": "clothing-women",
+        "children": [
+          {
+            "name": "Kurtas",
+            "slug": "clothing-women-kurtas",
+            "children": []
+          },
+          {
+            "name": "Sarees",
+            "slug": "clothing-women-sarees",
+            "children": []
+          },
+          {
+            "name": "Tops",
+            "slug": "clothing-women-tops",
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "Kids",
+        "slug": "clothing-kids",
+        "children": [
+          {
+            "name": "Boys' clothing",
+            "slug": "clothing-kids-boys-clothing",
+            "children": []
+          },
+          {
+            "name": "Girls' clothing",
+            "slug": "clothing-kids-girls-clothing",
+            "children": []
+          },
+          {
+            "name": "Baby clothing",
+            "slug": "clothing-kids-baby-clothing",
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Footwear",
+    "slug": "footwear",
+    "children": [
+      {
+        "name": "Men",
+        "slug": "footwear-men",
+        "children": [
+          {
+            "name": "Sports shoes",
+            "slug": "footwear-men-sports-shoes",
+            "children": []
+          },
+          {
+            "name": "Formal shoes",
+            "slug": "footwear-men-formal-shoes",
+            "children": []
+          },
+          {
+            "name": "Sandals",
+            "slug": "footwear-men-sandals",
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "Women",
+        "slug": "footwear-women",
+        "children": [
+          {
+            "name": "Flats",
+            "slug": "footwear-women-flats",
+            "children": []
+          },
+          {
+            "name": "Heels",
+            "slug": "footwear-women-heels",
+            "children": []
+          },
+          {
+            "name": "Sneakers",
+            "slug": "footwear-women-sneakers",
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Home & Kitchen",
+    "slug": "home-kitchen",
+    "children": [
+      {
+        "name": "Kitchenware",
+        "slug": "home-kitchen-kitchenware",
+        "children": [
+          {
+            "name": "Cookware",
+            "slug": "home-kitchen-kitchenware-cookware",
+            "children": []
+          },
+          {
+            "name": "Dinnerware",
+            "slug": "home-kitchen-kitchenware-dinnerware",
+            "children": []
+          },
+          {
+            "name": "Storage containers",
+            "slug": "home-kitchen-kitchenware-storage-containers",
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "Home decor",
+        "slug": "home-kitchen-home-decor",
+        "children": [
+          {
+            "name": "Cushions",
+            "slug": "home-kitchen-home-decor-cushions",
+            "children": []
+          },
+          {
+            "name": "Wall art",
+            "slug": "home-kitchen-home-decor-wall-art",
+            "children": []
+          },
+          {
+            "name": "Lamps",
+            "slug": "home-kitchen-home-decor-lamps",
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "Bedding",
+        "slug": "home-kitchen-bedding",
+        "children": [
+          {
+            "name": "Bedsheets",
+            "slug": "home-kitchen-bedding-bedsheets",
+            "children": []
+          },
+          {
+            "name": "Blankets",
+            "slug": "home-kitchen-bedding-blankets",
+            "children": []
+          },
+          {
+            "name": "Pillows",
+            "slug": "home-kitchen-bedding-pillows",
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Electronics accessories",
+    "slug": "electronics-accessories",
+    "children": [
+      {
+        "name": "Mobile accessories",
+        "slug": "electronics-accessories-mobile-accessories",
+        "children": [
+          {
+            "name": "Phone cases",
+            "slug": "electronics-accessories-mobile-accessories-phone-cases",
+            "children": []
+          },
+          {
+            "name": "Chargers",
+            "slug": "electronics-accessories-mobile-accessories-chargers",
+            "children": []
+          },
+          {
+            "name": "Cables",
+            "slug": "electronics-accessories-mobile-accessories-cables",
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "Audio",
+        "slug": "electronics-accessories-audio",
+        "children": [
+          {
+            "name": "Headphones",
+            "slug": "electronics-accessories-audio-headphones",
+            "children": []
+          },
+          {
+            "name": "Speakers",
+            "slug": "electronics-accessories-audio-speakers",
+            "children": []
+          },
+          {
+            "name": "Earbuds",
+            "slug": "electronics-accessories-audio-earbuds",
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Books & Stationery",
+    "slug": "books-stationery",
+    "children": [
+      {
+        "name": "Books",
+        "slug": "books-stationery-books",
+        "children": [
+          {
+            "name": "Fiction",
+            "slug": "books-stationery-books-fiction",
+            "children": []
+          },
+          {
+            "name": "Non-fiction",
+            "slug": "books-stationery-books-non-fiction",
+            "children": []
+          },
+          {
+            "name": "Children's books",
+            "slug": "books-stationery-books-childrens-books",
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "Stationery",
+        "slug": "books-stationery-stationery",
+        "children": [
+          {
+            "name": "Notebooks",
+            "slug": "books-stationery-stationery-notebooks",
+            "children": []
+          },
+          {
+            "name": "Pens",
+            "slug": "books-stationery-stationery-pens",
+            "children": []
+          },
+          {
+            "name": "Art supplies",
+            "slug": "books-stationery-stationery-art-supplies",
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Sports & Fitness",
+    "slug": "sports-fitness",
+    "children": [
+      {
+        "name": "Fitness",
+        "slug": "sports-fitness-fitness",
+        "children": [
+          {
+            "name": "Yoga mats",
+            "slug": "sports-fitness-fitness-yoga-mats",
+            "children": []
+          },
+          {
+            "name": "Dumbbells",
+            "slug": "sports-fitness-fitness-dumbbells",
+            "children": []
+          },
+          {
+            "name": "Resistance bands",
+            "slug": "sports-fitness-fitness-resistance-bands",
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "Outdoor play",
+        "slug": "sports-fitness-outdoor-play",
+        "children": [
+          {
+            "name": "Cricket",
+            "slug": "sports-fitness-outdoor-play-cricket",
+            "children": []
+          },
+          {
+            "name": "Badminton",
+            "slug": "sports-fitness-outdoor-play-badminton",
+            "children": []
+          },
+          {
+            "name": "Cycling",
+            "slug": "sports-fitness-outdoor-play-cycling",
+            "children": []
+          }
+        ]
+      }
+    ]
+  }
+]

@@ -123,6 +123,9 @@ model Coupon {
   percentOff     Int?     @map("percent_off")
   amountOffPaise Int?     @map("amount_off_paise")
   validUntil     DateTime @map("valid_until")
+  // How many orders may use the code; no limit when empty.
+  maxUses        Int?     @map("max_uses")
+  isSample       Boolean  @default(false) @map("is_sample")
   orders         Order[]
 
   @@map("coupons")
@@ -283,4 +286,14 @@ model CartItem {
 
   @@unique([cartId, variantId])
   @@map("cart_items")
+}
+
+// One row, written by the seed, marks a database as a demo one. The reset command refuses to run
+// on a database without it.
+model DemoMarker {
+  id        Uuid     @id @default(uuid())
+  name      String
+  createdAt DateTime @map("created_at")
+
+  @@map("_demo_marker")
 }

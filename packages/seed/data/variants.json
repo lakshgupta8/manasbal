@@ -1,0 +1,202 @@
+{
+  "colours": [
+    "Black",
+    "White",
+    "Navy",
+    "Maroon",
+    "Olive",
+    "Mustard",
+    "Teal",
+    "Grey",
+    "Beige",
+    "Rust"
+  ],
+  "leaves": {
+    "clothing-men-shirts": {
+      "sizes": ["S", "M", "L", "XL", "XXL"],
+      "colours": true,
+      "rupees": [599, 1799]
+    },
+    "clothing-men-t-shirts": {
+      "sizes": ["S", "M", "L", "XL", "XXL"],
+      "colours": true,
+      "rupees": [299, 999]
+    },
+    "clothing-men-trousers": {
+      "sizes": ["30", "32", "34", "36", "38"],
+      "colours": true,
+      "rupees": [699, 1999]
+    },
+    "clothing-women-kurtas": {
+      "sizes": ["S", "M", "L", "XL", "XXL"],
+      "colours": true,
+      "rupees": [499, 1799]
+    },
+    "clothing-women-sarees": { "sizes": null, "colours": true, "rupees": [799, 4999] },
+    "clothing-women-tops": {
+      "sizes": ["S", "M", "L", "XL"],
+      "colours": true,
+      "rupees": [349, 1299]
+    },
+    "clothing-kids-boys-clothing": {
+      "sizes": ["4-5Y", "6-7Y", "8-9Y", "10-11Y"],
+      "colours": true,
+      "rupees": [299, 1099]
+    },
+    "clothing-kids-girls-clothing": {
+      "sizes": ["4-5Y", "6-7Y", "8-9Y", "10-11Y"],
+      "colours": true,
+      "rupees": [299, 1199]
+    },
+    "clothing-kids-baby-clothing": {
+      "sizes": ["0-3M", "3-6M", "6-12M", "12-18M"],
+      "colours": true,
+      "rupees": [199, 799]
+    },
+    "footwear-men-sports-shoes": {
+      "sizes": ["6", "7", "8", "9", "10", "11"],
+      "colours": true,
+      "rupees": [899, 3499]
+    },
+    "footwear-men-formal-shoes": {
+      "sizes": ["6", "7", "8", "9", "10", "11"],
+      "colours": true,
+      "rupees": [999, 3999]
+    },
+    "footwear-men-sandals": {
+      "sizes": ["6", "7", "8", "9", "10", "11"],
+      "colours": true,
+      "rupees": [399, 1499]
+    },
+    "footwear-women-flats": {
+      "sizes": ["3", "4", "5", "6", "7", "8"],
+      "colours": true,
+      "rupees": [399, 1499]
+    },
+    "footwear-women-heels": {
+      "sizes": ["3", "4", "5", "6", "7", "8"],
+      "colours": true,
+      "rupees": [599, 2499]
+    },
+    "footwear-women-sneakers": {
+      "sizes": ["3", "4", "5", "6", "7", "8"],
+      "colours": true,
+      "rupees": [799, 2999]
+    },
+    "home-kitchen-kitchenware-cookware": {
+      "sizes": ["1.5 L", "3 L", "5 L"],
+      "colours": false,
+      "rupees": [499, 3499]
+    },
+    "home-kitchen-kitchenware-dinnerware": {
+      "sizes": null,
+      "colours": true,
+      "rupees": [599, 3999]
+    },
+    "home-kitchen-kitchenware-storage-containers": {
+      "sizes": ["500 ml", "1 L", "2 L"],
+      "colours": true,
+      "rupees": [199, 1499]
+    },
+    "home-kitchen-home-decor-cushions": {
+      "sizes": ["40 x 40 cm", "50 x 50 cm"],
+      "colours": true,
+      "rupees": [249, 999]
+    },
+    "home-kitchen-home-decor-wall-art": {
+      "sizes": ["30 x 40 cm", "45 x 60 cm"],
+      "colours": false,
+      "rupees": [349, 2499]
+    },
+    "home-kitchen-home-decor-lamps": { "sizes": null, "colours": true, "rupees": [449, 2999] },
+    "home-kitchen-bedding-bedsheets": {
+      "sizes": ["Single", "Double", "King"],
+      "colours": true,
+      "rupees": [499, 2499]
+    },
+    "home-kitchen-bedding-blankets": {
+      "sizes": ["Single", "Double"],
+      "colours": true,
+      "rupees": [599, 2999]
+    },
+    "home-kitchen-bedding-pillows": {
+      "sizes": ["Standard", "King"],
+      "colours": false,
+      "rupees": [299, 1499]
+    },
+    "electronics-accessories-mobile-accessories-phone-cases": {
+      "sizes": null,
+      "colours": true,
+      "rupees": [149, 799]
+    },
+    "electronics-accessories-mobile-accessories-chargers": {
+      "sizes": ["20 W", "33 W", "65 W"],
+      "colours": false,
+      "rupees": [399, 2499]
+    },
+    "electronics-accessories-mobile-accessories-cables": {
+      "sizes": ["1 m", "2 m"],
+      "colours": true,
+      "rupees": [149, 799]
+    },
+    "electronics-accessories-audio-headphones": {
+      "sizes": null,
+      "colours": true,
+      "rupees": [799, 4999]
+    },
+    "electronics-accessories-audio-speakers": {
+      "sizes": null,
+      "colours": true,
+      "rupees": [899, 5999]
+    },
+    "electronics-accessories-audio-earbuds": {
+      "sizes": null,
+      "colours": true,
+      "rupees": [599, 3999]
+    },
+    "books-stationery-books-fiction": { "sizes": null, "colours": false, "rupees": [199, 599] },
+    "books-stationery-books-non-fiction": { "sizes": null, "colours": false, "rupees": [249, 799] },
+    "books-stationery-books-childrens-books": {
+      "sizes": null,
+      "colours": false,
+      "rupees": [149, 499]
+    },
+    "books-stationery-stationery-notebooks": {
+      "sizes": ["A5", "A4"],
+      "colours": true,
+      "rupees": [79, 399]
+    },
+    "books-stationery-stationery-pens": { "sizes": null, "colours": true, "rupees": [29, 299] },
+    "books-stationery-stationery-art-supplies": {
+      "sizes": null,
+      "colours": false,
+      "rupees": [99, 999]
+    },
+    "sports-fitness-fitness-yoga-mats": {
+      "sizes": ["4 mm", "6 mm", "8 mm"],
+      "colours": true,
+      "rupees": [399, 1999]
+    },
+    "sports-fitness-fitness-dumbbells": { "sizes": null, "colours": false, "rupees": [349, 2999] },
+    "sports-fitness-fitness-resistance-bands": {
+      "sizes": ["Light", "Medium", "Heavy"],
+      "colours": true,
+      "rupees": [199, 999]
+    },
+    "sports-fitness-outdoor-play-cricket": {
+      "sizes": null,
+      "colours": false,
+      "rupees": [299, 3999]
+    },
+    "sports-fitness-outdoor-play-badminton": {
+      "sizes": null,
+      "colours": true,
+      "rupees": [199, 2499]
+    },
+    "sports-fitness-outdoor-play-cycling": {
+      "sizes": ["S", "M", "L"],
+      "colours": true,
+      "rupees": [299, 2999]
+    }
+  }
+}
