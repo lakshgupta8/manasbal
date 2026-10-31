@@ -24,9 +24,16 @@ const IS_WINDOWS = process.platform === "win32";
 
 // Brings the database up to the contract the seed is built against, with the API's own Prisma
 // CLI. DATABASE_URL comes from the environment rather than the command line, so a connection
-// string with "&" in it survives the Windows shell.
-export function migrateDatabase(run: typeof execFileSync = execFileSync): void {
-  run("pnpm", ["--filter", "@manasbal/api", "exec", "prisma", "db", "migrate"], {
+// string with "&" in it survives the Windows shell. SEED_MIGRATE_TO names the ref to stop at:
+// the nightly run sets it to prod, so the live database never gets a migration no released API
+// uses. Without it, every committed migration is applied (fine for a local database).
+export function migrateDatabase(
+  run: typeof execFileSync = execFileSync,
+  env: NodeJS.ProcessEnv = process.env,
+): void {
+  const target = env["SEED_MIGRATE_TO"];
+  const to = target ? ["--to", target] : [];
+  run("pnpm", ["--filter", "@manasbal/api", "exec", "prisma", "db", "migrate", ...to], {
     stdio: "inherit",
     shell: IS_WINDOWS,
   });
