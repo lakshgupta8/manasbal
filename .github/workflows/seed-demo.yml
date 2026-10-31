@@ -1,0 +1,61 @@
+name: Reset demo data
+
+# Wipes the live demo database every night and seeds the demo profile again, so visitors' rows
+# last at most a day. The reset refuses unless SEED_ALLOW_RESET=true and the database has a
+# _demo_marker row (see packages/seed/README.md for the one-time setup).
+#
+# Scheduled runs use this file from the default branch (dev) but check out main, the released
+# code, and migrate only up to the prod ref, so the live database never gets a schema no
+# released API uses. A manual run can pick another branch, for example dev before the first
+# release that contains the seed.
+
+on:
+  schedule:
+    # 21:00 UTC = 02:30 IST, when the demo is quietest.
+    - cron: "0 21 * * *"
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Branch to seed from (the released code is main)
+        type: string
+        default: main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: seed-demo
+  cancel-in-progress: false
+
+jobs:
+  reset:
+    name: Reset and re-seed the demo database
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: demo
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.ref || 'main' }}
+
+      - uses: ./.github/actions/setup
+
+      # DATABASE_URL is Neon's direct (unpooled) string: TRUNCATE and migrations must not go
+      # through the pooler, as in deploy.yml.
+      - name: Reset to the demo profile
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SEED_ALLOW_RESET: "true"
+          SEED_MIGRATE_TO: prod
+        run: pnpm seed:reset --profile demo
+
+      - name: Smoke check (the live API lists at least one product; free instances cold-start slowly)
+        env:
+          API_URL: ${{ vars.API_URL }}
+        run: |
+          for _ in $(seq 1 30); do
+            count=$(curl -fsS --max-time 10 "$API_URL/products?limit=1" | jq '.items | length' || true)
+            if [ "${count:-0}" -ge 1 ]; then echo "The API lists products again"; exit 0; fi
+            sleep 10
+          done
+          echo "::error::$API_URL/products listed no products after the reset"; exit 1
