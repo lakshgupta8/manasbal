@@ -17,4 +17,7 @@ if [ -z "$BASE" ]; then
   BASE=FETCH_HEAD
 fi
 
-git diff --quiet "$BASE" HEAD -- "${PATHS[@]}"
+# Vercel's clone is shallow, so an older last-built commit may be missing from it: build.
+git cat-file -e "$BASE^{commit}" 2>/dev/null || exit 1
+
+git diff --quiet "$BASE" HEAD -- "${PATHS[@]}" || exit 1
