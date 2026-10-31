@@ -7,4 +7,7 @@ PATHS=(. ../../packages/tsconfig ../../packages/ui ../../package.json ../../pnpm
 # Compare with the last built commit; a first build has none, so build.
 [ -n "${CACHED_COMMIT_REF:-}" ] || exit 1
 
-git diff --quiet "$CACHED_COMMIT_REF" "${COMMIT_REF:-HEAD}" -- "${PATHS[@]}"
+# A last-built commit missing from the clone can't be compared: build.
+git cat-file -e "$CACHED_COMMIT_REF^{commit}" 2>/dev/null || exit 1
+
+git diff --quiet "$CACHED_COMMIT_REF" "${COMMIT_REF:-HEAD}" -- "${PATHS[@]}" || exit 1
