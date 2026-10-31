@@ -25,6 +25,8 @@ Never set `SEED_ALLOW_RESET` in a shell that points at a database you care about
 
 A reset runs in this order: the guard above, the API's migrations (`prisma db migrate`), then the truncate and the new seed in one transaction. If seeding fails, the truncate rolls back and the database is left as it was.
 
+The migrations go as far as every committed one, or only up to the ref in `SEED_MIGRATE_TO` when it is set (for example `SEED_MIGRATE_TO=prod`).
+
 ## A brand-new database
 
 A new database has no `_demo_marker` row, so the reset refuses. Bring it up to date and seed it once, then reset works from then on:
@@ -35,6 +37,27 @@ pnpm --filter @manasbal/seed seed --profile demo
 ```
 
 `seed` only inserts: on a database that already has the seed's rows it fails on duplicate keys. Use `seed:reset` for that.
+
+## The nightly reset of the live demo
+
+`.github/workflows/seed-demo.yml` runs `pnpm seed:reset --profile demo` every night at 21:00 UTC (02:30 IST), and on demand from **Actions → Reset demo data**. Then it checks that the live API lists products again.
+
+- **Released code only:** the scheduled run checks out `main` and sets `SEED_MIGRATE_TO=prod`, so the live database never gets a migration that no released API uses. A manual run can choose another branch.
+- **Direct connection:** the `demo` environment's `DATABASE_URL` secret is Neon's direct string, with pooling off (the same string as `DIRECT_URL`). `TRUNCATE` and migrations must not go through the pooler.
+
+### One-time step: mark the live database
+
+The live database was never seeded by `seed`, so it has no `_demo_marker` row and the first reset refuses. That is the guard working; there is no option to skip it. Mark the database once, by hand:
+
+1. Neon → the project → **SQL Editor**. Check the branch is `main` and the database is `manasbal`, the demo database and nothing else.
+2. Check the release with the `_demo_marker` migration is live: `SELECT count(*) FROM "_demo_marker";` returns `0` (an error means the table doesn't exist yet: release first).
+3. Run:
+
+   ```sql
+   INSERT INTO "_demo_marker" (id, name, created_at) VALUES (gen_random_uuid(), 'manasbal-demo', now());
+   ```
+
+After the first reset, the seed writes the marker itself.
 
 ## Profiles
 

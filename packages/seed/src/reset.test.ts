@@ -153,15 +153,32 @@ describe("estimate", () => {
 });
 
 describe("migrateDatabase", () => {
-  it("runs the API's Prisma migrate, with the connection string left in the environment", () => {
+  const options = { stdio: "inherit", shell: process.platform === "win32" };
+  const migrate = ["--filter", "@manasbal/api", "exec", "prisma", "db", "migrate"];
+
+  it("applies every committed migration when no target is set", () => {
     const run = vi.fn();
+
+    migrateDatabase(run as never, {});
+
+    expect(run).toHaveBeenCalledWith("pnpm", migrate, options);
+  });
+
+  it("stops at the ref SEED_MIGRATE_TO names", () => {
+    const run = vi.fn();
+
+    migrateDatabase(run as never, { SEED_MIGRATE_TO: "prod" });
+
+    expect(run).toHaveBeenCalledWith("pnpm", [...migrate, "--to", "prod"], options);
+  });
+
+  it("reads the target from the process environment by default", () => {
+    const run = vi.fn();
+    vi.stubEnv("SEED_MIGRATE_TO", "prod");
 
     migrateDatabase(run as never);
 
-    expect(run).toHaveBeenCalledWith(
-      "pnpm",
-      ["--filter", "@manasbal/api", "exec", "prisma", "db", "migrate"],
-      { stdio: "inherit", shell: process.platform === "win32" },
-    );
+    expect(run.mock.calls[0]![1]).toEqual([...migrate, "--to", "prod"]);
+    vi.unstubAllEnvs();
   });
 });
