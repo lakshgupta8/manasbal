@@ -49,7 +49,7 @@ pnpm --filter @manasbal/seed seed --profile demo
 
 The live database was never seeded by `seed`, so it has no `_demo_marker` row and the first reset refuses. That is the guard working; there is no option to skip it. Mark the database once, by hand:
 
-1. Neon → the project → **SQL Editor**. Check the branch is `main` and the database is `manasbal`, the demo database and nothing else.
+1. Neon → the project → **SQL Editor**. Check the branch is `production` (the one the live API uses) and the database is `manasbal`, the demo database and nothing else.
 2. Check the release with the `_demo_marker` migration is live: `SELECT count(*) FROM "_demo_marker";` returns `0` (an error means the table doesn't exist yet: release first).
 3. Run:
 
