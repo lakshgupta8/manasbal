@@ -1,5 +1,11 @@
 # @manasbal/types
 
+## 0.3.0
+
+### Minor Changes
+
+- 217df11: Reviews say whether they are samples.
+
 ## 0.2.0
 
 ### Minor Changes
