@@ -1,9 +1,12 @@
 import { execFile } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from "@testcontainers/postgresql";
 import { getDb, resetDb } from "../../src/prisma/db.js";
 
 const run = promisify(execFile);
+// The API folder, found from this file, so other packages (the seed) can use the helper too.
+const apiDir = fileURLToPath(new URL("../..", import.meta.url));
 
 export interface TestDatabase {
   url: string;
@@ -25,7 +28,7 @@ export async function startTestDatabase(): Promise<TestDatabase> {
   const previousUrl = process.env["DATABASE_URL"];
   try {
     await run("pnpm", ["exec", "prisma", "db", "migrate", "--db", url], {
-      cwd: process.cwd(),
+      cwd: apiDir,
       shell: process.platform === "win32",
       env: { ...process.env, DATABASE_URL: url },
     });

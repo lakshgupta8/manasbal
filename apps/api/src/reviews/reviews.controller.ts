@@ -27,6 +27,9 @@ export class Review {
   @ApiProperty({ description: "The reviewer first name only" })
   authorName: string;
 
+  @ApiProperty({ description: "True for a made-up review written by the demo seed" })
+  isSample: boolean;
+
   @ApiProperty({ format: "date-time" })
   createdAt: string;
 }

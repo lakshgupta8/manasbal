@@ -389,6 +389,8 @@ export interface components {
       body: string;
       /** @description The reviewer first name only */
       authorName: string;
+      /** @description True for a made-up review written by the demo seed */
+      isSample: boolean;
       /** Format: date-time */
       createdAt: string;
     };

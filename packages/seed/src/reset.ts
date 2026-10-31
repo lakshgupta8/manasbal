@@ -45,6 +45,14 @@ export function truncateSql(tables = contractTables()): string {
   return `TRUNCATE TABLE ${list} RESTART IDENTITY CASCADE`;
 }
 
+// The truncate as a plan a transaction can execute. The table names come from the contract, not
+// from input, so the statement is passed as one literal part with nothing interpolated.
+export function truncatePlan(db: Db) {
+  const text = truncateSql();
+  const strings = Object.assign([text], { raw: [text] }) as unknown as TemplateStringsArray;
+  return db.raw.sql(strings).affectedCount().build();
+}
+
 // Rows per table and an estimated size in bytes.
 export function estimate(data: Dataset): { counts: Record<string, number>; bytes: number } {
   const counts: Record<string, number> = {};
@@ -86,9 +94,7 @@ export async function reset(args: string[], deps: ResetDeps): Promise<void> {
   try {
     await assertResetAllowed(deps.env, () => hasMarker(db.orm));
     deps.migrate();
-    const text = truncateSql();
-    const strings = Object.assign([text], { raw: [text] }) as unknown as TemplateStringsArray;
-    const truncate = db.raw.sql(strings).affectedCount().build();
+    const truncate = truncatePlan(db);
     await db.transaction(async (tx) => {
       await tx.execute(truncate);
       await insertDataset(tx.orm, data);

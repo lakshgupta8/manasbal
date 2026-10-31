@@ -24,7 +24,7 @@ export class ReviewsService {
         : ordered.cursor({ createdAt: Temporal.Instant.from(after.createdAt), id: after.id });
     const rows = await paged
       .limit(params.take)
-      .select("id", "rating", "body", "createdAt")
+      .select("id", "rating", "body", "isSample", "createdAt")
       .include("user", (u) => u.select("name"))
       .all();
 
@@ -34,6 +34,7 @@ export class ReviewsService {
       body: row.body,
       // First name only: the rest of the name, the email and the user id stay private.
       authorName: (row.user?.name ?? "").split(" ")[0]!,
+      isSample: row.isSample,
       createdAt: row.createdAt.toString(),
     }));
     return toPage(items, params, (r) => `${r.createdAt}|${r.id}`);

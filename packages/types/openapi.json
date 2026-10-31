@@ -1047,12 +1047,16 @@
             "type": "string",
             "description": "The reviewer first name only"
           },
+          "isSample": {
+            "type": "boolean",
+            "description": "True for a made-up review written by the demo seed"
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
           }
         },
-        "required": ["id", "rating", "body", "authorName", "createdAt"]
+        "required": ["id", "rating", "body", "authorName", "isSample", "createdAt"]
       },
       "ReviewPage": {
         "type": "object",
