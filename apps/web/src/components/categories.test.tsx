@@ -30,8 +30,9 @@ describe("Categories", () => {
 
     render(await Categories());
 
-    expect(screen.getByRole("alert").textContent).toBe(
-      "Problem: Categories are unavailable right now",
+    expect(screen.getByRole("status").textContent).toBe(
+      "Note: Categories are unavailable right now",
     );
+    expect(screen.queryByRole("alert")).toBeNull();
   });
 });
