@@ -30,6 +30,8 @@ describe("Categories", () => {
 
     render(await Categories());
 
-    expect(screen.getByText("Categories are unavailable right now")).toBeDefined();
+    expect(screen.getByRole("alert").textContent).toBe(
+      "Problem: Categories are unavailable right now",
+    );
   });
 });

@@ -1,3 +1,4 @@
+import { Notice } from "@manasbal/ui";
 import { connection } from "next/server";
 import { getCategories } from "@/lib/categories";
 
@@ -6,7 +7,8 @@ import { getCategories } from "@/lib/categories";
 export async function Categories() {
   await connection();
   const categories = await getCategories();
-  if (categories === null) return <p>Categories are unavailable right now</p>;
+  if (categories === null)
+    return <Notice tone="error">Categories are unavailable right now</Notice>;
   return (
     <ul>
       {categories.map((category) => (

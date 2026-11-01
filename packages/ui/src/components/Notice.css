@@ -1,0 +1,27 @@
+/* Text contrast (WCAG AA, minimum 4.5:1): info 8.5:1, warning 7.8:1, error 9.4:1. The lead word carries the tone too. */
+.mb-notice {
+  padding: 0.5rem 0.75rem;
+  border-left: 4px solid;
+  border-radius: 0.25rem;
+  font:
+    0.875rem/1.4 system-ui,
+    sans-serif;
+}
+
+.mb-notice--info {
+  border-color: #167e86;
+  background: #eef6f7;
+  color: #0b4f54;
+}
+
+.mb-notice--warning {
+  border-color: #b45309;
+  background: #fef6e7;
+  color: #7a3e06;
+}
+
+.mb-notice--error {
+  border-color: #b42318;
+  background: #fdecea;
+  color: #7a1710;
+}
