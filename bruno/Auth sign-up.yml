@@ -1,0 +1,33 @@
+info:
+  name: Auth sign-up
+  type: http
+  seq: 18
+
+http:
+  method: POST
+  url: "{{baseUrl}}/auth/sign-up"
+  body:
+    type: json
+    data: |-
+      {
+        "email": "signup-{{$timestamp}}@example.com",
+        "password": "made-up-password-123",
+        "name": "Test Visitor",
+        "confirmAdult": true
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "201"
+    - expression: res.body.id
+      operator: isString
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
