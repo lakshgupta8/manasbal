@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@manasbal/sdk": "workspace:*",
+    "@manasbal/ui": "workspace:*",
     "next": "16.4.1",
     "react": "19.3.0",
     "react-dom": "19.3.0"
