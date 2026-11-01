@@ -77,6 +77,52 @@
         "tags": ["Auth"]
       }
     },
+    "/auth/sign-in": {
+      "post": {
+        "description": "Answers an access token and sets the refresh_token cookie.",
+        "operationId": "AuthController_signIn",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  }
+                },
+                "required": ["email", "password"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignInResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Email or password is wrong"
+          }
+        },
+        "summary": "Sign in",
+        "tags": ["Auth"]
+      }
+    },
     "/me/addresses": {
       "get": {
         "description": "Every delivery address the demo user has saved, sorted by name.",
@@ -845,6 +891,20 @@
           }
         },
         "required": ["id", "email", "name"]
+      },
+      "SignInResult": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string"
+          },
+          "expiresIn": {
+            "type": "number",
+            "description": "Seconds until the access token expires",
+            "example": 900
+          }
+        },
+        "required": ["accessToken", "expiresIn"]
       },
       "Address": {
         "type": "object",

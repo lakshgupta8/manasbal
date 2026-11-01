@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { signUpInputSchema } from "./auth.js";
+import { signInInputSchema, signUpInputSchema } from "./auth.js";
 
 const valid = {
   email: "test.buyer@example.test",
@@ -56,5 +56,29 @@ describe("signUpInputSchema", () => {
   it("fails on an email that is not an email, or a blank name", () => {
     expect(signUpInputSchema.safeParse({ ...valid, email: "not-an-email" }).success).toBe(false);
     expect(signUpInputSchema.safeParse({ ...valid, name: "   " }).success).toBe(false);
+  });
+});
+
+describe("signInInputSchema", () => {
+  const credentials = { email: "test.buyer@example.test", password: "x" };
+
+  it("parses an email and any non-empty password, lower-casing the email", () => {
+    expect(signInInputSchema.parse(credentials)).toEqual(credentials);
+    expect(signInInputSchema.parse({ ...credentials, email: " A@Example.COM " }).email).toBe(
+      "a@example.com",
+    );
+  });
+
+  it("does not apply the sign-up password rules, but keeps the upper limit", () => {
+    expect(signInInputSchema.safeParse({ ...credentials, password: "short" }).success).toBe(true);
+    expect(signInInputSchema.safeParse({ ...credentials, password: "" }).success).toBe(false);
+    expect(signInInputSchema.safeParse({ ...credentials, password: "x".repeat(129) }).success).toBe(
+      false,
+    );
+  });
+
+  it("fails on a malformed email or an unknown field", () => {
+    expect(signInInputSchema.safeParse({ ...credentials, email: "nope" }).success).toBe(false);
+    expect(signInInputSchema.safeParse({ ...credentials, remember: true }).success).toBe(false);
   });
 });

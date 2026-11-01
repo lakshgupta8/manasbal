@@ -44,6 +44,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/auth/sign-in": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Sign in
+     * @description Answers an access token and sets the refresh_token cookie.
+     */
+    post: operations["AuthController_signIn"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/me/addresses": {
     parameters: {
       query?: never;
@@ -310,6 +330,14 @@ export interface components {
       email: string;
       name: string;
     };
+    SignInResult: {
+      accessToken: string;
+      /**
+       * @description Seconds until the access token expires
+       * @example 900
+       */
+      expiresIn: number;
+    };
     Address: {
       /** Format: uuid */
       id: string;
@@ -540,6 +568,39 @@ export interface operations {
       };
       /** @description Invalid details, or we could not create this account */
       400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AuthController_signIn: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          email: string;
+          password: string;
+        };
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SignInResult"];
+        };
+      };
+      /** @description Email or password is wrong */
+      401: {
         headers: {
           [name: string]: unknown;
         };

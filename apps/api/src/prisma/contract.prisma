@@ -20,6 +20,7 @@ model User {
   reviews          Review[]
   cart             Cart?
   auditLogs        AuditLog[]
+  refreshTokens    RefreshToken[]
 
   @@map("users")
 }
@@ -296,4 +297,22 @@ model DemoMarker {
   createdAt DateTime @map("created_at")
 
   @@map("_demo_marker")
+}
+
+model RefreshToken {
+  id               Uuid      @id @default(uuid())
+  userId           Uuid      @map("user_id")
+  familyId         Uuid      @map("family_id")
+  tokenHash        String    @unique @map("token_hash")
+  expiresAt        DateTime  @map("expires_at")
+  usedAt           DateTime? @map("used_at")
+  revokedAt        DateTime? @map("revoked_at")
+  userAgent        String?   @map("user_agent")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  isSample         Boolean   @default(false) @map("is_sample")
+  createdByVisitor Boolean   @default(false) @map("created_by_visitor")
+  user             User      @relation(fields: [userId], references: [id])
+
+  @@map("refresh_tokens")
+  @@index([familyId])
 }
