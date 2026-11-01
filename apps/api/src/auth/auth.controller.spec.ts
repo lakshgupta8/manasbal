@@ -4,7 +4,7 @@ import { REFRESH_COOKIE, refreshCookieOptions } from "./cookie.js";
 const USER_ID = "7b0c1e2a-3d4f-4a5b-8c6d-7e8f9a0b1c2d";
 
 describe("AuthController", () => {
-  const service = { signUp: vi.fn(), signIn: vi.fn() };
+  const service = { signUp: vi.fn(), signIn: vi.fn(), refresh: vi.fn(), signOut: vi.fn() };
   const controller = new AuthController(service);
 
   it("passes the sign-up input to the service and answers its result", async () => {
@@ -39,5 +39,36 @@ describe("AuthController", () => {
       "cookie-token",
       refreshCookieOptions(),
     );
+  });
+
+  it("swaps the cookie's refresh token for a new pair", async () => {
+    service.refresh.mockResolvedValue({
+      accessToken: "new.jwt",
+      expiresIn: 900,
+      refreshToken: "new-cookie-token",
+    });
+    const reply = { setCookie: vi.fn() };
+    const request = { cookies: { [REFRESH_COOKIE]: "old-cookie-token" } };
+
+    const answer = await controller.refresh(request, "Test Browser", reply);
+
+    expect(answer).toEqual({ accessToken: "new.jwt", expiresIn: 900 });
+    expect(service.refresh).toHaveBeenCalledWith("old-cookie-token", "Test Browser");
+    expect(reply.setCookie).toHaveBeenCalledWith(
+      REFRESH_COOKIE,
+      "new-cookie-token",
+      refreshCookieOptions(),
+    );
+  });
+
+  it("signs out the cookie's session and clears the cookie", async () => {
+    service.signOut.mockResolvedValue(undefined);
+    const reply = { clearCookie: vi.fn() };
+    const request = { cookies: { [REFRESH_COOKIE]: "old-cookie-token" } };
+
+    await controller.signOut(request, reply);
+
+    expect(service.signOut).toHaveBeenCalledWith("old-cookie-token");
+    expect(reply.clearCookie).toHaveBeenCalledWith(REFRESH_COOKIE, refreshCookieOptions());
   });
 });

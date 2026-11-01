@@ -64,6 +64,46 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/auth/refresh": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Renew the access token
+     * @description Swaps the refresh_token cookie for a new access token and a new cookie. Each cookie works once; using one twice signs out every copy.
+     */
+    post: operations["AuthController_refresh"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/auth/sign-out": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Sign out
+     * @description Revokes the session's refresh tokens and clears the cookie.
+     */
+    post: operations["AuthController_signOut"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/me/addresses": {
     parameters: {
       query?: never;
@@ -601,6 +641,49 @@ export interface operations {
       };
       /** @description Email or password is wrong */
       401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AuthController_refresh: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SignInResult"];
+        };
+      };
+      /** @description No usable refresh token: sign in again */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AuthController_signOut: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
         headers: {
           [name: string]: unknown;
         };

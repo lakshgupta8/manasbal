@@ -1,0 +1,33 @@
+info:
+  name: Auth refresh reuse
+  type: http
+  seq: 21
+
+http:
+  method: POST
+  url: "{{baseUrl}}/auth/refresh"
+  headers:
+    - name: Cookie
+      value: "refresh_token={{usedRefreshToken}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Send exactly the Cookie header below, not the newest cookie Bruno's jar kept.
+        await bru.cookies.jar().deleteCookies(req.getUrl());
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "401"
+    - expression: res.body.detail
+      operator: eq
+      value: '"Sign in again"'
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
