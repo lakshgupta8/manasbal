@@ -1,4 +1,5 @@
 import "temporal-polyfill/global";
+import fastifyCookie from "@fastify/cookie";
 import { NestFactory } from "@nestjs/core";
 import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fastify";
 import { Logger } from "nestjs-pino";
@@ -15,6 +16,8 @@ async function bootstrap() {
     },
   );
   app.useLogger(app.get(Logger));
+  // Reads and sets the refresh_token cookie on /auth routes.
+  await app.register(fastifyCookie);
   echoRequestId(app);
   setupDocs(app);
   // Listen on all interfaces so the API is reachable inside Docker and on Render. Locally it

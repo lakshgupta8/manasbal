@@ -1,5 +1,5 @@
-import { BadRequestException } from "@nestjs/common";
-import { AuthService, SIGN_UP_FAILED } from "./auth.service.js";
+import { BadRequestException, UnauthorizedException } from "@nestjs/common";
+import { AuthService, SIGN_IN_FAILED, SIGN_UP_FAILED } from "./auth.service.js";
 
 const USER_ID = "7b0c1e2a-3d4f-4a5b-8c6d-7e8f9a0b1c2d";
 const HASH = "$argon2id$v=19$m=19456,t=2,p=1$stub";
@@ -28,20 +28,34 @@ function fakeCollection() {
 }
 
 let User = fakeCollection();
+let RefreshToken = fakeCollection();
 
-// Sign-up against a real database is in test/auth.e2e-spec.ts. These cover the service's own
-// decisions.
+// Sign-up and sign-in against a real database are in test/auth.e2e-spec.ts. These cover the
+// service's own decisions.
 vi.mock("../prisma/db.js", () => ({
-  getDb: () => ({ orm: { public: { User } } }),
+  getDb: () => ({ orm: { public: { User, RefreshToken } } }),
 }));
 
 describe("AuthService", () => {
-  const passwords = { hash: vi.fn<(password: string) => Promise<string>>() };
-  const service = new AuthService(passwords);
+  const passwords = {
+    hash: vi.fn<(password: string) => Promise<string>>(),
+    verify: vi.fn<(hash: string, password: string) => Promise<boolean>>(),
+  };
+  const tokens = {
+    signAccess: vi.fn<(user: { id: string; role: string }) => Promise<string>>(),
+    newRefresh: vi.fn<() => { token: string; hash: string }>(),
+  };
+  let service = new AuthService(passwords, tokens);
 
   beforeEach(() => {
     User = fakeCollection();
+    RefreshToken = fakeCollection();
     passwords.hash.mockReset().mockResolvedValue(HASH);
+    passwords.verify.mockReset();
+    tokens.signAccess.mockReset().mockResolvedValue("access.jwt");
+    tokens.newRefresh.mockReset().mockReturnValue({ token: "cookie-token", hash: "stored-hash" });
+    // A fresh service each time, so the cached dummy hash never carries over between tests.
+    service = new AuthService(passwords, tokens);
   });
 
   it("creates a buyer with the hash, marked for the demo reset", async () => {
@@ -84,5 +98,83 @@ describe("AuthService", () => {
 
     await expect(service.signUp(input)).rejects.toBe(failure);
     expect(User.first).toHaveBeenCalledTimes(2);
+  });
+
+  describe("signIn", () => {
+    const credentials = { email: input.email, password: input.password };
+    const user = { id: USER_ID, role: "buyer", passwordHash: HASH };
+
+    it("answers an access token and stores only the refresh token's hash", async () => {
+      User.first.mockResolvedValue(user);
+      passwords.verify.mockResolvedValue(true);
+      RefreshToken.create.mockResolvedValue({});
+      const before = Temporal.Now.instant();
+
+      await expect(service.signIn(credentials, "Test Browser")).resolves.toEqual({
+        accessToken: "access.jwt",
+        expiresIn: 900,
+        refreshToken: "cookie-token",
+      });
+
+      expect(User.filters).toEqual([{ email: input.email }]);
+      expect(passwords.verify).toHaveBeenCalledWith(HASH, input.password);
+      expect(tokens.signAccess).toHaveBeenCalledWith(user);
+      const row = RefreshToken.create.mock.calls[0]?.[0] as Record<string, unknown>;
+      expect(row).toMatchObject({
+        userId: USER_ID,
+        tokenHash: "stored-hash",
+        userAgent: "Test Browser",
+        createdByVisitor: true,
+      });
+      expect(row["familyId"]).toMatch(/^[0-9a-f-]{36}$/);
+      expect(JSON.stringify(row)).not.toContain("cookie-token");
+      const hours = before.until(row["expiresAt"] as Temporal.Instant).total({ unit: "hours" });
+      expect(hours / 24).toBeCloseTo(14, 2);
+    });
+
+    it("refuses a wrong password with the generic answer, and stores nothing", async () => {
+      User.first.mockResolvedValue(user);
+      passwords.verify.mockResolvedValue(false);
+
+      await expect(service.signIn(credentials, undefined)).rejects.toThrow(
+        new UnauthorizedException(SIGN_IN_FAILED),
+      );
+      expect(RefreshToken.create).not.toHaveBeenCalled();
+      expect(tokens.signAccess).not.toHaveBeenCalled();
+    });
+
+    it("gives an unknown email the same answer, after checking a dummy hash", async () => {
+      User.first.mockResolvedValue(null);
+      passwords.hash.mockResolvedValue("dummy-hash");
+      passwords.verify.mockResolvedValue(false);
+
+      await expect(service.signIn(credentials, undefined)).rejects.toThrow(
+        new UnauthorizedException(SIGN_IN_FAILED),
+      );
+      expect(passwords.verify).toHaveBeenCalledOnce();
+      expect(passwords.verify).toHaveBeenCalledWith("dummy-hash", input.password);
+    });
+
+    it("makes the dummy hash once and reuses it", async () => {
+      User.first.mockResolvedValue(null);
+      passwords.verify.mockResolvedValue(false);
+
+      await expect(service.signIn(credentials, undefined)).rejects.toThrow(UnauthorizedException);
+      await expect(service.signIn(credentials, undefined)).rejects.toThrow(UnauthorizedException);
+      expect(passwords.hash).toHaveBeenCalledOnce();
+    });
+
+    it("cuts the user agent to 255 characters, and stores none when there is none", async () => {
+      User.first.mockResolvedValue(user);
+      passwords.verify.mockResolvedValue(true);
+
+      await service.signIn(credentials, "x".repeat(300));
+      await service.signIn(credentials, undefined);
+
+      const agents = RefreshToken.create.mock.calls.map(
+        ([row]) => (row as { userAgent?: string }).userAgent,
+      );
+      expect(agents).toEqual(["x".repeat(255), undefined]);
+    });
   });
 });

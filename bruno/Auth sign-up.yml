@@ -18,6 +18,11 @@ http:
   auth: inherit
 
 runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        // Auth sign-in signs in with the account this request just made.
+        bru.setVar("signInEmail", res.body.email);
   assertions:
     - expression: res.status
       operator: eq
