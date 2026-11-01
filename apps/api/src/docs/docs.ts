@@ -8,6 +8,7 @@ export const DOCS_JSON_PATH = "docs-json";
 // Every tag a controller uses, so the docs page groups them in this order with a description.
 const TAGS: ReadonlyArray<readonly [name: string, description: string]> = [
   ["Health", "Whether the API is up, and which version is running"],
+  ["Auth", "Signing up and signing in"],
   ["Catalog", "Categories, products, stock and reviews"],
   ["Sellers", "Seller storefronts"],
   ["Cart", "The demo user's cart"],

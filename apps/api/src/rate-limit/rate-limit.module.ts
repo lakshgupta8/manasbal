@@ -6,6 +6,8 @@ import { ValkeyThrottlerStorage } from "./valkey-throttler.storage.js";
 import { VALKEY, ValkeyModule } from "../valkey/valkey.module.js";
 
 export const RATE_LIMIT = 100;
+// Every /auth/* route (set on AuthController): sign-up and sign-in are what attackers hammer.
+export const AUTH_RATE_LIMIT = 10;
 export const RATE_WINDOW_MS = 60_000;
 
 // 100 requests a minute per visitor (their IP address), counted in Valkey.

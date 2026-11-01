@@ -22,6 +22,61 @@
         "tags": ["Health"]
       }
     },
+    "/auth/sign-up": {
+      "post": {
+        "description": "Use made-up details. This is a demo.",
+        "operationId": "AuthController_signUp",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 12,
+                    "maxLength": 128
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "confirmAdult": {
+                    "type": "boolean",
+                    "enum": [true]
+                  }
+                },
+                "required": ["email", "password", "name", "confirmAdult"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignUpResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid details, or we could not create this account"
+          }
+        },
+        "summary": "Create an account",
+        "tags": ["Auth"]
+      }
+    },
     "/me/addresses": {
       "get": {
         "description": "Every delivery address the demo user has saved, sorted by name.",
@@ -721,6 +776,10 @@
       "description": "Whether the API is up, and which version is running"
     },
     {
+      "name": "Auth",
+      "description": "Signing up and signing in"
+    },
+    {
       "name": "Catalog",
       "description": "Categories, products, stock and reviews"
     },
@@ -770,6 +829,22 @@
           }
         },
         "required": ["status", "service", "version"]
+      },
+      "SignUpResult": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": ["id", "email", "name"]
       },
       "Address": {
         "type": "object",

@@ -24,6 +24,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/auth/sign-up": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Create an account
+     * @description Use made-up details. This is a demo.
+     */
+    post: operations["AuthController_signUp"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/me/addresses": {
     parameters: {
       query?: never;
@@ -284,6 +304,12 @@ export interface components {
       /** @example dev */
       version: string;
     };
+    SignUpResult: {
+      /** Format: uuid */
+      id: string;
+      email: string;
+      name: string;
+    };
     Address: {
       /** Format: uuid */
       id: string;
@@ -482,6 +508,42 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["HealthStatus"];
         };
+      };
+    };
+  };
+  AuthController_signUp: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          email: string;
+          password: string;
+          name: string;
+          /** @enum {boolean} */
+          confirmAdult: true;
+        };
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SignUpResult"];
+        };
+      };
+      /** @description Invalid details, or we could not create this account */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
