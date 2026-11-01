@@ -1,5 +1,7 @@
 /* Text contrast (WCAG AA, minimum 4.5:1): info 8.5:1, warning 7.8:1, error 9.4:1. The lead word carries the tone too. */
 .mb-notice {
+  /* info and warning render as <output>, which is inline by default. */
+  display: block;
   padding: 0.5rem 0.75rem;
   border-left: 4px solid;
   border-radius: 0.25rem;
