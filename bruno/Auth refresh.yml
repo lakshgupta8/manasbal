@@ -1,0 +1,38 @@
+info:
+  name: Auth refresh
+  type: http
+  seq: 20
+
+http:
+  method: POST
+  url: "{{baseUrl}}/auth/refresh"
+  headers:
+    - name: Cookie
+      value: "refresh_token={{refreshToken}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Send exactly the Cookie header below, not the newest cookie Bruno's jar kept.
+        await bru.cookies.jar().deleteCookies(req.getUrl());
+    - type: after-response
+      code: |-
+        // Keep the old token for Auth refresh reuse; sign out with the new one.
+        const cookie = [].concat(res.headers["set-cookie"] ?? []).join(";");
+        bru.setVar("usedRefreshToken", bru.getVar("refreshToken"));
+        bru.setVar("newRefreshToken", /refresh_token=([^;]*)/.exec(cookie)?.[1] ?? "");
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.accessToken
+      operator: isString
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

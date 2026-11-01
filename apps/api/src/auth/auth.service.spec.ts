@@ -1,5 +1,6 @@
 import { BadRequestException, UnauthorizedException } from "@nestjs/common";
-import { AuthService, SIGN_IN_FAILED, SIGN_UP_FAILED } from "./auth.service.js";
+import { AuthService, REFRESH_FAILED, SIGN_IN_FAILED, SIGN_UP_FAILED } from "./auth.service.js";
+import { hashRefresh } from "./tokens.service.js";
 
 const USER_ID = "7b0c1e2a-3d4f-4a5b-8c6d-7e8f9a0b1c2d";
 const HASH = "$argon2id$v=19$m=19456,t=2,p=1$stub";
@@ -23,6 +24,7 @@ function fakeCollection() {
     select: () => collection,
     first: vi.fn<() => Promise<unknown>>(),
     create: vi.fn<(row: object) => Promise<unknown>>(),
+    updateAndCount: vi.fn<(patch: object) => Promise<number>>(),
   };
   return collection;
 }
@@ -175,6 +177,132 @@ describe("AuthService", () => {
         ([row]) => (row as { userAgent?: string }).userAgent,
       );
       expect(agents).toEqual(["x".repeat(255), undefined]);
+    });
+  });
+
+  describe("refresh", () => {
+    const FAMILY_ID = "0f1e2d3c-4b5a-4968-8776-655443322110";
+    const ROW_ID = "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d";
+    const later = () => Temporal.Now.instant().add({ hours: 1 });
+    const stored = (overrides: object = {}) => ({
+      id: ROW_ID,
+      userId: USER_ID,
+      familyId: FAMILY_ID,
+      expiresAt: later(),
+      usedAt: null,
+      revokedAt: null,
+      ...overrides,
+    });
+    const refused = new UnauthorizedException(REFRESH_FAILED);
+
+    it("marks the token used and issues a new pair in the same family", async () => {
+      RefreshToken.first.mockResolvedValue(stored());
+      RefreshToken.updateAndCount.mockResolvedValue(1);
+      User.first.mockResolvedValue({ id: USER_ID, role: "buyer" });
+
+      await expect(service.refresh("old-token", "Test Browser")).resolves.toEqual({
+        accessToken: "access.jwt",
+        expiresIn: 900,
+        refreshToken: "cookie-token",
+      });
+
+      expect(RefreshToken.filters).toEqual([
+        { tokenHash: hashRefresh("old-token") },
+        { id: ROW_ID, usedAt: null },
+      ]);
+      const patch = RefreshToken.updateAndCount.mock.calls[0]?.[0] as Record<string, unknown>;
+      expect(patch["usedAt"]).toBeInstanceOf(Temporal.Instant);
+      expect(RefreshToken.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: USER_ID,
+          familyId: FAMILY_ID,
+          tokenHash: "stored-hash",
+          userAgent: "Test Browser",
+        }),
+      );
+      expect(tokens.signAccess).toHaveBeenCalledWith({ id: USER_ID, role: "buyer" });
+    });
+
+    it("refuses a missing cookie without looking anything up", async () => {
+      await expect(service.refresh(undefined, undefined)).rejects.toThrow(refused);
+      expect(RefreshToken.first).not.toHaveBeenCalled();
+    });
+
+    it("refuses an unknown token", async () => {
+      RefreshToken.first.mockResolvedValue(null);
+
+      await expect(service.refresh("made-up", undefined)).rejects.toThrow(refused);
+      expect(RefreshToken.updateAndCount).not.toHaveBeenCalled();
+    });
+
+    it("refuses a revoked token", async () => {
+      RefreshToken.first.mockResolvedValue(stored({ revokedAt: Temporal.Now.instant() }));
+
+      await expect(service.refresh("old-token", undefined)).rejects.toThrow(refused);
+      expect(RefreshToken.updateAndCount).not.toHaveBeenCalled();
+      expect(RefreshToken.create).not.toHaveBeenCalled();
+    });
+
+    it("revokes the whole family when a used token comes back", async () => {
+      RefreshToken.first.mockResolvedValue(stored({ usedAt: Temporal.Now.instant() }));
+
+      await expect(service.refresh("old-token", undefined)).rejects.toThrow(refused);
+      expect(RefreshToken.filters).toContainEqual({ familyId: FAMILY_ID, revokedAt: null });
+      const patch = RefreshToken.updateAndCount.mock.calls[0]?.[0] as Record<string, unknown>;
+      expect(patch["revokedAt"]).toBeInstanceOf(Temporal.Instant);
+      expect(RefreshToken.create).not.toHaveBeenCalled();
+    });
+
+    it("refuses an expired token", async () => {
+      RefreshToken.first.mockResolvedValue(
+        stored({ expiresAt: Temporal.Now.instant().subtract({ seconds: 1 }) }),
+      );
+
+      await expect(service.refresh("old-token", undefined)).rejects.toThrow(refused);
+      expect(RefreshToken.updateAndCount).not.toHaveBeenCalled();
+    });
+
+    it("treats losing a race for the same token as reuse", async () => {
+      RefreshToken.first.mockResolvedValue(stored());
+      // The claim finds the token already used; the revocation then updates the family.
+      RefreshToken.updateAndCount.mockResolvedValueOnce(0).mockResolvedValueOnce(2);
+
+      await expect(service.refresh("old-token", undefined)).rejects.toThrow(refused);
+      expect(RefreshToken.filters).toContainEqual({ familyId: FAMILY_ID, revokedAt: null });
+      expect(RefreshToken.create).not.toHaveBeenCalled();
+    });
+
+    it("refuses when the account is gone", async () => {
+      RefreshToken.first.mockResolvedValue(stored());
+      RefreshToken.updateAndCount.mockResolvedValue(1);
+      User.first.mockResolvedValue(null);
+
+      await expect(service.refresh("old-token", undefined)).rejects.toThrow(refused);
+      expect(RefreshToken.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("signOut", () => {
+    it("revokes the family of the cookie's token", async () => {
+      RefreshToken.first.mockResolvedValue({ familyId: "family-1" });
+
+      await service.signOut("old-token");
+
+      expect(RefreshToken.filters).toEqual([
+        { tokenHash: hashRefresh("old-token") },
+        { familyId: "family-1", revokedAt: null },
+      ]);
+      expect(RefreshToken.updateAndCount).toHaveBeenCalledOnce();
+    });
+
+    it("does nothing for a missing or unknown token", async () => {
+      RefreshToken.first.mockResolvedValue(null);
+
+      await service.signOut(undefined);
+      await service.signOut("made-up");
+
+      expect(RefreshToken.first).toHaveBeenCalledOnce();
+      expect(RefreshToken.updateAndCount).not.toHaveBeenCalled();
     });
   });
 });

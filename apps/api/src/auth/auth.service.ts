@@ -3,13 +3,22 @@ import { BadRequestException, Inject, Injectable, UnauthorizedException } from "
 import type { SignInInput, SignUpInput } from "@manasbal/types";
 import { getDb } from "../prisma/db.js";
 import { PasswordService } from "./password.service.js";
-import { ACCESS_TOKEN_SECONDS, REFRESH_TOKEN_HOURS, TokensService } from "./tokens.service.js";
+import {
+  ACCESS_TOKEN_SECONDS,
+  hashRefresh,
+  REFRESH_TOKEN_HOURS,
+  TokensService,
+} from "./tokens.service.js";
 
 // The one answer for every sign-up that can't go ahead, so strangers can't learn which emails exist.
 export const SIGN_UP_FAILED = "We could not create this account";
 
 // The one answer for "no such email" and "wrong password", so neither reveals which emails exist.
 export const SIGN_IN_FAILED = "Email or password is wrong";
+
+// The one answer for every refresh that can't go ahead: missing, unknown, used, expired or
+// revoked. The client's only move is to sign in again.
+export const REFRESH_FAILED = "Sign in again";
 
 const FIELDS = ["id", "email", "name"] as const;
 
@@ -71,12 +80,75 @@ export class AuthService {
     );
     if (user === null || !ok) throw new UnauthorizedException(SIGN_IN_FAILED);
 
+    // Each sign-in starts a new family; every refresh after it stays in that family.
+    return this.issue(user, randomUUID(), userAgent);
+  }
+
+  // Swaps a refresh token for a new access token and a new refresh token in the same family.
+  // A token works once: presenting one that was already used means someone kept a copy, so
+  // every token in its family is revoked, the newest one included.
+  async refresh(token: string | undefined, userAgent: string | undefined) {
+    if (!token) throw new UnauthorizedException(REFRESH_FAILED);
+    const tokens = getDb().orm.public.RefreshToken;
+    const row = await tokens
+      .where({ tokenHash: hashRefresh(token) })
+      .select("id", "userId", "familyId", "expiresAt", "usedAt", "revokedAt")
+      .first();
+    if (row === null || row.revokedAt !== null) throw new UnauthorizedException(REFRESH_FAILED);
+    if (row.usedAt !== null) return this.reuse(row.familyId);
+
+    const now = Temporal.Now.instant();
+    if (Temporal.Instant.compare(row.expiresAt, now) <= 0) {
+      throw new UnauthorizedException(REFRESH_FAILED);
+    }
+    // Only one caller can mark an unused token used, so two refreshes racing with the same
+    // token cannot both win: the loser counts as reuse.
+    const claimed = await tokens
+      .where({ id: row.id, usedAt: null })
+      .updateAndCount({ usedAt: now });
+    if (claimed === 0) return this.reuse(row.familyId);
+
+    const user = await getDb()
+      .orm.public.User.where({ id: row.userId })
+      .select("id", "role")
+      .first();
+    if (user === null) throw new UnauthorizedException(REFRESH_FAILED);
+    return this.issue(user, row.familyId, userAgent);
+  }
+
+  // Ends the session the cookie belongs to, on this device and any copy of it. An unknown or
+  // missing token is fine: the cookie is cleared either way.
+  async signOut(token: string | undefined): Promise<void> {
+    if (!token) return;
+    const row = await getDb()
+      .orm.public.RefreshToken.where({ tokenHash: hashRefresh(token) })
+      .select("familyId")
+      .first();
+    if (row !== null) await this.revokeFamily(row.familyId);
+  }
+
+  private async reuse(familyId: string): Promise<never> {
+    await this.revokeFamily(familyId);
+    throw new UnauthorizedException(REFRESH_FAILED);
+  }
+
+  private async revokeFamily(familyId: string): Promise<void> {
+    await getDb()
+      .orm.public.RefreshToken.where({ familyId, revokedAt: null })
+      .updateAndCount({ revokedAt: Temporal.Now.instant() });
+  }
+
+  // A new refresh token in the family, stored only as its hash, and an access token. Visitor
+  // sessions are removed by the nightly reset.
+  private async issue(
+    user: { id: string; role: string },
+    familyId: string,
+    userAgent: string | undefined,
+  ) {
     const refresh = this.tokens.newRefresh();
-    // Each sign-in starts a new family; refreshing (Thursday's card) keeps it. Visitor sessions
-    // are removed by the nightly reset.
-    await db.orm.public.RefreshToken.create({
+    await getDb().orm.public.RefreshToken.create({
       userId: user.id,
-      familyId: randomUUID(),
+      familyId,
       tokenHash: refresh.hash,
       expiresAt: Temporal.Now.instant().add({ hours: REFRESH_TOKEN_HOURS }),
       userAgent: userAgent?.slice(0, USER_AGENT_MAX),

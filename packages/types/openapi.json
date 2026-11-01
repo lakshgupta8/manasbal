@@ -123,6 +123,54 @@
         "tags": ["Auth"]
       }
     },
+    "/auth/refresh": {
+      "post": {
+        "description": "Swaps the refresh_token cookie for a new access token and a new cookie. Each cookie works once; using one twice signs out every copy.",
+        "operationId": "AuthController_refresh",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignInResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No usable refresh token: sign in again"
+          }
+        },
+        "security": [
+          {
+            "refresh_token": []
+          }
+        ],
+        "summary": "Renew the access token",
+        "tags": ["Auth"]
+      }
+    },
+    "/auth/sign-out": {
+      "post": {
+        "description": "Revokes the session's refresh tokens and clears the cookie.",
+        "operationId": "AuthController_signOut",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "refresh_token": []
+          }
+        ],
+        "summary": "Sign out",
+        "tags": ["Auth"]
+      }
+    },
     "/me/addresses": {
       "get": {
         "description": "Every delivery address the demo user has saved, sorted by name.",
@@ -857,6 +905,14 @@
     }
   ],
   "components": {
+    "securitySchemes": {
+      "refresh_token": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "refresh_token",
+        "description": "Set by sign-in"
+      }
+    },
     "schemas": {
       "HealthStatus": {
         "type": "object",

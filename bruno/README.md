@@ -20,6 +20,10 @@ On **prod** the `x-demo-user` header is refused, so requests that act as a user 
 
 The ids in [`environments/local.yml`](environments/local.yml) (`demoUser`, `adminUser`, `addressId`, `variantId` and the others) belong to rows in one database. On your own database, replace them with ids that exist there, or those requests answer 401 or 404.
 
+## Sign-in requests
+
+Run the `Auth` requests in order: **sign-up** makes a new account, **sign-in** signs in with it, **refresh** swaps the refresh cookie once, **refresh reuse** replays the old cookie and must answer 401 (reuse revokes the whole session), and **sign-out** clears the cookie. They pass values to each other through runtime variables, so running one on its own may fail.
+
 ## Run every request
 
 1. Right-click the collection name in the sidebar and choose **Run** (or click the collection, then **Run**).

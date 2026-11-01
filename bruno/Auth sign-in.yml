@@ -16,6 +16,12 @@ http:
   auth: inherit
 
 runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        // Auth refresh and Auth refresh reuse send this cookie value on purpose.
+        const cookie = [].concat(res.headers["set-cookie"] ?? []).join(";");
+        bru.setVar("refreshToken", /refresh_token=([^;]*)/.exec(cookie)?.[1] ?? "");
   assertions:
     - expression: res.status
       operator: eq

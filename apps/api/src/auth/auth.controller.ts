@@ -1,7 +1,19 @@
-import { Body, Controller, Headers, HttpCode, HttpStatus, Inject, Post, Res } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Headers,
+  HttpCode,
+  HttpStatus,
+  Inject,
+  Post,
+  Req,
+  Res,
+} from "@nestjs/common";
 import {
   ApiBadRequestResponse,
+  ApiCookieAuth,
   ApiCreatedResponse,
+  ApiNoContentResponse,
   ApiOkResponse,
   ApiOperation,
   ApiProperty,
@@ -9,7 +21,7 @@ import {
   ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
 import { Throttle } from "@nestjs/throttler";
-import type { FastifyReply } from "fastify";
+import type { FastifyReply, FastifyRequest } from "fastify";
 import {
   signInInputSchema,
   signUpInputSchema,
@@ -51,7 +63,10 @@ export class SignInResult {
 export class AuthController {
   // Typed as the part it uses: a class type makes the decorator metadata emit a branch that never
   // runs. @Inject still names the provider.
-  constructor(@Inject(AuthService) private readonly auth: Pick<AuthService, "signUp" | "signIn">) {}
+  constructor(
+    @Inject(AuthService)
+    private readonly auth: Pick<AuthService, "signUp" | "signIn" | "refresh" | "signOut">,
+  ) {}
 
   @Post("sign-up")
   @ApiOperation({
@@ -84,5 +99,46 @@ export class AuthController {
     const { refreshToken, ...answer } = await this.auth.signIn(input, userAgent);
     reply.setCookie(REFRESH_COOKIE, refreshToken, refreshCookieOptions());
     return answer;
+  }
+
+  @Post("refresh")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "Renew the access token",
+    description:
+      "Swaps the refresh_token cookie for a new access token and a new cookie. Each cookie works once; using one twice signs out every copy.",
+  })
+  @ApiCookieAuth(REFRESH_COOKIE)
+  @ApiOkResponse({ type: SignInResult })
+  @ApiUnauthorizedResponse({ description: "No usable refresh token: sign in again" })
+  async refresh(
+    @Req() request: Pick<FastifyRequest, "cookies">,
+    @Headers("user-agent") userAgent: string | undefined,
+    @Res({ passthrough: true }) reply: Pick<FastifyReply, "setCookie">,
+  ): Promise<SignInResult> {
+    const { refreshToken, ...answer } = await this.auth.refresh(
+      request.cookies[REFRESH_COOKIE],
+      userAgent,
+    );
+    reply.setCookie(REFRESH_COOKIE, refreshToken, refreshCookieOptions());
+    return answer;
+  }
+
+  @Post("sign-out")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: "Sign out",
+    description: "Revokes the session's refresh tokens and clears the cookie.",
+  })
+  @ApiCookieAuth(REFRESH_COOKIE)
+  @ApiNoContentResponse()
+  async signOut(
+    @Req() request: Pick<FastifyRequest, "cookies">,
+    @Res({ passthrough: true }) reply: Pick<FastifyReply, "clearCookie">,
+  ): Promise<void> {
+    await this.auth.signOut(request.cookies[REFRESH_COOKIE]);
+    // The browser drops the cookie only when its path and flags match the ones it was set with;
+    // clearCookie overrides the lifetime itself.
+    reply.clearCookie(REFRESH_COOKIE, refreshCookieOptions());
   }
 }

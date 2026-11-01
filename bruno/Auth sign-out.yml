@@ -1,0 +1,30 @@
+info:
+  name: Auth sign-out
+  type: http
+  seq: 22
+
+http:
+  method: POST
+  url: "{{baseUrl}}/auth/sign-out"
+  headers:
+    - name: Cookie
+      value: "refresh_token={{newRefreshToken}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Send exactly the Cookie header below, not the newest cookie Bruno's jar kept.
+        await bru.cookies.jar().deleteCookies(req.getUrl());
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "204"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
