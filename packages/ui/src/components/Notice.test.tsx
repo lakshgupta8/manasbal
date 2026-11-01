@@ -3,13 +3,13 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import * as stories from "./Notice.stories";
 
-const { Default, Warning, Error } = composeStories(stories);
+const { Default, Warning, ErrorTone } = composeStories(stories);
 
 describe("Notice", () => {
   it.each([
     { tone: "info", Story: Default, role: "status", leadWord: "Note:" },
     { tone: "warning", Story: Warning, role: "status", leadWord: "Warning:" },
-    { tone: "error", Story: Error, role: "alert", leadWord: "Problem:" },
+    { tone: "error", Story: ErrorTone, role: "alert", leadWord: "Problem:" },
   ])("$tone has role $role and lead word $leadWord", ({ Story, role, leadWord }) => {
     render(<Story />);
 

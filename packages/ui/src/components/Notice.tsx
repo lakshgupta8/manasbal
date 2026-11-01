@@ -17,12 +17,18 @@ const leadWords: Record<NoticeTone, string> = {
 
 /** Inline box that calls attention to a short message. The lead word means colour is never the only signal. */
 export function Notice({ tone, children, className }: NoticeProps) {
-  return (
-    <div
-      role={tone === "error" ? "alert" : "status"}
-      className={["mb-notice", `mb-notice--${tone}`, className].filter(Boolean).join(" ")}
-    >
+  const classes = ["mb-notice", `mb-notice--${tone}`, className].filter(Boolean).join(" ");
+  const content = (
+    <>
       <strong>{leadWords[tone]}</strong> {children}
+    </>
+  );
+
+  return tone === "error" ? (
+    <div role="alert" className={classes}>
+      {content}
     </div>
+  ) : (
+    <output className={classes}>{content}</output>
   );
 }

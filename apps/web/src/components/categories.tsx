@@ -7,8 +7,7 @@ import { getCategories } from "@/lib/categories";
 export async function Categories() {
   await connection();
   const categories = await getCategories();
-  if (categories === null)
-    return <Notice tone="error">Categories are unavailable right now</Notice>;
+  if (categories === null) return <Notice tone="info">Categories are unavailable right now</Notice>;
   return (
     <ul>
       {categories.map((category) => (

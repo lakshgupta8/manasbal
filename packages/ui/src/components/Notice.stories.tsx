@@ -25,7 +25,8 @@ export const Warning: Story = {
   },
 };
 
-export const Error: Story = {
+export const ErrorTone: Story = {
+  name: "Error",
   args: {
     tone: "error",
     children: "We could not load delivery options. Please try again.",
