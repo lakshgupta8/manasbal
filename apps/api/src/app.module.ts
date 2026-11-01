@@ -4,6 +4,7 @@ import { LoggerModule } from "nestjs-pino";
 import { ProblemDetailsFilter } from "./errors/problem-details.filter.js";
 import { AdminModule } from "./admin/admin.module.js";
 import { AuditModule } from "./audit/audit.module.js";
+import { AuthModule } from "./auth/auth.module.js";
 import { CartModule } from "./cart/cart.module.js";
 import { IdempotencyModule } from "./idempotency/idempotency.module.js";
 import { CatalogModule } from "./catalog/catalog.module.js";
@@ -21,6 +22,7 @@ import { UsersModule } from "./users/users.module.js";
     RateLimitModule,
     IdempotencyModule,
     AuditModule,
+    AuthModule,
     UsersModule,
     CatalogModule,
     SellersModule,
