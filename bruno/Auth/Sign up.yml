@@ -1,0 +1,38 @@
+info:
+  name: Sign up
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/auth/sign-up"
+  body:
+    type: json
+    data: |-
+      {
+        "email": "signup-{{$timestamp}}@example.com",
+        "password": "made-up-password-123",
+        "name": "Test Visitor",
+        "confirmAdult": true
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        // Sign in signs in with the account this request just made.
+        bru.setVar("signInEmail", res.body.email);
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "201"
+    - expression: res.body.id
+      operator: isString
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

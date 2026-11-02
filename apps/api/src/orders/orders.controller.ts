@@ -1,7 +1,7 @@
 import { Controller, Get, Query, UseGuards } from "@nestjs/common";
 import {
   ApiBadRequestResponse,
-  ApiHeader,
+  ApiBearerAuth,
   ApiOkResponse,
   ApiProperty,
   ApiQuery,
@@ -11,7 +11,8 @@ import {
 } from "@nestjs/swagger";
 import type { OrderPage as OrderPageShape } from "@manasbal/types";
 import { DEFAULT_LIMIT, MAX_LIMIT } from "../pagination/pagination.js";
-import { CurrentUserId, DEMO_USER_HEADER, DemoUserGuard } from "../users/demo-user.guard.js";
+import { AuthGuard } from "../auth/auth.guard.js";
+import { CurrentUserId } from "../auth/current-user.js";
 import { OrdersService } from "./orders.service.js";
 
 // Classes rather than interfaces so the OpenAPI description knows the shape of the answer. They
@@ -44,14 +45,9 @@ export class OrderPage {
 
 // The signed-in user's orders.
 @ApiTags("Orders")
-@ApiHeader({
-  name: DEMO_USER_HEADER,
-  description:
-    "Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it.",
-  required: false,
-})
-@ApiUnauthorizedResponse({ description: "No user, or the API runs in production" })
-@UseGuards(DemoUserGuard)
+@ApiBearerAuth()
+@ApiUnauthorizedResponse({ description: "No valid access token" })
+@UseGuards(AuthGuard)
 @Controller("orders")
 export class OrdersController {
   constructor(private readonly orders: OrdersService) {}

@@ -2,7 +2,7 @@ import { Controller, Get, Query, UseGuards } from "@nestjs/common";
 import {
   ApiBadRequestResponse,
   ApiForbiddenResponse,
-  ApiHeader,
+  ApiBearerAuth,
   ApiOkResponse,
   ApiProperty,
   ApiQuery,
@@ -12,7 +12,7 @@ import {
 } from "@nestjs/swagger";
 import type { AuditPage as AuditPageShape } from "@manasbal/types";
 import { DEFAULT_LIMIT, MAX_LIMIT } from "../pagination/pagination.js";
-import { DEMO_USER_HEADER, DemoUserGuard } from "../users/demo-user.guard.js";
+import { AuthGuard } from "../auth/auth.guard.js";
 import { AdminGuard } from "./admin.guard.js";
 import { AdminService } from "./admin.service.js";
 
@@ -55,15 +55,10 @@ export class AuditPage {
 
 // Only for users whose role is admin.
 @ApiTags("Admin")
-@ApiHeader({
-  name: DEMO_USER_HEADER,
-  description:
-    "Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it.",
-  required: false,
-})
-@ApiUnauthorizedResponse({ description: "No user, or the API runs in production" })
+@ApiBearerAuth()
+@ApiUnauthorizedResponse({ description: "No valid access token" })
 @ApiForbiddenResponse({ description: "The user is not an admin" })
-@UseGuards(DemoUserGuard, AdminGuard)
+@UseGuards(AuthGuard, AdminGuard)
 @Controller("admin")
 export class AdminController {
   constructor(private readonly admin: AdminService) {}

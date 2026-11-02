@@ -24,6 +24,166 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/auth/sign-up": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Create an account
+     * @description Use made-up details. This is a demo. When mail is on, sends a link to confirm the email address.
+     */
+    post: operations["AuthController_signUp"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/auth/sign-in": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Sign in
+     * @description Answers an access token and sets the refresh_token cookie.
+     */
+    post: operations["AuthController_signIn"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/auth/verify-email": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Confirm an email address
+     * @description Takes the token from the link in the sign-up mail. Each link works once.
+     */
+    post: operations["AuthController_verifyEmail"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/auth/forgot-password": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Ask for a password reset link
+     * @description Always answers 202, whether or not the email has an account; only an account gets the mail. The link works once, for 1 hour.
+     */
+    post: operations["AuthController_forgotPassword"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/auth/reset-password": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Set a new password
+     * @description Takes the token from the reset link and a new password. Each link works once, and every session of the account ends.
+     */
+    post: operations["AuthController_resetPassword"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/auth/refresh": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Renew the access token
+     * @description Swaps the refresh_token cookie for a new access token and a new cookie. Each cookie works once; using one twice signs out every copy.
+     */
+    post: operations["AuthController_refresh"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/auth/sign-out": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Sign out
+     * @description Revokes the session's refresh tokens and clears the cookie.
+     */
+    post: operations["AuthController_signOut"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/me": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Who am I
+     * @description The signed-in user's name, email and role.
+     */
+    get: operations["MeController_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/me/addresses": {
     parameters: {
       query?: never;
@@ -284,6 +444,28 @@ export interface components {
       /** @example dev */
       version: string;
     };
+    SignUpResult: {
+      /** Format: uuid */
+      id: string;
+      email: string;
+      name: string;
+    };
+    SignInResult: {
+      accessToken: string;
+      /**
+       * @description Seconds until the access token expires
+       * @example 900
+       */
+      expiresIn: number;
+    };
+    Me: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      email: string;
+      /** @example buyer */
+      role: string;
+    };
     Address: {
       /** Format: uuid */
       id: string;
@@ -485,13 +667,249 @@ export interface operations {
       };
     };
   };
+  AuthController_signUp: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          email: string;
+          password: string;
+          name: string;
+          /** @enum {boolean} */
+          confirmAdult: true;
+        };
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SignUpResult"];
+        };
+      };
+      /** @description Invalid details, or we could not create this account */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AuthController_signIn: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          email: string;
+          password: string;
+        };
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SignInResult"];
+        };
+      };
+      /** @description Email or password is wrong */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Check your email to confirm your account */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AuthController_verifyEmail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          token: string;
+        };
+      };
+    };
+    responses: {
+      /** @description The account is confirmed */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description This link is not valid any more */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AuthController_forgotPassword: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          email: string;
+        };
+      };
+    };
+    responses: {
+      /** @description If the email has an account, a reset link is on its way */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not an email address */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AuthController_resetPassword: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          token: string;
+          password: string;
+        };
+      };
+    };
+    responses: {
+      /** @description The password is changed; sign in again */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description This link is not valid any more, or the password is too short or too long */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AuthController_refresh: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SignInResult"];
+        };
+      };
+      /** @description No usable refresh token: sign in again */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AuthController_signOut: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  MeController_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Me"];
+        };
+      };
+      /** @description No valid access token, or the account is gone */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   AddressesController_list: {
     parameters: {
       query?: never;
-      header?: {
-        /** @description Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it. */
-        "x-demo-user"?: string;
-      };
+      header?: never;
       path?: never;
       cookie?: never;
     };
@@ -505,7 +923,7 @@ export interface operations {
           "application/json": components["schemas"]["Address"][];
         };
       };
-      /** @description No user, or the API runs in production */
+      /** @description No valid access token */
       401: {
         headers: {
           [name: string]: unknown;
@@ -517,10 +935,7 @@ export interface operations {
   AddressesController_create: {
     parameters: {
       query?: never;
-      header?: {
-        /** @description Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it. */
-        "x-demo-user"?: string;
-      };
+      header?: never;
       path?: never;
       cookie?: never;
     };
@@ -545,7 +960,7 @@ export interface operations {
           "application/json": components["schemas"]["Address"];
         };
       };
-      /** @description No user, or the API runs in production */
+      /** @description No valid access token */
       401: {
         headers: {
           [name: string]: unknown;
@@ -557,10 +972,7 @@ export interface operations {
   AddressesController_remove: {
     parameters: {
       query?: never;
-      header?: {
-        /** @description Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it. */
-        "x-demo-user"?: string;
-      };
+      header?: never;
       path: {
         id: string;
       };
@@ -574,7 +986,7 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description No user, or the API runs in production */
+      /** @description No valid access token */
       401: {
         headers: {
           [name: string]: unknown;
@@ -600,10 +1012,7 @@ export interface operations {
   AddressesController_update: {
     parameters: {
       query?: never;
-      header?: {
-        /** @description Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it. */
-        "x-demo-user"?: string;
-      };
+      header?: never;
       path: {
         id: string;
       };
@@ -630,7 +1039,7 @@ export interface operations {
           "application/json": components["schemas"]["Address"];
         };
       };
-      /** @description No user, or the API runs in production */
+      /** @description No valid access token */
       401: {
         headers: {
           [name: string]: unknown;
@@ -832,10 +1241,7 @@ export interface operations {
   CartController_get: {
     parameters: {
       query?: never;
-      header?: {
-        /** @description Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it. */
-        "x-demo-user"?: string;
-      };
+      header?: never;
       path?: never;
       cookie?: never;
     };
@@ -849,7 +1255,7 @@ export interface operations {
           "application/json": components["schemas"]["Cart"];
         };
       };
-      /** @description No user, or the API runs in production */
+      /** @description No valid access token */
       401: {
         headers: {
           [name: string]: unknown;
@@ -862,8 +1268,6 @@ export interface operations {
     parameters: {
       query?: never;
       header?: {
-        /** @description Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it. */
-        "x-demo-user"?: string;
         /** @description Repeats of the same key answer the first result instead of adding again */
         "Idempotency-Key"?: string;
       };
@@ -888,7 +1292,7 @@ export interface operations {
           "application/json": components["schemas"]["Cart"];
         };
       };
-      /** @description No user, or the API runs in production */
+      /** @description No valid access token */
       401: {
         headers: {
           [name: string]: unknown;
@@ -919,10 +1323,7 @@ export interface operations {
         /** @description 1 to 100, default 20 */
         limit?: string;
       };
-      header?: {
-        /** @description Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it. */
-        "x-demo-user"?: string;
-      };
+      header?: never;
       path?: never;
       cookie?: never;
     };
@@ -943,7 +1344,7 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description No user, or the API runs in production */
+      /** @description No valid access token */
       401: {
         headers: {
           [name: string]: unknown;
@@ -960,10 +1361,7 @@ export interface operations {
         /** @description 1 to 100, default 20 */
         limit?: string;
       };
-      header?: {
-        /** @description Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it. */
-        "x-demo-user"?: string;
-      };
+      header?: never;
       path?: never;
       cookie?: never;
     };
@@ -984,7 +1382,7 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description No user, or the API runs in production */
+      /** @description No valid access token */
       401: {
         headers: {
           [name: string]: unknown;

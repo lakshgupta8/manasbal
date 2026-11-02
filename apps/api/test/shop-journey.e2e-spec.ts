@@ -1,9 +1,10 @@
+import fastifyCookie from "@fastify/cookie";
 import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fastify";
 import { Test } from "@nestjs/testing";
 import { cartSchema, orderPageSchema, reviewPageSchema } from "@manasbal/types";
 import { AppModule } from "../src/app.module.js";
 import { RATE_LIMIT } from "../src/rate-limit/rate-limit.module.js";
-import { DEMO_USER_HEADER } from "../src/users/demo-user.guard.js";
+import { bearer } from "./support/auth.js";
 import { startTestDatabase, type TestDatabase } from "./support/test-database.js";
 import { startTestValkey, type TestValkey } from "./support/test-valkey.js";
 
@@ -23,18 +24,18 @@ describe("shop journey (e2e)", () => {
     sent += 1;
     return app.inject(options);
   };
-  const get = (url: string, userId?: string) =>
+  const get = async (url: string, userId?: string) =>
     send({
       method: "GET",
       url,
-      headers: userId === undefined ? {} : { [DEMO_USER_HEADER]: userId },
+      headers: userId === undefined ? {} : await bearer(userId),
     });
-  const addToCart = (userId: string, payload: object, key: string) =>
+  const addToCart = async (userId: string, payload: object, key: string) =>
     send({
       method: "POST",
       url: "/cart/items",
       payload,
-      headers: { [DEMO_USER_HEADER]: userId, "idempotency-key": key },
+      headers: { ...(await bearer(userId)), "idempotency-key": key },
     });
   const cartLines = () =>
     database.db.orm.public.CartItem.where({ variantId }).select("quantity").all();
@@ -44,7 +45,8 @@ describe("shop journey (e2e)", () => {
     valkey = await startTestValkey();
     const orm = database.db.orm.public;
 
-    // These users never sign in.
+    // These users never sign in; their requests carry a token from bearer(). The last test
+    // signs up and signs in through the real endpoints instead.
     const user = (email: string, name: string) =>
       orm.User.select("id").create({ email, passwordHash: "", name });
 
@@ -140,6 +142,8 @@ describe("shop journey (e2e)", () => {
 
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
     app = moduleRef.createNestApplication<NestFastifyApplication>(new FastifyAdapter());
+    // As in main.ts: sign-in sets the refresh cookie.
+    await app.register(fastifyCookie);
     await app.init();
     await app.getHttpAdapter().getInstance().ready();
   }, 240_000);
@@ -207,13 +211,49 @@ describe("shop journey (e2e)", () => {
     expect(page.items.map((order) => order.id)).toEqual([buyerOrder]);
   });
 
-  it("answers 401 as a problem document when the demo header is missing", async () => {
+  it("answers 401 as a problem document without an access token", async () => {
     for (const url of ["/cart", "/orders"]) {
       const response = await get(url);
 
       expect(response.statusCode).toBe(401);
       expect(response.headers["content-type"]).toContain("application/problem+json");
     }
+  });
+
+  it("signs up, signs in and keeps an address for the new account", async () => {
+    const credentials = { email: "meera@example.test", password: "a long passphrase" };
+    const signUp = await send({
+      method: "POST",
+      url: "/auth/sign-up",
+      payload: { ...credentials, name: "Meera Iyer", confirmAdult: true },
+    });
+    expect(signUp.statusCode).toBe(201);
+
+    const signIn = await send({ method: "POST", url: "/auth/sign-in", payload: credentials });
+    expect(signIn.statusCode).toBe(200);
+    const { accessToken } = signIn.json<{ accessToken: string }>();
+    const authorization = `Bearer ${accessToken}`;
+
+    const added = await send({
+      method: "POST",
+      url: "/me/addresses",
+      headers: { authorization },
+      payload: {
+        name: "Meera Iyer",
+        line1: "4 Sample Street",
+        city: "Kochi",
+        state: "KL",
+        pincode: "682001",
+      },
+    });
+    expect(added.statusCode).toBe(201);
+    const { id } = added.json<{ id: string }>();
+
+    const listed = await send({ method: "GET", url: "/me/addresses", headers: { authorization } });
+    expect(listed.statusCode).toBe(200);
+    expect(listed.json()).toEqual([
+      expect.objectContaining({ id, name: "Meera Iyer", pincode: "682001" }),
+    ]);
   });
 
   it("stays under the rate limit", () => {

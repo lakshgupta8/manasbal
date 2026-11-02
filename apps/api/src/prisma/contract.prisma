@@ -14,12 +14,15 @@ model User {
   isSample         Boolean  @default(false) @map("is_sample")
   createdByVisitor Boolean  @default(false) @map("created_by_visitor")
   createdAt        DateTime @default(now()) @map("created_at")
+  emailVerifiedAt  DateTime? @map("email_verified_at")
   seller           Seller?
   addresses        Address[]
   orders           Order[]
   reviews          Review[]
   cart             Cart?
   auditLogs        AuditLog[]
+  refreshTokens    RefreshToken[]
+  emailTokens      EmailToken[]
 
   @@map("users")
 }
@@ -296,4 +299,39 @@ model DemoMarker {
   createdAt DateTime @map("created_at")
 
   @@map("_demo_marker")
+}
+
+model RefreshToken {
+  id               Uuid      @id @default(uuid())
+  userId           Uuid      @map("user_id")
+  familyId         Uuid      @map("family_id")
+  tokenHash        String    @unique @map("token_hash")
+  expiresAt        DateTime  @map("expires_at")
+  usedAt           DateTime? @map("used_at")
+  revokedAt        DateTime? @map("revoked_at")
+  userAgent        String?   @map("user_agent")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  isSample         Boolean   @default(false) @map("is_sample")
+  createdByVisitor Boolean   @default(false) @map("created_by_visitor")
+  user             User      @relation(fields: [userId], references: [id])
+
+  @@map("refresh_tokens")
+  @@index([familyId])
+}
+
+// One-time links sent by email. purpose says what the link does ("verify-email"; the next one is
+// password reset). Only the SHA-256 hash of the token is stored, as for refresh tokens.
+model EmailToken {
+  id               Uuid      @id @default(uuid())
+  userId           Uuid      @map("user_id")
+  purpose          String
+  tokenHash        String    @unique @map("token_hash")
+  expiresAt        DateTime  @map("expires_at")
+  usedAt           DateTime? @map("used_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  isSample         Boolean   @default(false) @map("is_sample")
+  createdByVisitor Boolean   @default(false) @map("created_by_visitor")
+  user             User      @relation(fields: [userId], references: [id])
+
+  @@map("email_tokens")
 }

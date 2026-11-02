@@ -6,8 +6,9 @@ import {
 } from "@nestjs/common";
 import { getDb } from "../prisma/db.js";
 
-// Lets in only users whose role is admin. It runs after DemoUserGuard, which has already put the
-// user's id on the request.
+// Lets in only users whose role is admin. It runs after AuthGuard, which has already put the
+// user's id on the request. The role is read from the database rather than the token, so a
+// changed role applies at once instead of when the token expires.
 @Injectable()
 export class AdminGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {

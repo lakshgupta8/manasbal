@@ -1,5 +1,15 @@
 # @manasbal/types
 
+## 0.4.0
+
+### Minor Changes
+
+- eba2739: Protected endpoints take an access token (Authorization: Bearer); the x-demo-user header is gone; GET /me answers the signed-in user.
+- b5c7e2b: New accounts confirm their email address (POST /auth/verify-email); sign-in refuses unconfirmed accounts.
+- 1dc77f0: Forgotten passwords can be reset by email (POST /auth/forgot-password, POST /auth/reset-password); a reset ends every session.
+- 7775290: Users can sign in with `POST /auth/sign-in`: it answers a 15-minute access token and sets an httpOnly refresh cookie.
+- 668aa20: Visitors can create an account with `POST /auth/sign-up`.
+
 ## 0.3.0
 
 ### Minor Changes

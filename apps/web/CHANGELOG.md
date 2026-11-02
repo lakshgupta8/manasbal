@@ -1,5 +1,16 @@
 # @manasbal/web
 
+## 0.1.3
+
+### Patch Changes
+
+- 5bc3b06: Add the `Notice` component to `@manasbal/ui`, and use it for the "Categories are unavailable right now" message on the home page.
+- Updated dependencies [7b330ec]
+- Updated dependencies [5bc3b06]
+- Updated dependencies [90c1077]
+  - @manasbal/ui@0.0.2
+  - @manasbal/sdk@0.2.0
+
 ## 0.1.2
 
 ### Patch Changes

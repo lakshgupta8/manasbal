@@ -4,7 +4,7 @@ import { Test } from "@nestjs/testing";
 import { orderPageSchema } from "@manasbal/types";
 import { ProblemDetailsFilter } from "../src/errors/problem-details.filter.js";
 import { OrdersModule } from "../src/orders/orders.module.js";
-import { DEMO_USER_HEADER } from "../src/users/demo-user.guard.js";
+import { bearer } from "./support/auth.js";
 import { startTestDatabase, type TestDatabase } from "./support/test-database.js";
 
 interface Shopper {
@@ -19,8 +19,8 @@ describe("GET /orders (e2e)", () => {
   let buyer: Shopper;
   let other: Shopper;
 
-  const get = (userId: string, url: string) =>
-    app.inject({ method: "GET", url, headers: { [DEMO_USER_HEADER]: userId } });
+  const get = async (userId: string, url: string) =>
+    app.inject({ method: "GET", url, headers: await bearer(userId) });
 
   async function createShopper(email: string): Promise<Shopper> {
     const orm = database.db.orm.public;
@@ -106,7 +106,7 @@ describe("GET /orders (e2e)", () => {
     expect((await get(buyer.id, `/orders?limit=${limit}`)).statusCode).toBe(400);
   });
 
-  it("answers 401 without the demo header", async () => {
+  it("answers 401 without an access token", async () => {
     const response = await app.inject({ method: "GET", url: "/orders" });
 
     expect(response.statusCode).toBe(401);

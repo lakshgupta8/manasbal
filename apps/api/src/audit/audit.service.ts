@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { getDb } from "../prisma/db.js";
-import type { Actor } from "../users/demo-user.guard.js";
+import type { Actor } from "../auth/current-user.js";
 
 // The orm of getDb(), or of a transaction.
 type Orm = Pick<ReturnType<typeof getDb>, "orm">["orm"];

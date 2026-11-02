@@ -3,12 +3,6 @@ variables:
   - name: baseUrl
     value: http://localhost:3001
     description: ""
-  - name: demoUser
-    value: 65cedd33-1ee7-4e01-bf15-64eacf010381
-    description: ""
-  - name: addressId
-    value: 698e49bd-f6dd-4156-b91f-00bdc1bb7a8b
-    description: ""
   - name: productId
     value: 061d36a3-0f34-4b43-b93b-de2d43251eef
     description: ""
@@ -21,6 +15,9 @@ variables:
   - name: variantId
     value: 7a8e9a0f-a97f-4ac8-a411-c0736f79e889
     description: ""
-  - name: adminUser
-    value: 3fbacab0-047e-4acb-a75d-fc32e380cee1
-    description: ""
+  - name: adminAccessToken
+    value: ""
+    description: "An admin's access token for Admin audit log (see README); leave it empty in commits"
+  - name: mailpitUrl
+    value: http://localhost:8025
+    description: "Auth/Verify email reads the confirmation link from Mailpit"

@@ -22,21 +22,303 @@
         "tags": ["Health"]
       }
     },
+    "/auth/sign-up": {
+      "post": {
+        "description": "Use made-up details. This is a demo. When mail is on, sends a link to confirm the email address.",
+        "operationId": "AuthController_signUp",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 12,
+                    "maxLength": 128
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "confirmAdult": {
+                    "type": "boolean",
+                    "enum": [true]
+                  }
+                },
+                "required": ["email", "password", "name", "confirmAdult"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignUpResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid details, or we could not create this account"
+          }
+        },
+        "summary": "Create an account",
+        "tags": ["Auth"]
+      }
+    },
+    "/auth/sign-in": {
+      "post": {
+        "description": "Answers an access token and sets the refresh_token cookie.",
+        "operationId": "AuthController_signIn",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  }
+                },
+                "required": ["email", "password"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignInResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Email or password is wrong"
+          },
+          "403": {
+            "description": "Check your email to confirm your account"
+          }
+        },
+        "summary": "Sign in",
+        "tags": ["Auth"]
+      }
+    },
+    "/auth/verify-email": {
+      "post": {
+        "description": "Takes the token from the link in the sign-up mail. Each link works once.",
+        "operationId": "AuthController_verifyEmail",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                },
+                "required": ["token"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "The account is confirmed"
+          },
+          "400": {
+            "description": "This link is not valid any more"
+          }
+        },
+        "summary": "Confirm an email address",
+        "tags": ["Auth"]
+      }
+    },
+    "/auth/forgot-password": {
+      "post": {
+        "description": "Always answers 202, whether or not the email has an account; only an account gets the mail. The link works once, for 1 hour.",
+        "operationId": "AuthController_forgotPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  }
+                },
+                "required": ["email"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "If the email has an account, a reset link is on its way"
+          },
+          "400": {
+            "description": "Not an email address"
+          }
+        },
+        "summary": "Ask for a password reset link",
+        "tags": ["Auth"]
+      }
+    },
+    "/auth/reset-password": {
+      "post": {
+        "description": "Takes the token from the reset link and a new password. Each link works once, and every session of the account ends.",
+        "operationId": "AuthController_resetPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 12,
+                    "maxLength": 128
+                  }
+                },
+                "required": ["token", "password"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "The password is changed; sign in again"
+          },
+          "400": {
+            "description": "This link is not valid any more, or the password is too short or too long"
+          }
+        },
+        "summary": "Set a new password",
+        "tags": ["Auth"]
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "description": "Swaps the refresh_token cookie for a new access token and a new cookie. Each cookie works once; using one twice signs out every copy.",
+        "operationId": "AuthController_refresh",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignInResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No usable refresh token: sign in again"
+          }
+        },
+        "security": [
+          {
+            "refresh_token": []
+          }
+        ],
+        "summary": "Renew the access token",
+        "tags": ["Auth"]
+      }
+    },
+    "/auth/sign-out": {
+      "post": {
+        "description": "Revokes the session's refresh tokens and clears the cookie.",
+        "operationId": "AuthController_signOut",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "refresh_token": []
+          }
+        ],
+        "summary": "Sign out",
+        "tags": ["Auth"]
+      }
+    },
+    "/me": {
+      "get": {
+        "description": "The signed-in user's name, email and role.",
+        "operationId": "MeController_get",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Me"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No valid access token, or the account is gone"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Who am I",
+        "tags": ["Me"]
+      }
+    },
     "/me/addresses": {
       "get": {
         "description": "Every delivery address the demo user has saved, sorted by name.",
         "operationId": "AddressesController_list",
-        "parameters": [
-          {
-            "name": "x-demo-user",
-            "in": "header",
-            "description": "Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it.",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "",
@@ -52,26 +334,21 @@
             }
           },
           "401": {
-            "description": "No user, or the API runs in production"
+            "description": "No valid access token"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "List my addresses",
         "tags": ["Addresses"]
       },
       "post": {
         "description": "Saves a new delivery address for the demo user. The change is written to the audit log.",
         "operationId": "AddressesController_create",
-        "parameters": [
-          {
-            "name": "x-demo-user",
-            "in": "header",
-            "description": "Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it.",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -125,9 +402,14 @@
             }
           },
           "401": {
-            "description": "No user, or the API runs in production"
+            "description": "No valid access token"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Add an address",
         "tags": ["Addresses"]
       }
@@ -137,15 +419,6 @@
         "description": "Updates only the fields sent. The change is written to the audit log.",
         "operationId": "AddressesController_update",
         "parameters": [
-          {
-            "name": "x-demo-user",
-            "in": "header",
-            "description": "Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it.",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "id",
             "required": true,
@@ -207,12 +480,17 @@
             }
           },
           "401": {
-            "description": "No user, or the API runs in production"
+            "description": "No valid access token"
           },
           "404": {
             "description": "The user has no address with this id"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Change an address",
         "tags": ["Addresses"]
       },
@@ -220,15 +498,6 @@
         "description": "Deletes one of the demo user's addresses. An address an order was sent to cannot be deleted. The change is written to the audit log.",
         "operationId": "AddressesController_remove",
         "parameters": [
-          {
-            "name": "x-demo-user",
-            "in": "header",
-            "description": "Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it.",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "id",
             "required": true,
@@ -243,7 +512,7 @@
             "description": ""
           },
           "401": {
-            "description": "No user, or the API runs in production"
+            "description": "No valid access token"
           },
           "404": {
             "description": "The user has no address with this id"
@@ -252,6 +521,11 @@
             "description": "An order was sent to this address"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Delete an address",
         "tags": ["Addresses"]
       }
@@ -492,17 +766,7 @@
       "get": {
         "description": "The demo user's cart with its lines and total, in whole paise.",
         "operationId": "CartController_get",
-        "parameters": [
-          {
-            "name": "x-demo-user",
-            "in": "header",
-            "description": "Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it.",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "",
@@ -515,9 +779,14 @@
             }
           },
           "401": {
-            "description": "No user, or the API runs in production"
+            "description": "No valid access token"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Get my cart",
         "tags": ["Cart"]
       }
@@ -527,15 +796,6 @@
         "description": "Adds a variant to the cart. If it is already there, its quantity goes up. Send an Idempotency-Key header so that retrying the request doesn't add the item twice.",
         "operationId": "CartController_addItem",
         "parameters": [
-          {
-            "name": "x-demo-user",
-            "in": "header",
-            "description": "Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it.",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "Idempotency-Key",
             "in": "header",
@@ -582,7 +842,7 @@
             }
           },
           "401": {
-            "description": "No user, or the API runs in production"
+            "description": "No valid access token"
           },
           "404": {
             "description": "No such variant"
@@ -591,6 +851,11 @@
             "description": "More than the stock"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Add to my cart",
         "tags": ["Cart"]
       }
@@ -600,15 +865,6 @@
         "description": "One page of the demo user's orders, newest first. Totals are whole paise.",
         "operationId": "OrdersController_list",
         "parameters": [
-          {
-            "name": "x-demo-user",
-            "in": "header",
-            "description": "Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it.",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "cursor",
             "required": false,
@@ -643,9 +899,14 @@
             "description": "The cursor or limit is not valid"
           },
           "401": {
-            "description": "No user, or the API runs in production"
+            "description": "No valid access token"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "List my orders",
         "tags": ["Orders"]
       }
@@ -655,15 +916,6 @@
         "description": "One page of recorded changes, newest first. Only admins can read it.",
         "operationId": "AdminController_list",
         "parameters": [
-          {
-            "name": "x-demo-user",
-            "in": "header",
-            "description": "Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it.",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "cursor",
             "required": false,
@@ -698,12 +950,17 @@
             "description": "The cursor or limit is not valid"
           },
           "401": {
-            "description": "No user, or the API runs in production"
+            "description": "No valid access token"
           },
           "403": {
             "description": "The user is not an admin"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Read the audit log",
         "tags": ["Admin"]
       }
@@ -719,6 +976,14 @@
     {
       "name": "Health",
       "description": "Whether the API is up, and which version is running"
+    },
+    {
+      "name": "Auth",
+      "description": "Signing up and signing in"
+    },
+    {
+      "name": "Me",
+      "description": "The signed-in user"
     },
     {
       "name": "Catalog",
@@ -752,6 +1017,19 @@
     }
   ],
   "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      },
+      "refresh_token": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "refresh_token",
+        "description": "Set by sign-in"
+      }
+    },
     "schemas": {
       "HealthStatus": {
         "type": "object",
@@ -770,6 +1048,56 @@
           }
         },
         "required": ["status", "service", "version"]
+      },
+      "SignUpResult": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": ["id", "email", "name"]
+      },
+      "SignInResult": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string"
+          },
+          "expiresIn": {
+            "type": "number",
+            "description": "Seconds until the access token expires",
+            "example": 900
+          }
+        },
+        "required": ["accessToken", "expiresIn"]
+      },
+      "Me": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "example": "buyer"
+          }
+        },
+        "required": ["id", "name", "email", "role"]
       },
       "Address": {
         "type": "object",

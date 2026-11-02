@@ -18,3 +18,4 @@ export * from "./orders.js";
 export * from "./products.js";
 export * from "./reviews.js";
 export * from "./sellers.js";
+export * from "./auth.js";

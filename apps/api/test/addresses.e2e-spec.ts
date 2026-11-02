@@ -4,8 +4,8 @@ import { Test } from "@nestjs/testing";
 import { AuditModule } from "../src/audit/audit.module.js";
 import { ProblemDetailsFilter } from "../src/errors/problem-details.filter.js";
 import { fastifyOptions, REQUEST_ID_HEADER } from "../src/logging/logging.config.js";
-import { DEMO_USER_HEADER } from "../src/users/demo-user.guard.js";
 import { UsersModule } from "../src/users/users.module.js";
+import { bearer } from "./support/auth.js";
 import { startTestDatabase, type TestDatabase } from "./support/test-database.js";
 
 const address = {
@@ -23,7 +23,7 @@ describe("/me/addresses (e2e)", () => {
   let userA: string;
   let userB: string;
 
-  const as = (
+  const as = async (
     userId: string,
     method: "GET" | "POST" | "PATCH" | "DELETE",
     url: string,
@@ -35,7 +35,7 @@ describe("/me/addresses (e2e)", () => {
       url,
       payload,
       headers: {
-        [DEMO_USER_HEADER]: userId,
+        ...(await bearer(userId)),
         ...(requestId === undefined ? {} : { [REQUEST_ID_HEADER]: requestId }),
       },
     });
@@ -197,8 +197,8 @@ describe("/me/addresses (e2e)", () => {
     expect(response.json<{ detail: string }>().detail).toBe("pincode: Enter a 6-digit PIN code");
   });
 
-  it("refuses a user that doesn't exist", async () => {
-    const response = await as("00000000-0000-4000-8000-000000000000", "GET", "/me/addresses");
+  it("refuses a request without an access token", async () => {
+    const response = await app.inject({ method: "GET", url: "/me/addresses" });
 
     expect(response.statusCode).toBe(401);
   });

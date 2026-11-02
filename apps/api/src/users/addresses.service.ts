@@ -2,7 +2,7 @@ import { ConflictException, Inject, Injectable, NotFoundException } from "@nestj
 import type { AddressInput, AddressPatch } from "@manasbal/types";
 import { AuditService } from "../audit/audit.service.js";
 import { getDb } from "../prisma/db.js";
-import type { Actor } from "./demo-user.guard.js";
+import type { Actor } from "../auth/current-user.js";
 
 // What the API shows of an address: never the owner or the demo-reset flag.
 const FIELDS = ["id", "name", "line1", "city", "state", "pincode", "isDefault"] as const;

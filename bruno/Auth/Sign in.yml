@@ -1,0 +1,39 @@
+info:
+  name: Sign in
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: "{{baseUrl}}/auth/sign-in"
+  body:
+    type: json
+    data: |-
+      {
+        "email": "{{signInEmail}}",
+        "password": "made-up-password-123"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        // Every request that acts as a user sends this token (collection auth).
+        bru.setVar("accessToken", res.body.accessToken);
+        // Refresh and Refresh reuse send this cookie value on purpose.
+        const cookie = [].concat(res.headers["set-cookie"] ?? []).join(";");
+        bru.setVar("refreshToken", /refresh_token=([^;]*)/.exec(cookie)?.[1] ?? "");
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.accessToken
+      operator: isString
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
