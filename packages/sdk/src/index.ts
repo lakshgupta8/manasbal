@@ -6,14 +6,16 @@ export type * from "@manasbal/types";
 // A typed client for the Manasbal API: paths, parameters and answers all come from the
 // API's own OpenAPI description, so a changed endpoint shows up as a type error here.
 export interface ApiClientOptions extends ClientOptions {
-  // The temporary user (uuid) sent as x-demo-user until real sign-in arrives in Phase 5.
-  demoUser?: string;
+  // The access token from POST /auth/sign-in or /auth/refresh, sent as a bearer token.
+  // Leave it out for the public endpoints.
+  accessToken?: string;
 }
 
-export function createApiClient({ demoUser, headers, ...options }: ApiClientOptions = {}) {
+export function createApiClient({ accessToken, headers, ...options }: ApiClientOptions = {}) {
   return createClient<paths>({
     ...options,
-    headers: demoUser === undefined ? headers : { ...headers, "x-demo-user": demoUser },
+    headers:
+      accessToken === undefined ? headers : { ...headers, authorization: `Bearer ${accessToken}` },
   });
 }
 

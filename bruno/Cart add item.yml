@@ -1,14 +1,11 @@
 info:
   name: Cart add item
   type: http
-  seq: 13
+  seq: 14
 
 http:
   method: POST
   url: "{{baseUrl}}/cart/items"
-  headers:
-    - name: x-demo-user
-      value: "{{demoUser}}"
   body:
     type: json
     data: |-

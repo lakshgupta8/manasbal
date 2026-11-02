@@ -23,13 +23,13 @@ describe("createApiClient", () => {
     body: unknown,
     status = 200,
     contentType = "application/json",
-    demoUser?: string,
+    accessToken?: string,
   ) {
     const fetch = vi.fn<(request: Request) => Promise<Response>>(
       async () =>
         new Response(JSON.stringify(body), { status, headers: { "content-type": contentType } }),
     );
-    return { fetch, api: createApiClient({ baseUrl: "http://api.test", fetch, demoUser }) };
+    return { fetch, api: createApiClient({ baseUrl: "http://api.test", fetch, accessToken }) };
   }
 
   const ID = "00000000-0000-4000-8000-000000000001";
@@ -112,14 +112,14 @@ describe("createApiClient", () => {
     expect(fetch.mock.calls[0]![0].url).toBe("http://api.test/admin/audit-log");
   });
 
-  it("sends the demo user header only when given one", async () => {
-    const withUser = fakeApi({ items: [], subtotalPaise: 0 }, 200, "application/json", ID);
+  it("sends the access token as a bearer token only when given one", async () => {
+    const signedIn = fakeApi({ items: [], subtotalPaise: 0 }, 200, "application/json", "a.b.c");
     const without = fakeApi({ items: [], subtotalPaise: 0 });
 
-    await withUser.api.GET("/cart");
+    await signedIn.api.GET("/cart");
     await without.api.GET("/cart");
 
-    expect(withUser.fetch.mock.calls[0]![0].headers.get("x-demo-user")).toBe(ID);
-    expect(without.fetch.mock.calls[0]![0].headers.has("x-demo-user")).toBe(false);
+    expect(signedIn.fetch.mock.calls[0]![0].headers.get("authorization")).toBe("Bearer a.b.c");
+    expect(without.fetch.mock.calls[0]![0].headers.has("authorization")).toBe(false);
   });
 });

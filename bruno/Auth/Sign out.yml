@@ -1,14 +1,14 @@
 info:
-  name: Auth refresh reuse
+  name: Sign out
   type: http
-  seq: 21
+  seq: 6
 
 http:
   method: POST
-  url: "{{baseUrl}}/auth/refresh"
+  url: "{{baseUrl}}/auth/sign-out"
   headers:
     - name: Cookie
-      value: "refresh_token={{usedRefreshToken}}"
+      value: "refresh_token={{newRefreshToken}}"
   auth: inherit
 
 runtime:
@@ -20,10 +20,7 @@ runtime:
   assertions:
     - expression: res.status
       operator: eq
-      value: "401"
-    - expression: res.body.detail
-      operator: eq
-      value: '"Sign in again"'
+      value: "204"
 
 settings:
   encodeUrl: true
