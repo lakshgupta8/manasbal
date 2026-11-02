@@ -10,6 +10,7 @@ import {
   Res,
 } from "@nestjs/common";
 import {
+  ApiAcceptedResponse,
   ApiBadRequestResponse,
   ApiCookieAuth,
   ApiCreatedResponse,
@@ -24,9 +25,13 @@ import {
 import { Throttle } from "@nestjs/throttler";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import {
+  forgotPasswordInputSchema,
+  resetPasswordInputSchema,
   signInInputSchema,
   signUpInputSchema,
   verifyEmailInputSchema,
+  type ForgotPasswordInput,
+  type ResetPasswordInput,
   type SignInInput,
   type SignUpInput,
   type VerifyEmailInput,
@@ -70,7 +75,13 @@ export class AuthController {
     @Inject(AuthService)
     private readonly auth: Pick<
       AuthService,
-      "signUp" | "signIn" | "refresh" | "signOut" | "verifyEmail"
+      | "signUp"
+      | "signIn"
+      | "refresh"
+      | "signOut"
+      | "verifyEmail"
+      | "forgotPassword"
+      | "resetPassword"
     >,
   ) {}
 
@@ -122,6 +133,40 @@ export class AuthController {
     @Body(new ZodValidationPipe(verifyEmailInputSchema)) input: VerifyEmailInput,
   ): Promise<void> {
     return this.auth.verifyEmail(input.token);
+  }
+
+  @Post("forgot-password")
+  @HttpCode(HttpStatus.ACCEPTED)
+  @ApiOperation({
+    summary: "Ask for a password reset link",
+    description:
+      "Always answers 202, whether or not the email has an account; only an account gets the mail. The link works once, for 1 hour.",
+  })
+  @ApiZodBody(forgotPasswordInputSchema)
+  @ApiAcceptedResponse({ description: "If the email has an account, a reset link is on its way" })
+  @ApiBadRequestResponse({ description: "Not an email address" })
+  forgotPassword(
+    @Body(new ZodValidationPipe(forgotPasswordInputSchema)) input: ForgotPasswordInput,
+  ): void {
+    this.auth.forgotPassword(input.email);
+  }
+
+  @Post("reset-password")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: "Set a new password",
+    description:
+      "Takes the token from the reset link and a new password. Each link works once, and every session of the account ends.",
+  })
+  @ApiZodBody(resetPasswordInputSchema)
+  @ApiNoContentResponse({ description: "The password is changed; sign in again" })
+  @ApiBadRequestResponse({
+    description: "This link is not valid any more, or the password is too short or too long",
+  })
+  resetPassword(
+    @Body(new ZodValidationPipe(resetPasswordInputSchema)) input: ResetPasswordInput,
+  ): Promise<void> {
+    return this.auth.resetPassword(input.token, input.password);
   }
 
   @Post("refresh")

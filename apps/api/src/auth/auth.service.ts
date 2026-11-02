@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   Inject,
   Injectable,
+  Logger,
   UnauthorizedException,
 } from "@nestjs/common";
 import type { SignInInput, SignUpInput } from "@manasbal/types";
@@ -17,7 +18,14 @@ import {
   REFRESH_TOKEN_HOURS,
   TokensService,
 } from "./tokens.service.js";
-import { EMAIL_TOKEN_HOURS, VERIFY_EMAIL, verificationMail } from "./verification-mail.js";
+import {
+  EMAIL_TOKEN_HOURS,
+  RESET_PASSWORD,
+  RESET_TOKEN_HOURS,
+  resetMail,
+  VERIFY_EMAIL,
+  verificationMail,
+} from "./verification-mail.js";
 
 // The one answer for every sign-up that can't go ahead, so strangers can't learn which emails exist.
 export const SIGN_UP_FAILED = "We could not create this account";
@@ -35,6 +43,9 @@ export const EMAIL_NOT_CONFIRMED = "Check your email to confirm your account";
 // The one answer for an unknown, used or expired confirmation link.
 export const LINK_INVALID = "This link is not valid any more";
 
+// What is in a log when a reset mail could not be sent: never the address or the token.
+export const RESET_MAIL_FAILED = "Could not send a password reset mail";
+
 const FIELDS = ["id", "email", "name"] as const;
 
 // The longest user agent stored; anything after it is cut.
@@ -50,6 +61,8 @@ export class AuthService {
     private readonly tokens: Pick<TokensService, "signAccess" | "newRefresh" | "newEmailToken">,
     @Inject(MailerService) private readonly mailer: Pick<MailerService, "send">,
   ) {}
+
+  private readonly logger = new Logger(AuthService.name);
 
   // A real argon2id hash of nothing anyone knows, made on the first sign-in for an unknown email.
   private dummy: Promise<string> | undefined;
@@ -114,6 +127,49 @@ export class AuthService {
       return true;
     });
     if (!verified) throw new BadRequestException(LINK_INVALID);
+  }
+
+  // Answers at once, whether or not the email has an account, and does the work afterwards: the
+  // answer can't depend on the account, in what it says or in how long it takes.
+  forgotPassword(email: string): void {
+    this.sendReset(email).catch((error: unknown) => {
+      const kind = error instanceof Error ? error.name : "unknown error";
+      this.logger.error(`${RESET_MAIL_FAILED} (${kind})`);
+    });
+  }
+
+  // Sets a new password with the token from a reset link. The token works once; an unknown, used
+  // or expired one gets the same answer. Every session ends, so a thief who had the old
+  // password is signed out, and getting the mail proves the address.
+  async resetPassword(token: string, password: string): Promise<void> {
+    // Hashing is slow, so it happens before the transaction opens.
+    const passwordHash = await this.passwords.hash(password);
+    const now = Temporal.Now.instant();
+    const reset = await getDb().transaction(async (tx) => {
+      const { EmailToken, RefreshToken, User } = tx.orm.public;
+      const row = await EmailToken.where({ tokenHash: hashToken(token), purpose: RESET_PASSWORD })
+        .select("id", "userId", "expiresAt", "usedAt")
+        .first();
+      if (row === null || row.usedAt !== null) return false;
+      if (Temporal.Instant.compare(row.expiresAt, now) <= 0) return false;
+      // Two uses racing with the same link: only one marks it used.
+      const claimed = await EmailToken.where({ id: row.id, usedAt: null }).updateAndCount({
+        usedAt: now,
+      });
+      if (claimed === 0) return false;
+      const userId = row.userId;
+      await User.where({ id: userId }).updateAndCount({ passwordHash });
+      await User.where({ id: userId, emailVerifiedAt: null }).updateAndCount({
+        emailVerifiedAt: now,
+      });
+      await RefreshToken.where({ userId, revokedAt: null }).updateAndCount({ revokedAt: now });
+      // Any other reset link still in a mailbox stops working too.
+      await EmailToken.where({ userId, purpose: RESET_PASSWORD, usedAt: null }).updateAndCount({
+        usedAt: now,
+      });
+      return true;
+    });
+    if (!reset) throw new BadRequestException(LINK_INVALID);
   }
 
   async signIn({ email, password }: SignInInput, userAgent: string | undefined) {
@@ -191,6 +247,21 @@ export class AuthService {
       createdByVisitor: true,
     });
     await this.mailer.send(verificationMail(user.email, token));
+  }
+
+  // Only an existing account gets a link; an unknown email ends here, unseen by the caller.
+  private async sendReset(email: string): Promise<void> {
+    const user = await getDb().orm.public.User.where({ email }).select("id", "email").first();
+    if (user === null) return;
+    const { token, hash } = this.tokens.newEmailToken();
+    await getDb().orm.public.EmailToken.create({
+      userId: user.id,
+      purpose: RESET_PASSWORD,
+      tokenHash: hash,
+      expiresAt: Temporal.Now.instant().add({ hours: RESET_TOKEN_HOURS }),
+      createdByVisitor: true,
+    });
+    await this.mailer.send(resetMail(user.email, token));
   }
 
   private async reuse(familyId: string): Promise<never> {

@@ -78,6 +78,18 @@ The API listens on http://localhost:3001 (set `PORT` to change it). Start the da
 
 **Bruno collection.** Requests for every endpoint are in [`bruno`](bruno); see its [README](bruno/README.md) for how to open and run them.
 
+## Sign-in
+
+1. `POST /auth/sign-up` creates an account. You must be 18 or older, and you confirm it on the form.
+2. With mail on (`MAIL_MODE=smtp`, the local default), a confirmation link arrives in Mailpit at http://localhost:8025; `POST /auth/verify-email` takes its token.
+3. `POST /auth/sign-in` answers a 15-minute access token, sent as `Authorization: Bearer <token>`, and sets a `refresh_token` cookie.
+4. `POST /auth/refresh` swaps the cookie for a new token; `POST /auth/sign-out` ends the session.
+5. A forgotten password: `POST /auth/forgot-password` mails a 1-hour link, and `POST /auth/reset-password` sets a new password and ends every session.
+
+**Use made-up details.** This is a demo: never enter a real name, email address or password. Visitor accounts are deleted by the nightly reset.
+
+Production runs with mail off, so new accounts are confirmed at once and nobody receives mail. Password reset therefore can't be used there until real mail arrives (Phase 13). More detail is in [apps/api/README.md](apps/api/README.md#signing-in).
+
 ## Documentation
 
 - [Architecture decisions](docs/adr)
