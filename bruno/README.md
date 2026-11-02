@@ -25,11 +25,12 @@ The ids in [`environments/local.yml`](environments/local.yml) (`productId`, `var
 The `Auth` folder runs first and in this order:
 
 1. **Sign up** makes a new account with a fresh email.
-2. **Sign in** signs in with it and saves the access token (`accessToken`) and the refresh cookie.
-3. **Me** reads the account back with the token.
-4. **Refresh** swaps the refresh cookie once and saves the new access token.
-5. **Refresh reuse** replays the old cookie and must answer 401 (reuse revokes the whole session).
-6. **Sign out** clears the cookie. The access token keeps working until it expires (15 minutes).
+2. **Verify email** confirms it. With `MAIL_MODE=smtp` (the local default in `.env.example`), its script reads the confirmation link from the newest mail to that account in Mailpit (`mailpitUrl`, http://localhost:8025) and posts the token. With `MAIL_MODE=off`, as on prod, no mail is sent, the account is confirmed at sign-up, and this request is skipped.
+3. **Sign in** signs in with it and saves the access token (`accessToken`) and the refresh cookie. With mail on, an account that is not confirmed yet answers 403.
+4. **Me** reads the account back with the token.
+5. **Refresh** swaps the refresh cookie once and saves the new access token.
+6. **Refresh reuse** replays the old cookie and must answer 401 (reuse revokes the whole session).
+7. **Sign out** clears the cookie. The access token keeps working until it expires (15 minutes).
 
 They pass values to each other through runtime variables, so running one on its own may fail. Every other request with `auth: inherit` sends `Authorization: Bearer {{accessToken}}`, set once in [`opencollection.yml`](opencollection.yml). **Address add** saves the new address's id, which **Address edit** and **Address delete** then change.
 

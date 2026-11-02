@@ -1,14 +1,23 @@
 import { randomUUID } from "node:crypto";
-import { BadRequestException, Inject, Injectable, UnauthorizedException } from "@nestjs/common";
+import {
+  BadRequestException,
+  ForbiddenException,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from "@nestjs/common";
 import type { SignInInput, SignUpInput } from "@manasbal/types";
+import { readMailSettings } from "../mail/mail-settings.js";
+import { MailerService } from "../mail/mailer.service.js";
 import { getDb } from "../prisma/db.js";
 import { PasswordService } from "./password.service.js";
 import {
   ACCESS_TOKEN_SECONDS,
-  hashRefresh,
+  hashToken,
   REFRESH_TOKEN_HOURS,
   TokensService,
 } from "./tokens.service.js";
+import { EMAIL_TOKEN_HOURS, VERIFY_EMAIL, verificationMail } from "./verification-mail.js";
 
 // The one answer for every sign-up that can't go ahead, so strangers can't learn which emails exist.
 export const SIGN_UP_FAILED = "We could not create this account";
@@ -19,6 +28,12 @@ export const SIGN_IN_FAILED = "Email or password is wrong";
 // The one answer for every refresh that can't go ahead: missing, unknown, used, expired or
 // revoked. The client's only move is to sign in again.
 export const REFRESH_FAILED = "Sign in again";
+
+// A right password on an account whose email address is not confirmed yet.
+export const EMAIL_NOT_CONFIRMED = "Check your email to confirm your account";
+
+// The one answer for an unknown, used or expired confirmation link.
+export const LINK_INVALID = "This link is not valid any more";
 
 const FIELDS = ["id", "email", "name"] as const;
 
@@ -32,7 +47,8 @@ export class AuthService {
   constructor(
     @Inject(PasswordService) private readonly passwords: Pick<PasswordService, "hash" | "verify">,
     @Inject(TokensService)
-    private readonly tokens: Pick<TokensService, "signAccess" | "newRefresh">,
+    private readonly tokens: Pick<TokensService, "signAccess" | "newRefresh" | "newEmailToken">,
+    @Inject(MailerService) private readonly mailer: Pick<MailerService, "send">,
   ) {}
 
   // A real argon2id hash of nothing anyone knows, made on the first sign-in for an unknown email.
@@ -50,13 +66,17 @@ export class AuthService {
     if ((await users.where({ email }).select("id").first()) !== null) {
       throw new BadRequestException(SIGN_UP_FAILED);
     }
+    // With mail off nothing could confirm the address, so the account counts as confirmed now.
+    const mailOn = readMailSettings().mode === "smtp";
+    let user: { id: string; email: string; name: string };
     try {
       // Visitor accounts are removed by the nightly reset.
-      return await users.select(...FIELDS).create({
+      user = await users.select(...FIELDS).create({
         email,
         name,
         passwordHash,
         role: "buyer",
+        emailVerifiedAt: mailOn ? null : Temporal.Now.instant(),
         createdByVisitor: true,
       });
     } catch (error) {
@@ -66,12 +86,40 @@ export class AuthService {
       }
       throw error;
     }
+    // Only a new account gets a mail: a taken email has already been refused above.
+    if (mailOn) await this.sendVerification(user);
+    return user;
+  }
+
+  // Confirms the address of the account the link was sent to. The token works once; an unknown,
+  // used or expired one gets the same answer.
+  async verifyEmail(token: string): Promise<void> {
+    const now = Temporal.Now.instant();
+    const verified = await getDb().transaction(async (tx) => {
+      const tokens = tx.orm.public.EmailToken;
+      const row = await tokens
+        .where({ tokenHash: hashToken(token), purpose: VERIFY_EMAIL })
+        .select("id", "userId", "expiresAt", "usedAt")
+        .first();
+      if (row === null || row.usedAt !== null) return false;
+      if (Temporal.Instant.compare(row.expiresAt, now) <= 0) return false;
+      // Two clicks racing with the same link: only one marks it used.
+      const claimed = await tokens
+        .where({ id: row.id, usedAt: null })
+        .updateAndCount({ usedAt: now });
+      if (claimed === 0) return false;
+      await tx.orm.public.User.where({ id: row.userId, emailVerifiedAt: null }).updateAndCount({
+        emailVerifiedAt: now,
+      });
+      return true;
+    });
+    if (!verified) throw new BadRequestException(LINK_INVALID);
   }
 
   async signIn({ email, password }: SignInInput, userAgent: string | undefined) {
     const db = getDb();
     const user = await db.orm.public.User.where({ email })
-      .select("id", "role", "passwordHash")
+      .select("id", "role", "passwordHash", "emailVerifiedAt")
       .first();
     // An unknown email still costs one hash check, so both failures take about the same time.
     const ok = await this.passwords.verify(
@@ -79,6 +127,11 @@ export class AuthService {
       password,
     );
     if (user === null || !ok) throw new UnauthorizedException(SIGN_IN_FAILED);
+    // Only after the right password, so a wrong one never tells whether the account is confirmed.
+    // With mail off no link could arrive, so an older unconfirmed account is let in.
+    if (user.emailVerifiedAt === null && readMailSettings().mode === "smtp") {
+      throw new ForbiddenException(EMAIL_NOT_CONFIRMED);
+    }
 
     // Each sign-in starts a new family; every refresh after it stays in that family.
     return this.issue(user, randomUUID(), userAgent);
@@ -91,7 +144,7 @@ export class AuthService {
     if (!token) throw new UnauthorizedException(REFRESH_FAILED);
     const tokens = getDb().orm.public.RefreshToken;
     const row = await tokens
-      .where({ tokenHash: hashRefresh(token) })
+      .where({ tokenHash: hashToken(token) })
       .select("id", "userId", "familyId", "expiresAt", "usedAt", "revokedAt")
       .first();
     if (row === null || row.revokedAt !== null) throw new UnauthorizedException(REFRESH_FAILED);
@@ -121,10 +174,23 @@ export class AuthService {
   async signOut(token: string | undefined): Promise<void> {
     if (!token) return;
     const row = await getDb()
-      .orm.public.RefreshToken.where({ tokenHash: hashRefresh(token) })
+      .orm.public.RefreshToken.where({ tokenHash: hashToken(token) })
       .select("familyId")
       .first();
     if (row !== null) await this.revokeFamily(row.familyId);
+  }
+
+  // A one-time link, stored only as its hash; visitor rows are removed by the nightly reset.
+  private async sendVerification(user: { id: string; email: string }): Promise<void> {
+    const { token, hash } = this.tokens.newEmailToken();
+    await getDb().orm.public.EmailToken.create({
+      userId: user.id,
+      purpose: VERIFY_EMAIL,
+      tokenHash: hash,
+      expiresAt: Temporal.Now.instant().add({ hours: EMAIL_TOKEN_HOURS }),
+      createdByVisitor: true,
+    });
+    await this.mailer.send(verificationMail(user.email, token));
   }
 
   private async reuse(familyId: string): Promise<never> {

@@ -1,7 +1,7 @@
 info:
   name: Sign out
   type: http
-  seq: 6
+  seq: 7
 
 http:
   method: POST

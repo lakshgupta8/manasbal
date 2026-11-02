@@ -1,5 +1,5 @@
 import { SignJWT } from "jose";
-import { ACCESS_TOKEN_SECONDS, hashRefresh, TokensService } from "./tokens.service.js";
+import { ACCESS_TOKEN_SECONDS, hashToken, TokensService } from "./tokens.service.js";
 
 const USER = { id: "7b0c1e2a-3d4f-4a5b-8c6d-7e8f9a0b1c2d", role: "buyer" };
 const MINUTE = 60_000;
@@ -46,9 +46,17 @@ describe("TokensService", () => {
     const { token, hash } = tokens.newRefresh();
 
     expect(token).toMatch(/^[\w-]{43}$/);
-    expect(hash).toBe(hashRefresh(token));
+    expect(hash).toBe(hashToken(token));
     expect(hash).toMatch(/^[0-9a-f]{64}$/);
     expect(hash).not.toBe(token);
     expect(tokens.newRefresh().token).not.toBe(token);
+  });
+
+  it("makes email tokens the same way", () => {
+    const { token, hash } = tokens.newEmailToken();
+
+    expect(token).toMatch(/^[\w-]{43}$/);
+    expect(hash).toBe(hashToken(token));
+    expect(tokens.newEmailToken().token).not.toBe(token);
   });
 });

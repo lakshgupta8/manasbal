@@ -35,7 +35,7 @@ export interface paths {
     put?: never;
     /**
      * Create an account
-     * @description Use made-up details. This is a demo.
+     * @description Use made-up details. This is a demo. When mail is on, sends a link to confirm the email address.
      */
     post: operations["AuthController_signUp"];
     delete?: never;
@@ -58,6 +58,26 @@ export interface paths {
      * @description Answers an access token and sets the refresh_token cookie.
      */
     post: operations["AuthController_signIn"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/auth/verify-email": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Confirm an email address
+     * @description Takes the token from the link in the sign-up mail. Each link works once.
+     */
+    post: operations["AuthController_verifyEmail"];
     delete?: never;
     options?: never;
     head?: never;
@@ -669,6 +689,44 @@ export interface operations {
       };
       /** @description Email or password is wrong */
       401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Check your email to confirm your account */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AuthController_verifyEmail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          token: string;
+        };
+      };
+    };
+    responses: {
+      /** @description The account is confirmed */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description This link is not valid any more */
+      400: {
         headers: {
           [name: string]: unknown;
         };

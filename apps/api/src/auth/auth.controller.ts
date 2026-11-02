@@ -13,6 +13,7 @@ import {
   ApiBadRequestResponse,
   ApiCookieAuth,
   ApiCreatedResponse,
+  ApiForbiddenResponse,
   ApiNoContentResponse,
   ApiOkResponse,
   ApiOperation,
@@ -25,8 +26,10 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import {
   signInInputSchema,
   signUpInputSchema,
+  verifyEmailInputSchema,
   type SignInInput,
   type SignUpInput,
+  type VerifyEmailInput,
 } from "@manasbal/types";
 import { AUTH_RATE_LIMIT, RATE_WINDOW_MS } from "../rate-limit/rate-limit.module.js";
 import { ApiZodBody, ZodValidationPipe } from "../validation/zod-validation.pipe.js";
@@ -65,13 +68,17 @@ export class AuthController {
   // runs. @Inject still names the provider.
   constructor(
     @Inject(AuthService)
-    private readonly auth: Pick<AuthService, "signUp" | "signIn" | "refresh" | "signOut">,
+    private readonly auth: Pick<
+      AuthService,
+      "signUp" | "signIn" | "refresh" | "signOut" | "verifyEmail"
+    >,
   ) {}
 
   @Post("sign-up")
   @ApiOperation({
     summary: "Create an account",
-    description: "Use made-up details. This is a demo.",
+    description:
+      "Use made-up details. This is a demo. When mail is on, sends a link to confirm the email address.",
   })
   @ApiZodBody(signUpInputSchema)
   @ApiCreatedResponse({ type: SignUpResult })
@@ -91,6 +98,7 @@ export class AuthController {
   @ApiZodBody(signInInputSchema)
   @ApiOkResponse({ type: SignInResult })
   @ApiUnauthorizedResponse({ description: "Email or password is wrong" })
+  @ApiForbiddenResponse({ description: "Check your email to confirm your account" })
   async signIn(
     @Body(new ZodValidationPipe(signInInputSchema)) input: SignInInput,
     @Headers("user-agent") userAgent: string | undefined,
@@ -99,6 +107,21 @@ export class AuthController {
     const { refreshToken, ...answer } = await this.auth.signIn(input, userAgent);
     reply.setCookie(REFRESH_COOKIE, refreshToken, refreshCookieOptions());
     return answer;
+  }
+
+  @Post("verify-email")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: "Confirm an email address",
+    description: "Takes the token from the link in the sign-up mail. Each link works once.",
+  })
+  @ApiZodBody(verifyEmailInputSchema)
+  @ApiNoContentResponse({ description: "The account is confirmed" })
+  @ApiBadRequestResponse({ description: "This link is not valid any more" })
+  verifyEmail(
+    @Body(new ZodValidationPipe(verifyEmailInputSchema)) input: VerifyEmailInput,
+  ): Promise<void> {
+    return this.auth.verifyEmail(input.token);
   }
 
   @Post("refresh")

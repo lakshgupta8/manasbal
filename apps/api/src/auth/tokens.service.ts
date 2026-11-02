@@ -38,11 +38,21 @@ export class TokensService {
 
   // 32 random bytes for the cookie; only the SHA-256 hash is stored.
   newRefresh(): { token: string; hash: string } {
-    const token = randomBytes(32).toString("base64url");
-    return { token, hash: hashRefresh(token) };
+    return newToken();
+  }
+
+  // The same for the one-time link in an email (EmailToken).
+  newEmailToken(): { token: string; hash: string } {
+    return newToken();
   }
 }
 
-export function hashRefresh(token: string): string {
+function newToken(): { token: string; hash: string } {
+  const token = randomBytes(32).toString("base64url");
+  return { token, hash: hashToken(token) };
+}
+
+// The stored form of a refresh or email token.
+export function hashToken(token: string): string {
   return createHash("sha256").update(token).digest("hex");
 }

@@ -1,0 +1,49 @@
+info:
+  name: Verify email
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{baseUrl}}/auth/verify-email"
+  body:
+    type: json
+    data: |-
+      {
+        "token": "{{verifyToken}}"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Reads the link from the newest mail to the account Sign up made, in Mailpit. With
+        // MAIL_MODE=off (or no mailpitUrl, as on prod) no mail exists and this request is skipped.
+        const axios = require("axios");
+        const mailpit = bru.getEnvVar("mailpitUrl");
+        const email = bru.getVar("signInEmail");
+        let token;
+        if (mailpit && email) {
+          const search = await axios.get(`${mailpit}/api/v1/search`, {
+            params: { query: `to:"${email}"`, limit: 1 },
+          });
+          const id = search.data.messages?.[0]?.ID;
+          if (id) {
+            const message = await axios.get(`${mailpit}/api/v1/message/${id}`);
+            token = /token=([\w-]+)/.exec(message.data.Text)?.[1];
+          }
+        }
+        if (token) bru.setVar("verifyToken", token);
+        else bru.runner.skipRequest();
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "204"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

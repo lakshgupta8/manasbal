@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { signInInputSchema, signUpInputSchema } from "./auth.js";
+import { signInInputSchema, signUpInputSchema, verifyEmailInputSchema } from "./auth.js";
 
 const valid = {
   email: "test.buyer@example.test",
@@ -81,4 +81,19 @@ describe("signInInputSchema", () => {
     expect(signInInputSchema.safeParse({ ...credentials, email: "nope" }).success).toBe(false);
     expect(signInInputSchema.safeParse({ ...credentials, remember: true }).success).toBe(false);
   });
+});
+
+describe("verifyEmailInputSchema", () => {
+  it("parses a token and trims it", () => {
+    expect(verifyEmailInputSchema.parse({ token: " abc_DEF-123 " })).toEqual({
+      token: "abc_DEF-123",
+    });
+  });
+
+  it.each([{}, { token: "" }, { token: "x".repeat(101) }, { token: "t", extra: true }])(
+    "refuses %j",
+    (input) => {
+      expect(verifyEmailInputSchema.safeParse(input).success).toBe(false);
+    },
+  );
 });

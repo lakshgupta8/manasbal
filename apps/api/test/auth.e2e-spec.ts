@@ -4,9 +4,16 @@ import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fa
 import { Test } from "@nestjs/testing";
 import { AuditModule } from "../src/audit/audit.module.js";
 import { AuthModule } from "../src/auth/auth.module.js";
-import { REFRESH_FAILED, SIGN_IN_FAILED, SIGN_UP_FAILED } from "../src/auth/auth.service.js";
+import {
+  EMAIL_NOT_CONFIRMED,
+  LINK_INVALID,
+  REFRESH_FAILED,
+  SIGN_IN_FAILED,
+  SIGN_UP_FAILED,
+} from "../src/auth/auth.service.js";
 import { ProblemDetailsFilter } from "../src/errors/problem-details.filter.js";
 import { fastifyOptions } from "../src/logging/logging.config.js";
+import { type Mail, MailerService } from "../src/mail/mailer.service.js";
 import { UsersModule } from "../src/users/users.module.js";
 import { startTestDatabase, type TestDatabase } from "./support/test-database.js";
 
@@ -22,6 +29,15 @@ const signUp = {
 describe("/auth (e2e)", () => {
   let database: TestDatabase;
   let app: NestFastifyApplication;
+  // Stands in for SMTP. MAIL_MODE is unset here (off), so it only receives mail in the tests
+  // that switch mail on.
+  const sent: Mail[] = [];
+  const mailer = {
+    send: (mail: Mail) => {
+      sent.push(mail);
+      return Promise.resolve();
+    },
+  };
 
   const post = (payload: object) => app.inject({ method: "POST", url: "/auth/sign-up", payload });
   const signIn = (payload: object) =>
@@ -38,7 +54,10 @@ describe("/auth (e2e)", () => {
     const moduleRef = await Test.createTestingModule({
       imports: [AuditModule, AuthModule, UsersModule],
       providers: [{ provide: APP_FILTER, useClass: ProblemDetailsFilter }],
-    }).compile();
+    })
+      .overrideProvider(MailerService)
+      .useValue(mailer)
+      .compile();
     app = moduleRef.createNestApplication<NestFastifyApplication>(
       new FastifyAdapter(fastifyOptions),
     );
@@ -54,7 +73,9 @@ describe("/auth (e2e)", () => {
 
   beforeEach(async () => {
     await database.sql("delete from refresh_tokens");
+    await database.sql("delete from email_tokens");
     await database.sql("delete from users");
+    sent.length = 0;
   });
 
   it("creates a visitor buyer and stores only an argon2id hash", async () => {
@@ -236,6 +257,92 @@ describe("/auth (e2e)", () => {
       expect(cleared).toContain("Expires=Thu, 01 Jan 1970");
       // A revoked token refuses to refresh.
       expect((await refresh(token)).statusCode).toBe(401);
+    });
+  });
+
+  it("with mail off, confirms the account at sign-up and sends nothing", async () => {
+    expect((await post(signUp)).statusCode).toBe(201);
+
+    expect(await database.sql("select email_verified_at is not null from users")).toBe("t");
+    expect(await database.sql("select count(*) from email_tokens")).toBe("0");
+    expect(sent).toEqual([]);
+  });
+
+  describe("with mail on", () => {
+    const verify = (token: string) =>
+      app.inject({ method: "POST", url: "/auth/verify-email", payload: { token } });
+    const linkToken = (mail: Mail | undefined) =>
+      /token=([\w-]+)/.exec(mail?.text ?? "")?.[1] ?? "";
+
+    beforeEach(() => {
+      vi.stubEnv("MAIL_MODE", "smtp");
+    });
+
+    afterEach(() => {
+      vi.unstubAllEnvs();
+    });
+
+    it("mails a link, refuses sign-in until it is used, then lets the account in", async () => {
+      expect((await post(signUp)).statusCode).toBe(201);
+      expect(sent).toHaveLength(1);
+      expect(sent[0]?.to).toBe(signUp.email);
+      expect(sent[0]?.text).toContain("Use made-up details. This is a demo.");
+      const token = linkToken(sent[0]);
+      expect(token).toMatch(/^[\w-]{43}$/);
+
+      // Only the hash is stored.
+      const stored = await database.sql("select token_hash || ',' || purpose from email_tokens");
+      expect(stored).toMatch(/^[0-9a-f]{64},verify-email$/);
+      expect(stored).not.toContain(token);
+
+      const early = await signIn({ email: signUp.email, password: signUp.password });
+      expect(early.statusCode).toBe(403);
+      expect(early.json()).toMatchObject({ detail: EMAIL_NOT_CONFIRMED });
+
+      expect((await verify(token)).statusCode).toBe(204);
+      expect(await database.sql("select email_verified_at is not null from users")).toBe("t");
+      expect(await database.sql("select used_at is not null from email_tokens")).toBe("t");
+
+      const later = await signIn({ email: signUp.email, password: signUp.password });
+      expect(later.statusCode).toBe(200);
+    });
+
+    it("never says whether the account is confirmed to a wrong password", async () => {
+      expect((await post(signUp)).statusCode).toBe(201);
+
+      const answer = await signIn({ email: signUp.email, password: "not the password" });
+
+      expect(answer.statusCode).toBe(401);
+      expect(answer.json()).toMatchObject({ detail: SIGN_IN_FAILED });
+    });
+
+    it("gives a used, an expired and a made-up link the same 400", async () => {
+      expect((await post(signUp)).statusCode).toBe(201);
+      const token = linkToken(sent[0]);
+      expect((await verify(token)).statusCode).toBe(204);
+
+      const used = await verify(token);
+      const madeUp = await verify("not-a-real-token");
+      await database.sql("delete from email_tokens");
+      await database.sql("delete from users");
+      expect((await post(signUp)).statusCode).toBe(201);
+      await database.sql("update email_tokens set expires_at = now() - interval '1 minute'");
+      const expired = await verify(linkToken(sent[1]));
+
+      for (const answer of [used, madeUp, expired]) {
+        expect(answer.statusCode).toBe(400);
+        expect(answer.json()).toMatchObject({ detail: LINK_INVALID });
+      }
+    });
+
+    it("sends no mail for a taken email", async () => {
+      expect((await post(signUp)).statusCode).toBe(201);
+
+      const again = await post(signUp);
+
+      expect(again.statusCode).toBe(400);
+      expect(again.json()).toMatchObject({ detail: SIGN_UP_FAILED });
+      expect(sent).toHaveLength(1);
     });
   });
 

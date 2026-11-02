@@ -4,7 +4,13 @@ import { REFRESH_COOKIE, refreshCookieOptions } from "./cookie.js";
 const USER_ID = "7b0c1e2a-3d4f-4a5b-8c6d-7e8f9a0b1c2d";
 
 describe("AuthController", () => {
-  const service = { signUp: vi.fn(), signIn: vi.fn(), refresh: vi.fn(), signOut: vi.fn() };
+  const service = {
+    signUp: vi.fn(),
+    signIn: vi.fn(),
+    refresh: vi.fn(),
+    signOut: vi.fn(),
+    verifyEmail: vi.fn(),
+  };
   const controller = new AuthController(service);
 
   it("passes the sign-up input to the service and answers its result", async () => {
@@ -39,6 +45,13 @@ describe("AuthController", () => {
       "cookie-token",
       refreshCookieOptions(),
     );
+  });
+
+  it("passes the link's token to the service", async () => {
+    service.verifyEmail.mockResolvedValue(undefined);
+
+    await expect(controller.verifyEmail({ token: "link-token" })).resolves.toBeUndefined();
+    expect(service.verifyEmail).toHaveBeenCalledWith("link-token");
   });
 
   it("swaps the cookie's refresh token for a new pair", async () => {
