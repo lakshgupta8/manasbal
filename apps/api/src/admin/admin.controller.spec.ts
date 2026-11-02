@@ -2,7 +2,7 @@ import { APP_FILTER } from "@nestjs/core";
 import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fastify";
 import { Test } from "@nestjs/testing";
 import { ProblemDetailsFilter } from "../errors/problem-details.filter.js";
-import { DemoUserGuard } from "../users/demo-user.guard.js";
+import { AuthGuard } from "../auth/auth.guard.js";
 import { AdminGuard } from "./admin.guard.js";
 import { AdminModule } from "./admin.module.js";
 import { AdminService } from "./admin.service.js";
@@ -22,7 +22,7 @@ describe("AdminController", () => {
     })
       .overrideProvider(AdminService)
       .useValue(service)
-      .overrideGuard(DemoUserGuard)
+      .overrideGuard(AuthGuard)
       .useValue(allow)
       .overrideGuard(AdminGuard)
       .useValue(allow)

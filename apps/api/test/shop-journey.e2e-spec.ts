@@ -3,7 +3,7 @@ import { Test } from "@nestjs/testing";
 import { cartSchema, orderPageSchema, reviewPageSchema } from "@manasbal/types";
 import { AppModule } from "../src/app.module.js";
 import { RATE_LIMIT } from "../src/rate-limit/rate-limit.module.js";
-import { DEMO_USER_HEADER } from "../src/users/demo-user.guard.js";
+import { bearer } from "./support/auth.js";
 import { startTestDatabase, type TestDatabase } from "./support/test-database.js";
 import { startTestValkey, type TestValkey } from "./support/test-valkey.js";
 
@@ -23,18 +23,18 @@ describe("shop journey (e2e)", () => {
     sent += 1;
     return app.inject(options);
   };
-  const get = (url: string, userId?: string) =>
+  const get = async (url: string, userId?: string) =>
     send({
       method: "GET",
       url,
-      headers: userId === undefined ? {} : { [DEMO_USER_HEADER]: userId },
+      headers: userId === undefined ? {} : await bearer(userId),
     });
-  const addToCart = (userId: string, payload: object, key: string) =>
+  const addToCart = async (userId: string, payload: object, key: string) =>
     send({
       method: "POST",
       url: "/cart/items",
       payload,
-      headers: { [DEMO_USER_HEADER]: userId, "idempotency-key": key },
+      headers: { ...(await bearer(userId)), "idempotency-key": key },
     });
   const cartLines = () =>
     database.db.orm.public.CartItem.where({ variantId }).select("quantity").all();
@@ -207,7 +207,7 @@ describe("shop journey (e2e)", () => {
     expect(page.items.map((order) => order.id)).toEqual([buyerOrder]);
   });
 
-  it("answers 401 as a problem document when the demo header is missing", async () => {
+  it("answers 401 as a problem document without an access token", async () => {
     for (const url of ["/cart", "/orders"]) {
       const response = await get(url);
 

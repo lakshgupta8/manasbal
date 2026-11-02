@@ -3,15 +3,15 @@ import { APP_FILTER } from "@nestjs/core";
 import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fastify";
 import { Test } from "@nestjs/testing";
 import { ProblemDetailsFilter } from "../errors/problem-details.filter.js";
-import { DEMO_USER_HEADER, DemoUserGuard } from "../users/demo-user.guard.js";
+import { AuthGuard } from "../auth/auth.guard.js";
 import { OrdersModule } from "./orders.module.js";
 import { OrdersService } from "./orders.service.js";
 
 const USER_ID = "7b0c1e2a-3d4f-4a5b-8c6d-7e8f9a0b1c2d";
 
-// The query needs a real database and lives in test/orders.e2e-spec.ts. This one needs none: in
-// production the guard refuses before anything is looked up.
-describe("OrdersController in production", () => {
+// The query needs a real database and lives in test/orders.e2e-spec.ts. This one needs none:
+// without an access token the real guard refuses before anything is looked up.
+describe("OrdersController without a token", () => {
   let app: NestFastifyApplication;
 
   beforeAll(async () => {
@@ -28,20 +28,8 @@ describe("OrdersController in production", () => {
     await app.close();
   });
 
-  beforeEach(() => {
-    vi.stubEnv("NODE_ENV", "production");
-  });
-
-  afterEach(() => {
-    vi.unstubAllEnvs();
-  });
-
   it("GET /orders answers 401", async () => {
-    const response = await app.inject({
-      method: "GET",
-      url: "/orders",
-      headers: { [DEMO_USER_HEADER]: USER_ID },
-    });
+    const response = await app.inject({ method: "GET", url: "/orders" });
 
     expect(response.statusCode).toBe(401);
     expect(response.headers["content-type"]).toContain("application/problem+json");
@@ -61,7 +49,7 @@ describe("OrdersController", () => {
     })
       .overrideProvider(OrdersService)
       .useValue(service)
-      .overrideGuard(DemoUserGuard)
+      .overrideGuard(AuthGuard)
       .useValue({
         canActivate: (context: ExecutionContext) => {
           context.switchToHttp().getRequest<{ userId?: string }>().userId = USER_ID;

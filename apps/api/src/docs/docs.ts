@@ -10,6 +10,7 @@ export const DOCS_JSON_PATH = "docs-json";
 const TAGS: ReadonlyArray<readonly [name: string, description: string]> = [
   ["Health", "Whether the API is up, and which version is running"],
   ["Auth", "Signing up and signing in"],
+  ["Me", "The signed-in user"],
   ["Catalog", "Categories, products, stock and reviews"],
   ["Sellers", "Seller storefronts"],
   ["Cart", "The demo user's cart"],
@@ -25,6 +26,8 @@ export function createOpenApiDocument(app: INestApplication, version: string): O
     .setVersion(version)
     // Relative, so the same document is right locally, on previews and in production.
     .addServer("/", "The server that serves these docs")
+    // The access token sign-in answers; every protected endpoint takes it.
+    .addBearerAuth()
     // The httpOnly cookie sign-in sets; /auth/refresh and /auth/sign-out read it.
     .addCookieAuth(
       REFRESH_COOKIE,

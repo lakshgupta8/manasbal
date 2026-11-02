@@ -4,10 +4,12 @@ import { NestFactory } from "@nestjs/core";
 import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fastify";
 import { Logger } from "nestjs-pino";
 import { AppModule } from "./app.module.js";
+import { requireJwtSecret } from "./auth/jwt-secret.js";
 import { setupDocs } from "./docs/docs.js";
 import { echoRequestId, fastifyOptions } from "./logging/logging.config.js";
 
 async function bootstrap() {
+  requireJwtSecret();
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter(fastifyOptions),

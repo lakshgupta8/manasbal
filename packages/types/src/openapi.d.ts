@@ -104,6 +104,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/me": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Who am I
+     * @description The signed-in user's name, email and role.
+     */
+    get: operations["MeController_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/me/addresses": {
     parameters: {
       query?: never;
@@ -377,6 +397,14 @@ export interface components {
        * @example 900
        */
       expiresIn: number;
+    };
+    Me: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      email: string;
+      /** @example buyer */
+      role: string;
     };
     Address: {
       /** Format: uuid */
@@ -691,13 +719,36 @@ export interface operations {
       };
     };
   };
+  MeController_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Me"];
+        };
+      };
+      /** @description No valid access token, or the account is gone */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   AddressesController_list: {
     parameters: {
       query?: never;
-      header?: {
-        /** @description Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it. */
-        "x-demo-user"?: string;
-      };
+      header?: never;
       path?: never;
       cookie?: never;
     };
@@ -711,7 +762,7 @@ export interface operations {
           "application/json": components["schemas"]["Address"][];
         };
       };
-      /** @description No user, or the API runs in production */
+      /** @description No valid access token */
       401: {
         headers: {
           [name: string]: unknown;
@@ -723,10 +774,7 @@ export interface operations {
   AddressesController_create: {
     parameters: {
       query?: never;
-      header?: {
-        /** @description Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it. */
-        "x-demo-user"?: string;
-      };
+      header?: never;
       path?: never;
       cookie?: never;
     };
@@ -751,7 +799,7 @@ export interface operations {
           "application/json": components["schemas"]["Address"];
         };
       };
-      /** @description No user, or the API runs in production */
+      /** @description No valid access token */
       401: {
         headers: {
           [name: string]: unknown;
@@ -763,10 +811,7 @@ export interface operations {
   AddressesController_remove: {
     parameters: {
       query?: never;
-      header?: {
-        /** @description Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it. */
-        "x-demo-user"?: string;
-      };
+      header?: never;
       path: {
         id: string;
       };
@@ -780,7 +825,7 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description No user, or the API runs in production */
+      /** @description No valid access token */
       401: {
         headers: {
           [name: string]: unknown;
@@ -806,10 +851,7 @@ export interface operations {
   AddressesController_update: {
     parameters: {
       query?: never;
-      header?: {
-        /** @description Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it. */
-        "x-demo-user"?: string;
-      };
+      header?: never;
       path: {
         id: string;
       };
@@ -836,7 +878,7 @@ export interface operations {
           "application/json": components["schemas"]["Address"];
         };
       };
-      /** @description No user, or the API runs in production */
+      /** @description No valid access token */
       401: {
         headers: {
           [name: string]: unknown;
@@ -1038,10 +1080,7 @@ export interface operations {
   CartController_get: {
     parameters: {
       query?: never;
-      header?: {
-        /** @description Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it. */
-        "x-demo-user"?: string;
-      };
+      header?: never;
       path?: never;
       cookie?: never;
     };
@@ -1055,7 +1094,7 @@ export interface operations {
           "application/json": components["schemas"]["Cart"];
         };
       };
-      /** @description No user, or the API runs in production */
+      /** @description No valid access token */
       401: {
         headers: {
           [name: string]: unknown;
@@ -1068,8 +1107,6 @@ export interface operations {
     parameters: {
       query?: never;
       header?: {
-        /** @description Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it. */
-        "x-demo-user"?: string;
         /** @description Repeats of the same key answer the first result instead of adding again */
         "Idempotency-Key"?: string;
       };
@@ -1094,7 +1131,7 @@ export interface operations {
           "application/json": components["schemas"]["Cart"];
         };
       };
-      /** @description No user, or the API runs in production */
+      /** @description No valid access token */
       401: {
         headers: {
           [name: string]: unknown;
@@ -1125,10 +1162,7 @@ export interface operations {
         /** @description 1 to 100, default 20 */
         limit?: string;
       };
-      header?: {
-        /** @description Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it. */
-        "x-demo-user"?: string;
-      };
+      header?: never;
       path?: never;
       cookie?: never;
     };
@@ -1149,7 +1183,7 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description No user, or the API runs in production */
+      /** @description No valid access token */
       401: {
         headers: {
           [name: string]: unknown;
@@ -1166,10 +1200,7 @@ export interface operations {
         /** @description 1 to 100, default 20 */
         limit?: string;
       };
-      header?: {
-        /** @description Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it. */
-        "x-demo-user"?: string;
-      };
+      header?: never;
       path?: never;
       cookie?: never;
     };
@@ -1190,7 +1221,7 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description No user, or the API runs in production */
+      /** @description No valid access token */
       401: {
         headers: {
           [name: string]: unknown;

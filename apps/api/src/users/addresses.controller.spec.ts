@@ -7,7 +7,7 @@ import { AuditModule } from "../audit/audit.module.js";
 import { fastifyOptions, REQUEST_ID_HEADER } from "../logging/logging.config.js";
 import { ProblemDetailsFilter } from "../errors/problem-details.filter.js";
 import { AddressesService } from "./addresses.service.js";
-import { DEMO_USER_HEADER, DemoUserGuard } from "./demo-user.guard.js";
+import { AuthGuard } from "../auth/auth.guard.js";
 import { UsersModule } from "./users.module.js";
 
 const USER_ID = "7b0c1e2a-3d4f-4a5b-8c6d-7e8f9a0b1c2d";
@@ -16,7 +16,7 @@ const REQUEST_ID = "test-req-1";
 const ACTOR = { userId: USER_ID, requestId: REQUEST_ID };
 const ADDRESS_ID = "0f1e2d3c-4b5a-4968-8776-655443322110";
 
-// Every endpoint, called the way a client that knows the demo header would call it.
+// Every endpoint, called the way a client would call it.
 const requests: InjectOptions[] = [
   { method: "GET", url: "/me/addresses" },
   {
@@ -35,8 +35,8 @@ const requests: InjectOptions[] = [
 ];
 
 // The ownership rules need a real database and live in test/addresses.e2e-spec.ts. This one
-// needs none: in production the guard refuses before anything is looked up.
-describe("AddressesController in production", () => {
+// needs none: without an access token the real guard refuses before anything is looked up.
+describe("AddressesController without a token", () => {
   let app: NestFastifyApplication;
 
   beforeAll(async () => {
@@ -53,16 +53,8 @@ describe("AddressesController in production", () => {
     await app.close();
   });
 
-  beforeEach(() => {
-    vi.stubEnv("NODE_ENV", "production");
-  });
-
-  afterEach(() => {
-    vi.unstubAllEnvs();
-  });
-
   it.each(requests)("$method $url answers 401", async (request) => {
-    const response = await app.inject({ ...request, headers: { [DEMO_USER_HEADER]: USER_ID } });
+    const response = await app.inject(request);
 
     expect(response.statusCode).toBe(401);
     expect(response.headers["content-type"]).toContain("application/problem+json");
@@ -87,7 +79,7 @@ describe("AddressesController", () => {
     })
       .overrideProvider(AddressesService)
       .useValue(service)
-      .overrideGuard(DemoUserGuard)
+      .overrideGuard(AuthGuard)
       .useValue({
         canActivate: (context: ExecutionContext) => {
           context.switchToHttp().getRequest<{ userId?: string }>().userId = USER_ID;
