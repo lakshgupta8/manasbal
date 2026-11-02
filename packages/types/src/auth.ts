@@ -22,3 +22,12 @@ export const signInInputSchema = z
   .strict();
 
 export type SignInInput = z.infer<typeof signInInputSchema>;
+
+// The token from the link in the confirmation mail: 32 random bytes as base64url (43 characters).
+export const verifyEmailInputSchema = z
+  .object({
+    token: z.string().trim().min(1).max(100),
+  })
+  .strict();
+
+export type VerifyEmailInput = z.infer<typeof verifyEmailInputSchema>;

@@ -24,7 +24,7 @@
     },
     "/auth/sign-up": {
       "post": {
-        "description": "Use made-up details. This is a demo.",
+        "description": "Use made-up details. This is a demo. When mail is on, sends a link to confirm the email address.",
         "operationId": "AuthController_signUp",
         "parameters": [],
         "requestBody": {
@@ -117,9 +117,48 @@
           },
           "401": {
             "description": "Email or password is wrong"
+          },
+          "403": {
+            "description": "Check your email to confirm your account"
           }
         },
         "summary": "Sign in",
+        "tags": ["Auth"]
+      }
+    },
+    "/auth/verify-email": {
+      "post": {
+        "description": "Takes the token from the link in the sign-up mail. Each link works once.",
+        "operationId": "AuthController_verifyEmail",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                },
+                "required": ["token"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "The account is confirmed"
+          },
+          "400": {
+            "description": "This link is not valid any more"
+          }
+        },
+        "summary": "Confirm an email address",
         "tags": ["Auth"]
       }
     },

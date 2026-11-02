@@ -27,4 +27,6 @@ Commit the contract, the generated files and `migrations/`. Don't edit the gener
 
 Protected endpoints (`/me`, `/me/addresses`, `/cart`, `/orders`, `/admin`) take an access token in `Authorization: Bearer <token>`. Get one from `POST /auth/sign-in` (sign up first with `POST /auth/sign-up`); it lasts 15 minutes, and `POST /auth/refresh` swaps the `refresh_token` cookie for a new one. Without a valid token they answer 401. The API signs tokens with `JWT_SECRET` (see `.env.example`) and refuses to start in production without it.
 
+**Confirming the email address.** With `MAIL_MODE=smtp` (the local default), sign-up mails a link to `${WEB_URL}/verify-email?token=…`; open the mail in Mailpit at http://localhost:8025 and post the token to `POST /auth/verify-email`. Until then sign-in answers 403 "Check your email to confirm your account". With `MAIL_MODE=off` (or unset, as in production and the tests) no mail is sent and new accounts are confirmed at once.
+
 The API imports the request schemas from `@manasbal/types` at run time, so build that package before `start:dev`: `pnpm --filter @manasbal/types build`. `pnpm dev` does it for you.

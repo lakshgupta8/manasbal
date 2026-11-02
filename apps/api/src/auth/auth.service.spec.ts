@@ -1,6 +1,13 @@
-import { BadRequestException, UnauthorizedException } from "@nestjs/common";
-import { AuthService, REFRESH_FAILED, SIGN_IN_FAILED, SIGN_UP_FAILED } from "./auth.service.js";
-import { hashRefresh } from "./tokens.service.js";
+import { BadRequestException, ForbiddenException, UnauthorizedException } from "@nestjs/common";
+import {
+  AuthService,
+  EMAIL_NOT_CONFIRMED,
+  LINK_INVALID,
+  REFRESH_FAILED,
+  SIGN_IN_FAILED,
+  SIGN_UP_FAILED,
+} from "./auth.service.js";
+import { hashToken } from "./tokens.service.js";
 
 const USER_ID = "7b0c1e2a-3d4f-4a5b-8c6d-7e8f9a0b1c2d";
 const HASH = "$argon2id$v=19$m=19456,t=2,p=1$stub";
@@ -31,11 +38,16 @@ function fakeCollection() {
 
 let User = fakeCollection();
 let RefreshToken = fakeCollection();
+let EmailToken = fakeCollection();
 
 // Sign-up and sign-in against a real database are in test/auth.e2e-spec.ts. These cover the
 // service's own decisions.
 vi.mock("../prisma/db.js", () => ({
-  getDb: () => ({ orm: { public: { User, RefreshToken } } }),
+  getDb: () => ({
+    orm: { public: { User, RefreshToken, EmailToken } },
+    transaction: (work: (tx: object) => Promise<unknown>) =>
+      work({ orm: { public: { User, EmailToken } } }),
+  }),
 }));
 
 describe("AuthService", () => {
@@ -46,36 +58,82 @@ describe("AuthService", () => {
   const tokens = {
     signAccess: vi.fn<(user: { id: string; role: string }) => Promise<string>>(),
     newRefresh: vi.fn<() => { token: string; hash: string }>(),
+    newEmailToken: vi.fn<() => { token: string; hash: string }>(),
   };
-  let service = new AuthService(passwords, tokens);
+  const mailer = { send: vi.fn<(mail: { to: string; text: string }) => Promise<void>>() };
+  let service = new AuthService(passwords, tokens, mailer);
 
   beforeEach(() => {
     User = fakeCollection();
     RefreshToken = fakeCollection();
+    EmailToken = fakeCollection();
+    vi.unstubAllEnvs();
     passwords.hash.mockReset().mockResolvedValue(HASH);
     passwords.verify.mockReset();
     tokens.signAccess.mockReset().mockResolvedValue("access.jwt");
     tokens.newRefresh.mockReset().mockReturnValue({ token: "cookie-token", hash: "stored-hash" });
+    tokens.newEmailToken.mockReset().mockReturnValue({ token: "link-token", hash: "link-hash" });
+    mailer.send.mockReset().mockResolvedValue(undefined);
     // A fresh service each time, so the cached dummy hash never carries over between tests.
-    service = new AuthService(passwords, tokens);
+    service = new AuthService(passwords, tokens, mailer);
   });
 
-  it("creates a buyer with the hash, marked for the demo reset", async () => {
+  it("creates a confirmed buyer with the hash when mail is off, and sends nothing", async () => {
     const created = { id: USER_ID, email: input.email, name: input.name };
     User.first.mockResolvedValue(null);
     User.create.mockResolvedValue(created);
+    const before = Temporal.Now.instant();
 
     await expect(service.signUp(input)).resolves.toBe(created);
 
     expect(passwords.hash).toHaveBeenCalledWith(input.password);
     expect(User.filters).toEqual([{ email: input.email }]);
-    expect(User.create).toHaveBeenCalledWith({
+    const row = User.create.mock.calls[0]?.[0] as Record<string, unknown>;
+    expect(row).toMatchObject({
       email: input.email,
       name: input.name,
       passwordHash: HASH,
       role: "buyer",
       createdByVisitor: true,
     });
+    const verifiedAt = row["emailVerifiedAt"] as Temporal.Instant;
+    expect(Temporal.Instant.compare(verifiedAt, before)).toBeGreaterThanOrEqual(0);
+    expect(EmailToken.create).not.toHaveBeenCalled();
+    expect(mailer.send).not.toHaveBeenCalled();
+  });
+
+  it("with mail on, creates an unconfirmed buyer and mails a link stored only as its hash", async () => {
+    vi.stubEnv("MAIL_MODE", "smtp");
+    const created = { id: USER_ID, email: input.email, name: input.name };
+    User.first.mockResolvedValue(null);
+    User.create.mockResolvedValue(created);
+    const before = Temporal.Now.instant();
+
+    await expect(service.signUp(input)).resolves.toBe(created);
+
+    expect(User.create.mock.calls[0]?.[0]).toMatchObject({ emailVerifiedAt: null });
+    const token = EmailToken.create.mock.calls[0]?.[0] as Record<string, unknown>;
+    expect(token).toMatchObject({
+      userId: USER_ID,
+      purpose: "verify-email",
+      tokenHash: "link-hash",
+      createdByVisitor: true,
+    });
+    expect(JSON.stringify(token)).not.toContain("link-token");
+    const hours = before.until(token["expiresAt"] as Temporal.Instant).total({ unit: "hours" });
+    expect(hours).toBeCloseTo(24, 2);
+    const mail = mailer.send.mock.calls[0]?.[0];
+    expect(mail?.to).toBe(input.email);
+    expect(mail?.text).toContain("/verify-email?token=link-token");
+  });
+
+  it("never mails a taken email", async () => {
+    vi.stubEnv("MAIL_MODE", "smtp");
+    User.first.mockResolvedValue({ id: USER_ID });
+
+    await expect(service.signUp(input)).rejects.toThrow(new BadRequestException(SIGN_UP_FAILED));
+    expect(EmailToken.create).not.toHaveBeenCalled();
+    expect(mailer.send).not.toHaveBeenCalled();
   });
 
   it("gives the generic answer for a taken email, and creates nothing", async () => {
@@ -104,7 +162,9 @@ describe("AuthService", () => {
 
   describe("signIn", () => {
     const credentials = { email: input.email, password: input.password };
-    const user = { id: USER_ID, role: "buyer", passwordHash: HASH };
+    const confirmedAt = Temporal.Instant.from("2026-11-01T10:00:00Z");
+    const user = { id: USER_ID, role: "buyer", passwordHash: HASH, emailVerifiedAt: confirmedAt };
+    const unconfirmed = { ...user, emailVerifiedAt: null };
 
     it("answers an access token and stores only the refresh token's hash", async () => {
       User.first.mockResolvedValue(user);
@@ -145,6 +205,47 @@ describe("AuthService", () => {
       expect(tokens.signAccess).not.toHaveBeenCalled();
     });
 
+    it("refuses an unconfirmed account after a right password, with mail on", async () => {
+      vi.stubEnv("MAIL_MODE", "smtp");
+      User.first.mockResolvedValue(unconfirmed);
+      passwords.verify.mockResolvedValue(true);
+
+      await expect(service.signIn(credentials, undefined)).rejects.toThrow(
+        new ForbiddenException(EMAIL_NOT_CONFIRMED),
+      );
+      expect(RefreshToken.create).not.toHaveBeenCalled();
+      expect(tokens.signAccess).not.toHaveBeenCalled();
+    });
+
+    it("gives an unconfirmed account the generic answer for a wrong password", async () => {
+      vi.stubEnv("MAIL_MODE", "smtp");
+      User.first.mockResolvedValue(unconfirmed);
+      passwords.verify.mockResolvedValue(false);
+
+      await expect(service.signIn(credentials, undefined)).rejects.toThrow(
+        new UnauthorizedException(SIGN_IN_FAILED),
+      );
+    });
+
+    it("lets a confirmed account in with mail on", async () => {
+      vi.stubEnv("MAIL_MODE", "smtp");
+      User.first.mockResolvedValue(user);
+      passwords.verify.mockResolvedValue(true);
+
+      await expect(service.signIn(credentials, undefined)).resolves.toMatchObject({
+        accessToken: "access.jwt",
+      });
+    });
+
+    it("lets an unconfirmed account in with mail off, since no link could arrive", async () => {
+      User.first.mockResolvedValue(unconfirmed);
+      passwords.verify.mockResolvedValue(true);
+
+      await expect(service.signIn(credentials, undefined)).resolves.toMatchObject({
+        accessToken: "access.jwt",
+      });
+    });
+
     it("gives an unknown email the same answer, after checking a dummy hash", async () => {
       User.first.mockResolvedValue(null);
       passwords.hash.mockResolvedValue("dummy-hash");
@@ -180,6 +281,57 @@ describe("AuthService", () => {
     });
   });
 
+  describe("verifyEmail", () => {
+    const LINK_ROW_ID = "2b3c4d5e-6f7a-4b8c-9d0e-1f2a3b4c5d6e";
+    const stored = (overrides: object = {}) => ({
+      id: LINK_ROW_ID,
+      userId: USER_ID,
+      expiresAt: Temporal.Now.instant().add({ hours: 1 }),
+      usedAt: null,
+      ...overrides,
+    });
+    const refused = new BadRequestException(LINK_INVALID);
+
+    it("marks the token used and confirms the account", async () => {
+      EmailToken.first.mockResolvedValue(stored());
+      EmailToken.updateAndCount.mockResolvedValue(1);
+      User.updateAndCount.mockResolvedValue(1);
+
+      await expect(service.verifyEmail("link-token")).resolves.toBeUndefined();
+
+      expect(EmailToken.filters).toEqual([
+        { tokenHash: hashToken("link-token"), purpose: "verify-email" },
+        { id: LINK_ROW_ID, usedAt: null },
+      ]);
+      expect(User.filters).toEqual([{ id: USER_ID, emailVerifiedAt: null }]);
+      const patch = EmailToken.updateAndCount.mock.calls[0]?.[0] as { usedAt: unknown };
+      expect(User.updateAndCount).toHaveBeenCalledWith({ emailVerifiedAt: patch.usedAt });
+    });
+
+    it.each([
+      { case: "an unknown token", row: null },
+      { case: "a used token", row: stored({ usedAt: Temporal.Now.instant() }) },
+      {
+        case: "an expired token",
+        row: stored({ expiresAt: Temporal.Now.instant().subtract({ seconds: 1 }) }),
+      },
+    ])("refuses $case and confirms nothing", async ({ row }) => {
+      EmailToken.first.mockResolvedValue(row);
+
+      await expect(service.verifyEmail("link-token")).rejects.toThrow(refused);
+      expect(EmailToken.updateAndCount).not.toHaveBeenCalled();
+      expect(User.updateAndCount).not.toHaveBeenCalled();
+    });
+
+    it("refuses the loser of two clicks racing with the same link", async () => {
+      EmailToken.first.mockResolvedValue(stored());
+      EmailToken.updateAndCount.mockResolvedValue(0);
+
+      await expect(service.verifyEmail("link-token")).rejects.toThrow(refused);
+      expect(User.updateAndCount).not.toHaveBeenCalled();
+    });
+  });
+
   describe("refresh", () => {
     const FAMILY_ID = "0f1e2d3c-4b5a-4968-8776-655443322110";
     const ROW_ID = "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d";
@@ -207,7 +359,7 @@ describe("AuthService", () => {
       });
 
       expect(RefreshToken.filters).toEqual([
-        { tokenHash: hashRefresh("old-token") },
+        { tokenHash: hashToken("old-token") },
         { id: ROW_ID, usedAt: null },
       ]);
       const patch = RefreshToken.updateAndCount.mock.calls[0]?.[0] as Record<string, unknown>;
@@ -289,7 +441,7 @@ describe("AuthService", () => {
       await service.signOut("old-token");
 
       expect(RefreshToken.filters).toEqual([
-        { tokenHash: hashRefresh("old-token") },
+        { tokenHash: hashToken("old-token") },
         { familyId: "family-1", revokedAt: null },
       ]);
       expect(RefreshToken.updateAndCount).toHaveBeenCalledOnce();
