@@ -1,9 +1,15 @@
-import { BadRequestException, ForbiddenException, UnauthorizedException } from "@nestjs/common";
+import {
+  BadRequestException,
+  ForbiddenException,
+  Logger,
+  UnauthorizedException,
+} from "@nestjs/common";
 import {
   AuthService,
   EMAIL_NOT_CONFIRMED,
   LINK_INVALID,
   REFRESH_FAILED,
+  RESET_MAIL_FAILED,
   SIGN_IN_FAILED,
   SIGN_UP_FAILED,
 } from "./auth.service.js";
@@ -46,7 +52,7 @@ vi.mock("../prisma/db.js", () => ({
   getDb: () => ({
     orm: { public: { User, RefreshToken, EmailToken } },
     transaction: (work: (tx: object) => Promise<unknown>) =>
-      work({ orm: { public: { User, EmailToken } } }),
+      work({ orm: { public: { User, RefreshToken, EmailToken } } }),
   }),
 }));
 
@@ -329,6 +335,139 @@ describe("AuthService", () => {
 
       await expect(service.verifyEmail("link-token")).rejects.toThrow(refused);
       expect(User.updateAndCount).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("forgotPassword", () => {
+    const logged = () => vi.spyOn(Logger.prototype, "error").mockImplementation(() => undefined);
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it("stores a 1-hour reset token as its hash and mails the link", async () => {
+      User.first.mockResolvedValue({ id: USER_ID, email: input.email });
+      const before = Temporal.Now.instant();
+
+      expect(service.forgotPassword(input.email)).toBeUndefined();
+
+      await vi.waitFor(() => expect(mailer.send).toHaveBeenCalled());
+      expect(User.filters).toEqual([{ email: input.email }]);
+      const row = EmailToken.create.mock.calls[0]?.[0] as Record<string, unknown>;
+      expect(row).toMatchObject({
+        userId: USER_ID,
+        purpose: "reset-password",
+        tokenHash: "link-hash",
+        createdByVisitor: true,
+      });
+      expect(JSON.stringify(row)).not.toContain("link-token");
+      const hours = before.until(row["expiresAt"] as Temporal.Instant).total({ unit: "hours" });
+      expect(hours).toBeCloseTo(1, 2);
+      const mail = mailer.send.mock.calls[0]?.[0];
+      expect(mail?.to).toBe(input.email);
+      expect(mail?.text).toContain("/reset-password?token=link-token");
+    });
+
+    it("stores and sends nothing for an unknown email", async () => {
+      User.first.mockResolvedValue(null);
+
+      expect(service.forgotPassword("nobody@example.test")).toBeUndefined();
+
+      await vi.waitFor(() => expect(User.first).toHaveBeenCalled());
+      await Promise.resolve();
+      expect(EmailToken.create).not.toHaveBeenCalled();
+      expect(mailer.send).not.toHaveBeenCalled();
+    });
+
+    it("logs a failed send without the address or the token", async () => {
+      const error = logged();
+      User.first.mockResolvedValue({ id: USER_ID, email: input.email });
+      mailer.send.mockRejectedValue(new TypeError(`could not reach ${input.email}`));
+
+      expect(service.forgotPassword(input.email)).toBeUndefined();
+
+      await vi.waitFor(() => expect(error).toHaveBeenCalled());
+      expect(error).toHaveBeenCalledWith(`${RESET_MAIL_FAILED} (TypeError)`);
+      expect(JSON.stringify(error.mock.calls)).not.toContain(input.email);
+      expect(JSON.stringify(error.mock.calls)).not.toContain("link-token");
+    });
+
+    it("logs a failure that is not an Error too", async () => {
+      const error = logged();
+      User.first.mockRejectedValue("connection lost");
+
+      service.forgotPassword(input.email);
+
+      await vi.waitFor(() =>
+        expect(error).toHaveBeenCalledWith(`${RESET_MAIL_FAILED} (unknown error)`),
+      );
+    });
+  });
+
+  describe("resetPassword", () => {
+    const LINK_ROW_ID = "3c4d5e6f-7a8b-4c9d-8e0f-1a2b3c4d5e6f";
+    const stored = (overrides: object = {}) => ({
+      id: LINK_ROW_ID,
+      userId: USER_ID,
+      expiresAt: Temporal.Now.instant().add({ minutes: 30 }),
+      usedAt: null,
+      ...overrides,
+    });
+    const refused = new BadRequestException(LINK_INVALID);
+
+    it("sets the new hash, uses the link up, confirms the address and ends every session", async () => {
+      passwords.hash.mockResolvedValue("new-hash");
+      EmailToken.first.mockResolvedValue(stored());
+      EmailToken.updateAndCount.mockResolvedValue(1);
+
+      await expect(
+        service.resetPassword("link-token", "a new long passphrase"),
+      ).resolves.toBeUndefined();
+
+      expect(passwords.hash).toHaveBeenCalledWith("a new long passphrase");
+      expect(EmailToken.filters).toEqual([
+        { tokenHash: hashToken("link-token"), purpose: "reset-password" },
+        { id: LINK_ROW_ID, usedAt: null },
+        { userId: USER_ID, purpose: "reset-password", usedAt: null },
+      ]);
+      const usedAt = (EmailToken.updateAndCount.mock.calls[0]?.[0] as { usedAt: unknown }).usedAt;
+      expect(User.filters).toEqual([{ id: USER_ID }, { id: USER_ID, emailVerifiedAt: null }]);
+      expect(User.updateAndCount.mock.calls).toEqual([
+        [{ passwordHash: "new-hash" }],
+        [{ emailVerifiedAt: usedAt }],
+      ]);
+      expect(RefreshToken.filters).toEqual([{ userId: USER_ID, revokedAt: null }]);
+      expect(RefreshToken.updateAndCount).toHaveBeenCalledWith({ revokedAt: usedAt });
+      expect(EmailToken.updateAndCount).toHaveBeenLastCalledWith({ usedAt });
+    });
+
+    it.each([
+      { case: "an unknown token", row: null },
+      { case: "a used token", row: stored({ usedAt: Temporal.Now.instant() }) },
+      {
+        case: "an expired token",
+        row: stored({ expiresAt: Temporal.Now.instant().subtract({ seconds: 1 }) }),
+      },
+    ])("refuses $case and changes nothing", async ({ row }) => {
+      EmailToken.first.mockResolvedValue(row);
+
+      await expect(service.resetPassword("link-token", "a new long passphrase")).rejects.toThrow(
+        refused,
+      );
+      expect(EmailToken.updateAndCount).not.toHaveBeenCalled();
+      expect(User.updateAndCount).not.toHaveBeenCalled();
+      expect(RefreshToken.updateAndCount).not.toHaveBeenCalled();
+    });
+
+    it("refuses the loser of two uses racing with the same link", async () => {
+      EmailToken.first.mockResolvedValue(stored());
+      EmailToken.updateAndCount.mockResolvedValue(0);
+
+      await expect(service.resetPassword("link-token", "a new long passphrase")).rejects.toThrow(
+        refused,
+      );
+      expect(User.updateAndCount).not.toHaveBeenCalled();
+      expect(RefreshToken.updateAndCount).not.toHaveBeenCalled();
     });
   });
 

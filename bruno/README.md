@@ -31,6 +31,11 @@ The `Auth` folder runs first and in this order:
 5. **Refresh** swaps the refresh cookie once and saves the new access token.
 6. **Refresh reuse** replays the old cookie and must answer 401 (reuse revokes the whole session).
 7. **Sign out** clears the cookie. The access token keeps working until it expires (15 minutes).
+8. **Forgot password** asks for a reset link for the same account and must answer 202 (it answers 202 for any email).
+9. **Reset password** reads the link from the newest reset mail to that account in Mailpit (it waits up to 3 seconds, since the API sends it just after answering) and sets the password to `made-up-new-password-456`. The reset ends every session of the account.
+10. **Sign in with new password** signs in with it and saves the new access token for the requests after the folder.
+
+With `MAIL_MODE=off` no mail exists, so **Verify email**, **Reset password** and **Sign in with new password** skip themselves.
 
 They pass values to each other through runtime variables, so running one on its own may fail. Every other request with `auth: inherit` sends `Authorization: Bearer {{accessToken}}`, set once in [`opencollection.yml`](opencollection.yml). **Address add** saves the new address's id, which **Address edit** and **Address delete** then change.
 

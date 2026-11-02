@@ -10,6 +10,8 @@ describe("AuthController", () => {
     refresh: vi.fn(),
     signOut: vi.fn(),
     verifyEmail: vi.fn(),
+    forgotPassword: vi.fn(),
+    resetPassword: vi.fn(),
   };
   const controller = new AuthController(service);
 
@@ -52,6 +54,20 @@ describe("AuthController", () => {
 
     await expect(controller.verifyEmail({ token: "link-token" })).resolves.toBeUndefined();
     expect(service.verifyEmail).toHaveBeenCalledWith("link-token");
+  });
+
+  it("starts a reset for the email and answers nothing", () => {
+    expect(controller.forgotPassword({ email: "test.buyer@example.test" })).toBeUndefined();
+    expect(service.forgotPassword).toHaveBeenCalledWith("test.buyer@example.test");
+  });
+
+  it("passes the reset token and the new password to the service", async () => {
+    service.resetPassword.mockResolvedValue(undefined);
+
+    await expect(
+      controller.resetPassword({ token: "link-token", password: "a new long passphrase" }),
+    ).resolves.toBeUndefined();
+    expect(service.resetPassword).toHaveBeenCalledWith("link-token", "a new long passphrase");
   });
 
   it("swaps the cookie's refresh token for a new pair", async () => {

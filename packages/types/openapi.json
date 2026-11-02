@@ -162,6 +162,81 @@
         "tags": ["Auth"]
       }
     },
+    "/auth/forgot-password": {
+      "post": {
+        "description": "Always answers 202, whether or not the email has an account; only an account gets the mail. The link works once, for 1 hour.",
+        "operationId": "AuthController_forgotPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  }
+                },
+                "required": ["email"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "If the email has an account, a reset link is on its way"
+          },
+          "400": {
+            "description": "Not an email address"
+          }
+        },
+        "summary": "Ask for a password reset link",
+        "tags": ["Auth"]
+      }
+    },
+    "/auth/reset-password": {
+      "post": {
+        "description": "Takes the token from the reset link and a new password. Each link works once, and every session of the account ends.",
+        "operationId": "AuthController_resetPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 12,
+                    "maxLength": 128
+                  }
+                },
+                "required": ["token", "password"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "The password is changed; sign in again"
+          },
+          "400": {
+            "description": "This link is not valid any more, or the password is too short or too long"
+          }
+        },
+        "summary": "Set a new password",
+        "tags": ["Auth"]
+      }
+    },
     "/auth/refresh": {
       "post": {
         "description": "Swaps the refresh_token cookie for a new access token and a new cookie. Each cookie works once; using one twice signs out every copy.",

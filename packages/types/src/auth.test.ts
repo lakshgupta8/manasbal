@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { signInInputSchema, signUpInputSchema, verifyEmailInputSchema } from "./auth.js";
+import {
+  forgotPasswordInputSchema,
+  resetPasswordInputSchema,
+  signInInputSchema,
+  signUpInputSchema,
+  verifyEmailInputSchema,
+} from "./auth.js";
 
 const valid = {
   email: "test.buyer@example.test",
@@ -96,4 +102,46 @@ describe("verifyEmailInputSchema", () => {
       expect(verifyEmailInputSchema.safeParse(input).success).toBe(false);
     },
   );
+});
+
+describe("forgotPasswordInputSchema", () => {
+  it("normalises the email like sign-in", () => {
+    expect(forgotPasswordInputSchema.parse({ email: " A@Example.COM " })).toEqual({
+      email: "a@example.com",
+    });
+  });
+
+  it("refuses a malformed email or an unknown field", () => {
+    expect(forgotPasswordInputSchema.safeParse({ email: "nope" }).success).toBe(false);
+    expect(forgotPasswordInputSchema.safeParse({ email: "a@example.com", x: 1 }).success).toBe(
+      false,
+    );
+  });
+});
+
+describe("resetPasswordInputSchema", () => {
+  const token = "abc_DEF-123";
+
+  it("parses a token and a new password", () => {
+    expect(resetPasswordInputSchema.parse({ token, password: "a long passphrase" })).toEqual({
+      token,
+      password: "a long passphrase",
+    });
+  });
+
+  it("applies the sign-up password rule", () => {
+    const short = resetPasswordInputSchema.safeParse({ token, password: "x".repeat(11) });
+
+    expect(short.success).toBe(false);
+    expect(short.error?.issues[0]?.message).toBe("Use at least 12 characters");
+    expect(resetPasswordInputSchema.safeParse({ token, password: "x".repeat(129) }).success).toBe(
+      false,
+    );
+  });
+
+  it("refuses a missing token", () => {
+    expect(resetPasswordInputSchema.safeParse({ password: "a long passphrase" }).success).toBe(
+      false,
+    );
+  });
 });

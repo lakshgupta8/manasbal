@@ -344,6 +344,97 @@ describe("/auth (e2e)", () => {
       expect(again.json()).toMatchObject({ detail: SIGN_UP_FAILED });
       expect(sent).toHaveLength(1);
     });
+
+    describe("password reset", () => {
+      const newPassword = "a brand new passphrase";
+      const forgot = (email: string) =>
+        app.inject({ method: "POST", url: "/auth/forgot-password", payload: { email } });
+      const reset = (token: string, password = newPassword) =>
+        app.inject({ method: "POST", url: "/auth/reset-password", payload: { token, password } });
+      const refreshWith = (token: string) =>
+        app.inject({ method: "POST", url: "/auth/refresh", cookies: { refresh_token: token } });
+
+      // Signs up, confirms and signs in; answers the refresh token from the cookie.
+      async function signedIn(): Promise<string> {
+        expect((await post(signUp)).statusCode).toBe(201);
+        expect((await verify(linkToken(sent[0]))).statusCode).toBe(204);
+        const answer = await signIn({ email: signUp.email, password: signUp.password });
+        expect(answer.statusCode).toBe(200);
+        return /^refresh_token=([\w-]+);/.exec(String(answer.headers["set-cookie"]))?.[1] ?? "";
+      }
+
+      it("mails a link, changes the password, and ends every session", async () => {
+        const refreshToken = await signedIn();
+
+        const known = await forgot(signUp.email);
+        const unknown = await forgot("nobody@example.test");
+
+        // Both answers look the same.
+        for (const answer of [known, unknown]) {
+          expect(answer.statusCode).toBe(202);
+          expect(answer.body).toBe("");
+        }
+        // The mail goes out after the answer; only the account gets one.
+        await vi.waitFor(() => expect(sent).toHaveLength(2));
+        const mail = sent[1];
+        expect(mail?.to).toBe(signUp.email);
+        expect(mail?.text).toContain("/reset-password?token=");
+        expect(mail?.text).toContain("If you didn't ask for this, ignore this mail.");
+        expect(sent.map((m) => m.to)).not.toContain("nobody@example.test");
+        const stored = await database.sql(
+          "select purpose || ',' || (expires_at - created_at < interval '61 minutes') from email_tokens where purpose = 'reset-password'",
+        );
+        expect(stored).toBe("reset-password,true");
+
+        const token = linkToken(mail);
+        expect((await reset(token)).statusCode).toBe(204);
+
+        const oldPassword = await signIn({ email: signUp.email, password: signUp.password });
+        expect(oldPassword.statusCode).toBe(401);
+        const fresh = await signIn({ email: signUp.email, password: newPassword });
+        expect(fresh.statusCode).toBe(200);
+        // All sessions end: the cookie from before the reset no longer works.
+        const oldSession = await refreshWith(refreshToken);
+        expect(oldSession.statusCode).toBe(401);
+        expect(oldSession.json()).toMatchObject({ detail: REFRESH_FAILED });
+
+        // A reused token fails.
+        const again = await reset(token, "yet another passphrase");
+        expect(again.statusCode).toBe(400);
+        expect(again.json()).toMatchObject({ detail: LINK_INVALID });
+      });
+
+      it("uses up every older reset link when one is used", async () => {
+        await signedIn();
+        expect((await forgot(signUp.email)).statusCode).toBe(202);
+        expect((await forgot(signUp.email)).statusCode).toBe(202);
+        await vi.waitFor(() => expect(sent).toHaveLength(3));
+
+        expect((await reset(linkToken(sent[2]))).statusCode).toBe(204);
+
+        const older = await reset(linkToken(sent[1]), "yet another passphrase");
+        expect(older.statusCode).toBe(400);
+      });
+
+      it("refuses an expired or made-up link, and a weak password", async () => {
+        await signedIn();
+        expect((await forgot(signUp.email)).statusCode).toBe(202);
+        await vi.waitFor(() => expect(sent).toHaveLength(2));
+        const token = linkToken(sent[1]);
+
+        const weak = await reset(token, "too short");
+        expect(weak.statusCode).toBe(400);
+        expect(JSON.stringify(weak.json())).toContain("Use at least 12 characters");
+
+        expect((await reset("not-a-real-token")).statusCode).toBe(400);
+        await database.sql(
+          "update email_tokens set expires_at = now() - interval '1 minute' where purpose = 'reset-password'",
+        );
+        const expired = await reset(token);
+        expect(expired.statusCode).toBe(400);
+        expect(expired.json()).toMatchObject({ detail: LINK_INVALID });
+      });
+    });
   });
 
   describe("GET /me", () => {
