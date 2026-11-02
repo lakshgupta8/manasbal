@@ -7,10 +7,6 @@ const MINUTE = 60_000;
 describe("TokensService", () => {
   const tokens = new TokensService();
 
-  beforeEach(() => {
-    vi.stubEnv("JWT_SECRET", "test-only-secret-0123456789abcdef");
-  });
-
   afterEach(() => {
     vi.unstubAllEnvs();
   });

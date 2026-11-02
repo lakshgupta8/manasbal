@@ -4,7 +4,7 @@ import { Test } from "@nestjs/testing";
 import { cartSchema } from "@manasbal/types";
 import { CartModule } from "../src/cart/cart.module.js";
 import { ProblemDetailsFilter } from "../src/errors/problem-details.filter.js";
-import { DEMO_USER_HEADER } from "../src/users/demo-user.guard.js";
+import { bearer } from "./support/auth.js";
 import { startTestDatabase, type TestDatabase } from "./support/test-database.js";
 
 const MISSING_VARIANT = "00000000-0000-4000-8000-0000000000ff";
@@ -16,12 +16,12 @@ describe("/cart (e2e)", () => {
   let buyer: string;
   let variantId: string;
 
-  const add = (userId: string | undefined, payload: object) =>
+  const add = async (userId: string | undefined, payload: object) =>
     app.inject({
       method: "POST",
       url: "/cart/items",
       payload,
-      headers: userId === undefined ? {} : { [DEMO_USER_HEADER]: userId },
+      headers: userId === undefined ? {} : await bearer(userId),
     });
 
   beforeAll(async () => {
@@ -86,7 +86,7 @@ describe("/cart (e2e)", () => {
     const response = await app.inject({
       method: "GET",
       url: "/cart",
-      headers: { [DEMO_USER_HEADER]: buyer },
+      headers: await bearer(buyer),
     });
 
     expect(response.statusCode).toBe(200);
@@ -146,7 +146,7 @@ describe("/cart (e2e)", () => {
     expect(response.statusCode).toBe(400);
   });
 
-  it("answers 401 without the demo header", async () => {
+  it("answers 401 without an access token", async () => {
     expect((await add(undefined, { variantId, quantity: 1 })).statusCode).toBe(401);
     expect((await app.inject({ method: "GET", url: "/cart" })).statusCode).toBe(401);
   });

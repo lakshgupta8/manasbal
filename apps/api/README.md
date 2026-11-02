@@ -23,8 +23,8 @@ pnpm --filter @manasbal/api exec prisma db migrate --advance-ref db     # apply 
 
 Commit the contract, the generated files and `migrations/`. Don't edit the generated files by hand.
 
-## Acting as a user
+## Signing in
 
-Sign-in doesn't exist yet. Outside production, endpoints under `/me` take the user's id in an `x-demo-user` header (pick one in Prisma Studio, see AGENTS.md). In production they always answer 401.
+Protected endpoints (`/me`, `/me/addresses`, `/cart`, `/orders`, `/admin`) take an access token in `Authorization: Bearer <token>`. Get one from `POST /auth/sign-in` (sign up first with `POST /auth/sign-up`); it lasts 15 minutes, and `POST /auth/refresh` swaps the `refresh_token` cookie for a new one. Without a valid token they answer 401. The API signs tokens with `JWT_SECRET` (see `.env.example`) and refuses to start in production without it.
 
 The API imports the request schemas from `@manasbal/types` at run time, so build that package before `start:dev`: `pnpm --filter @manasbal/types build`. `pnpm dev` does it for you.

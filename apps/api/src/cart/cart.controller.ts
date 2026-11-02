@@ -2,6 +2,7 @@ import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
 import {
   ApiConflictResponse,
   ApiCreatedResponse,
+  ApiBearerAuth,
   ApiHeader,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -12,7 +13,8 @@ import {
 } from "@nestjs/swagger";
 import { cartItemInputSchema, type Cart as CartShape, type CartItemInput } from "@manasbal/types";
 import { ApiZodBody, ZodValidationPipe } from "../validation/zod-validation.pipe.js";
-import { CurrentUserId, DEMO_USER_HEADER, DemoUserGuard } from "../users/demo-user.guard.js";
+import { AuthGuard } from "../auth/auth.guard.js";
+import { CurrentUserId } from "../auth/current-user.js";
 import { CartService } from "./cart.service.js";
 
 // Classes rather than interfaces so the OpenAPI description knows the shape of the answer. They
@@ -47,14 +49,9 @@ export class Cart {
 
 // The signed-in user's cart.
 @ApiTags("Cart")
-@ApiHeader({
-  name: DEMO_USER_HEADER,
-  description:
-    "Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it.",
-  required: false,
-})
-@ApiUnauthorizedResponse({ description: "No user, or the API runs in production" })
-@UseGuards(DemoUserGuard)
+@ApiBearerAuth()
+@ApiUnauthorizedResponse({ description: "No valid access token" })
+@UseGuards(AuthGuard)
 @Controller("cart")
 export class CartController {
   constructor(private readonly cart: CartService) {}

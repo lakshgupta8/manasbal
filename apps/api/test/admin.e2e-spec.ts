@@ -4,7 +4,7 @@ import { Test } from "@nestjs/testing";
 import { auditPageSchema } from "@manasbal/types";
 import { AdminModule } from "../src/admin/admin.module.js";
 import { ProblemDetailsFilter } from "../src/errors/problem-details.filter.js";
-import { DEMO_USER_HEADER } from "../src/users/demo-user.guard.js";
+import { bearer } from "./support/auth.js";
 import { startTestDatabase, type TestDatabase } from "./support/test-database.js";
 
 // Needs Docker: a throwaway Postgres with the migrations applied.
@@ -16,11 +16,13 @@ describe("GET /admin/audit-log (e2e)", () => {
   let older: string;
   let newer: string;
 
-  const get = (userId: string | undefined, url: string) =>
+  // The admin signs in as an admin; AdminGuard still checks the role in the database.
+  const get = async (userId: string | undefined, url: string) =>
     app.inject({
       method: "GET",
       url,
-      headers: userId === undefined ? {} : { [DEMO_USER_HEADER]: userId },
+      headers:
+        userId === undefined ? {} : await bearer(userId, userId === admin ? "admin" : "buyer"),
     });
 
   beforeAll(async () => {
@@ -83,7 +85,7 @@ describe("GET /admin/audit-log (e2e)", () => {
     expect(response.headers["content-type"]).toContain("application/problem+json");
   });
 
-  it("answers 401 without the demo header", async () => {
+  it("answers 401 without an access token", async () => {
     const response = await get(undefined, "/admin/audit-log");
 
     expect(response.statusCode).toBe(401);

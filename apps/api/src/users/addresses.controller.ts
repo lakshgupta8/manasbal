@@ -14,7 +14,7 @@ import {
 import {
   ApiConflictResponse,
   ApiCreatedResponse,
-  ApiHeader,
+  ApiBearerAuth,
   ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -31,13 +31,8 @@ import {
 } from "@manasbal/types";
 import { ApiZodBody, ZodValidationPipe } from "../validation/zod-validation.pipe.js";
 import { AddressesService } from "./addresses.service.js";
-import {
-  type Actor,
-  CurrentActor,
-  CurrentUserId,
-  DEMO_USER_HEADER,
-  DemoUserGuard,
-} from "./demo-user.guard.js";
+import { AuthGuard } from "../auth/auth.guard.js";
+import { type Actor, CurrentActor, CurrentUserId } from "../auth/current-user.js";
 
 // A class rather than an interface so the OpenAPI description (and the generated SDK) knows
 // the shape of the answer.
@@ -66,14 +61,9 @@ export class Address {
 
 // The signed-in user's delivery addresses. The default one comes first.
 @ApiTags("Addresses")
-@ApiHeader({
-  name: DEMO_USER_HEADER,
-  description:
-    "Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it.",
-  required: false,
-})
-@ApiUnauthorizedResponse({ description: "No user, or the API runs in production" })
-@UseGuards(DemoUserGuard)
+@ApiBearerAuth()
+@ApiUnauthorizedResponse({ description: "No valid access token" })
+@UseGuards(AuthGuard)
 @Controller("me/addresses")
 export class AddressesController {
   constructor(private readonly addresses: AddressesService) {}

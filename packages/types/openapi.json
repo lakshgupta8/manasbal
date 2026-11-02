@@ -171,21 +171,40 @@
         "tags": ["Auth"]
       }
     },
+    "/me": {
+      "get": {
+        "description": "The signed-in user's name, email and role.",
+        "operationId": "MeController_get",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Me"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No valid access token, or the account is gone"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Who am I",
+        "tags": ["Me"]
+      }
+    },
     "/me/addresses": {
       "get": {
         "description": "Every delivery address the demo user has saved, sorted by name.",
         "operationId": "AddressesController_list",
-        "parameters": [
-          {
-            "name": "x-demo-user",
-            "in": "header",
-            "description": "Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it.",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "",
@@ -201,26 +220,21 @@
             }
           },
           "401": {
-            "description": "No user, or the API runs in production"
+            "description": "No valid access token"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "List my addresses",
         "tags": ["Addresses"]
       },
       "post": {
         "description": "Saves a new delivery address for the demo user. The change is written to the audit log.",
         "operationId": "AddressesController_create",
-        "parameters": [
-          {
-            "name": "x-demo-user",
-            "in": "header",
-            "description": "Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it.",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -274,9 +288,14 @@
             }
           },
           "401": {
-            "description": "No user, or the API runs in production"
+            "description": "No valid access token"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Add an address",
         "tags": ["Addresses"]
       }
@@ -286,15 +305,6 @@
         "description": "Updates only the fields sent. The change is written to the audit log.",
         "operationId": "AddressesController_update",
         "parameters": [
-          {
-            "name": "x-demo-user",
-            "in": "header",
-            "description": "Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it.",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "id",
             "required": true,
@@ -356,12 +366,17 @@
             }
           },
           "401": {
-            "description": "No user, or the API runs in production"
+            "description": "No valid access token"
           },
           "404": {
             "description": "The user has no address with this id"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Change an address",
         "tags": ["Addresses"]
       },
@@ -369,15 +384,6 @@
         "description": "Deletes one of the demo user's addresses. An address an order was sent to cannot be deleted. The change is written to the audit log.",
         "operationId": "AddressesController_remove",
         "parameters": [
-          {
-            "name": "x-demo-user",
-            "in": "header",
-            "description": "Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it.",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "id",
             "required": true,
@@ -392,7 +398,7 @@
             "description": ""
           },
           "401": {
-            "description": "No user, or the API runs in production"
+            "description": "No valid access token"
           },
           "404": {
             "description": "The user has no address with this id"
@@ -401,6 +407,11 @@
             "description": "An order was sent to this address"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Delete an address",
         "tags": ["Addresses"]
       }
@@ -641,17 +652,7 @@
       "get": {
         "description": "The demo user's cart with its lines and total, in whole paise.",
         "operationId": "CartController_get",
-        "parameters": [
-          {
-            "name": "x-demo-user",
-            "in": "header",
-            "description": "Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it.",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "",
@@ -664,9 +665,14 @@
             }
           },
           "401": {
-            "description": "No user, or the API runs in production"
+            "description": "No valid access token"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Get my cart",
         "tags": ["Cart"]
       }
@@ -676,15 +682,6 @@
         "description": "Adds a variant to the cart. If it is already there, its quantity goes up. Send an Idempotency-Key header so that retrying the request doesn't add the item twice.",
         "operationId": "CartController_addItem",
         "parameters": [
-          {
-            "name": "x-demo-user",
-            "in": "header",
-            "description": "Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it.",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "Idempotency-Key",
             "in": "header",
@@ -731,7 +728,7 @@
             }
           },
           "401": {
-            "description": "No user, or the API runs in production"
+            "description": "No valid access token"
           },
           "404": {
             "description": "No such variant"
@@ -740,6 +737,11 @@
             "description": "More than the stock"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Add to my cart",
         "tags": ["Cart"]
       }
@@ -749,15 +751,6 @@
         "description": "One page of the demo user's orders, newest first. Totals are whole paise.",
         "operationId": "OrdersController_list",
         "parameters": [
-          {
-            "name": "x-demo-user",
-            "in": "header",
-            "description": "Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it.",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "cursor",
             "required": false,
@@ -792,9 +785,14 @@
             "description": "The cursor or limit is not valid"
           },
           "401": {
-            "description": "No user, or the API runs in production"
+            "description": "No valid access token"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "List my orders",
         "tags": ["Orders"]
       }
@@ -804,15 +802,6 @@
         "description": "One page of recorded changes, newest first. Only admins can read it.",
         "operationId": "AdminController_list",
         "parameters": [
-          {
-            "name": "x-demo-user",
-            "in": "header",
-            "description": "Id of the user to act as. Outside production only, until sign-in exists. The API client's demoUser option sets it.",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "cursor",
             "required": false,
@@ -847,12 +836,17 @@
             "description": "The cursor or limit is not valid"
           },
           "401": {
-            "description": "No user, or the API runs in production"
+            "description": "No valid access token"
           },
           "403": {
             "description": "The user is not an admin"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Read the audit log",
         "tags": ["Admin"]
       }
@@ -872,6 +866,10 @@
     {
       "name": "Auth",
       "description": "Signing up and signing in"
+    },
+    {
+      "name": "Me",
+      "description": "The signed-in user"
     },
     {
       "name": "Catalog",
@@ -906,6 +904,11 @@
   ],
   "components": {
     "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      },
       "refresh_token": {
         "type": "apiKey",
         "in": "cookie",
@@ -961,6 +964,26 @@
           }
         },
         "required": ["accessToken", "expiresIn"]
+      },
+      "Me": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "example": "buyer"
+          }
+        },
+        "required": ["id", "name", "email", "role"]
       },
       "Address": {
         "type": "object",

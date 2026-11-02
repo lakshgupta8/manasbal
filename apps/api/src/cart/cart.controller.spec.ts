@@ -4,22 +4,22 @@ import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fa
 import { Test } from "@nestjs/testing";
 import type { InjectOptions } from "fastify";
 import { ProblemDetailsFilter } from "../errors/problem-details.filter.js";
-import { DEMO_USER_HEADER, DemoUserGuard } from "../users/demo-user.guard.js";
+import { AuthGuard } from "../auth/auth.guard.js";
 import { CartModule } from "./cart.module.js";
 import { CartService } from "./cart.service.js";
 
 const USER_ID = "7b0c1e2a-3d4f-4a5b-8c6d-7e8f9a0b1c2d";
 const VARIANT_ID = "1a2b3c4d-0000-4000-8000-0000000000a1";
 
-// Every endpoint, called the way a client that knows the demo header would call it.
+// Every endpoint, called the way a client would call it.
 const requests: InjectOptions[] = [
   { method: "GET", url: "/cart" },
   { method: "POST", url: "/cart/items", payload: { variantId: VARIANT_ID, quantity: 1 } },
 ];
 
 // The stock rules need a real database and live in test/cart.e2e-spec.ts. This one needs none:
-// in production the guard refuses before anything is looked up.
-describe("CartController in production", () => {
+// without an access token the real guard refuses before anything is looked up.
+describe("CartController without a token", () => {
   let app: NestFastifyApplication;
 
   beforeAll(async () => {
@@ -36,16 +36,8 @@ describe("CartController in production", () => {
     await app.close();
   });
 
-  beforeEach(() => {
-    vi.stubEnv("NODE_ENV", "production");
-  });
-
-  afterEach(() => {
-    vi.unstubAllEnvs();
-  });
-
   it.each(requests)("$method $url answers 401", async (request) => {
-    const response = await app.inject({ ...request, headers: { [DEMO_USER_HEADER]: USER_ID } });
+    const response = await app.inject(request);
 
     expect(response.statusCode).toBe(401);
     expect(response.headers["content-type"]).toContain("application/problem+json");
@@ -68,7 +60,7 @@ describe("CartController", () => {
     })
       .overrideProvider(CartService)
       .useValue(service)
-      .overrideGuard(DemoUserGuard)
+      .overrideGuard(AuthGuard)
       .useValue({
         canActivate: (context: ExecutionContext) => {
           context.switchToHttp().getRequest<{ userId?: string }>().userId = USER_ID;

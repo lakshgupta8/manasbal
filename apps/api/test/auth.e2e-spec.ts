@@ -2,10 +2,12 @@ import fastifyCookie from "@fastify/cookie";
 import { APP_FILTER } from "@nestjs/core";
 import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fastify";
 import { Test } from "@nestjs/testing";
+import { AuditModule } from "../src/audit/audit.module.js";
 import { AuthModule } from "../src/auth/auth.module.js";
 import { REFRESH_FAILED, SIGN_IN_FAILED, SIGN_UP_FAILED } from "../src/auth/auth.service.js";
 import { ProblemDetailsFilter } from "../src/errors/problem-details.filter.js";
 import { fastifyOptions } from "../src/logging/logging.config.js";
+import { UsersModule } from "../src/users/users.module.js";
 import { startTestDatabase, type TestDatabase } from "./support/test-database.js";
 
 const signUp = {
@@ -31,11 +33,10 @@ describe("/auth (e2e)", () => {
     });
 
   beforeAll(async () => {
-    vi.stubEnv("JWT_SECRET", "test-only-secret-0123456789abcdef");
     database = await startTestDatabase();
 
     const moduleRef = await Test.createTestingModule({
-      imports: [AuthModule],
+      imports: [AuditModule, AuthModule, UsersModule],
       providers: [{ provide: APP_FILTER, useClass: ProblemDetailsFilter }],
     }).compile();
     app = moduleRef.createNestApplication<NestFastifyApplication>(
@@ -49,7 +50,6 @@ describe("/auth (e2e)", () => {
   afterAll(async () => {
     await app.close();
     await database.stop();
-    vi.unstubAllEnvs();
   });
 
   beforeEach(async () => {
@@ -236,6 +236,38 @@ describe("/auth (e2e)", () => {
       expect(cleared).toContain("Expires=Thu, 01 Jan 1970");
       // A revoked token refuses to refresh.
       expect((await refresh(token)).statusCode).toBe(401);
+    });
+  });
+
+  describe("GET /me", () => {
+    it("answers the signed-in user's name, email and role for their access token", async () => {
+      expect((await post(signUp)).statusCode).toBe(201);
+      const signedIn = await signIn({ email: signUp.email, password: signUp.password });
+      const { accessToken } = signedIn.json<{ accessToken: string }>();
+
+      const me = await app.inject({
+        method: "GET",
+        url: "/me",
+        headers: { authorization: `Bearer ${accessToken}` },
+      });
+
+      expect(me.statusCode).toBe(200);
+      expect(me.json()).toEqual({
+        id: expect.any(String) as string,
+        name: signUp.name,
+        email: signUp.email,
+        role: "buyer",
+      });
+    });
+
+    it("answers 401 without a token, or with a made-up one", async () => {
+      expect((await app.inject({ method: "GET", url: "/me" })).statusCode).toBe(401);
+      const forged = await app.inject({
+        method: "GET",
+        url: "/me",
+        headers: { authorization: "Bearer not.a.token" },
+      });
+      expect(forged.statusCode).toBe(401);
     });
   });
 });
