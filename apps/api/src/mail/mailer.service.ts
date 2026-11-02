@@ -37,7 +37,12 @@ export class MailerService {
   async send(mail: Mail): Promise<void> {
     const settings = readMailSettings();
     if (settings.mode === "off") return;
-    this.transport ??= createTransport(transportOptions(settings.smtpUrl));
+    this.transport ??= this.open(settings.smtpUrl);
     await this.transport.sendMail({ from: MAIL_FROM, ...mail });
+  }
+
+  private open(smtpUrl: string): Transporter {
+    const { host, port, secure, requireTLS, auth } = transportOptions(smtpUrl);
+    return createTransport({ host, port, secure, requireTLS, auth });
   }
 }
