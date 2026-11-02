@@ -1,7 +1,7 @@
 info:
-  name: Auth sign-up
+  name: Sign up
   type: http
-  seq: 18
+  seq: 1
 
 http:
   method: POST
@@ -21,7 +21,7 @@ runtime:
   scripts:
     - type: after-response
       code: |-
-        // Auth sign-in signs in with the account this request just made.
+        // Sign in signs in with the account this request just made.
         bru.setVar("signInEmail", res.body.email);
   assertions:
     - expression: res.status

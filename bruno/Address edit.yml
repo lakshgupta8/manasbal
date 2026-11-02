@@ -1,14 +1,11 @@
 info:
   name: Address edit
   type: http
-  seq: 4
+  seq: 5
 
 http:
   method: PATCH
   url: "{{baseUrl}}/me/addresses/{{addressId}}"
-  headers:
-    - name: x-demo-user
-      value: "{{demoUser}}"
   body:
     type: json
     data: |-

@@ -2,6 +2,12 @@ opencollection: 1.0.0
 
 info:
   name: manasbal
+
+# Requests with auth: inherit send the access token that Auth/Sign in saves.
+request:
+  auth:
+    type: bearer
+    token: "{{accessToken}}"
 bundled: false
 extensions:
   bruno:

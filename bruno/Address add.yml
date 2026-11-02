@@ -1,14 +1,11 @@
 info:
   name: Address add
   type: http
-  seq: 2
+  seq: 3
 
 http:
   method: POST
   url: "{{baseUrl}}/me/addresses"
-  headers:
-    - name: x-demo-user
-      value: "{{demoUser}}"
   body:
     type: json
     data: |-
@@ -23,6 +20,11 @@ http:
   auth: inherit
 
 runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        // Address edit and Address delete change the address this request made.
+        bru.setVar("addressId", res.body.id);
   assertions:
     - expression: res.status
       operator: eq

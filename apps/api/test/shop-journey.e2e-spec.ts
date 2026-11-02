@@ -1,3 +1,4 @@
+import fastifyCookie from "@fastify/cookie";
 import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fastify";
 import { Test } from "@nestjs/testing";
 import { cartSchema, orderPageSchema, reviewPageSchema } from "@manasbal/types";
@@ -44,7 +45,8 @@ describe("shop journey (e2e)", () => {
     valkey = await startTestValkey();
     const orm = database.db.orm.public;
 
-    // These users never sign in.
+    // These users never sign in; their requests carry a token from bearer(). The last test
+    // signs up and signs in through the real endpoints instead.
     const user = (email: string, name: string) =>
       orm.User.select("id").create({ email, passwordHash: "", name });
 
@@ -140,6 +142,8 @@ describe("shop journey (e2e)", () => {
 
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
     app = moduleRef.createNestApplication<NestFastifyApplication>(new FastifyAdapter());
+    // As in main.ts: sign-in sets the refresh cookie.
+    await app.register(fastifyCookie);
     await app.init();
     await app.getHttpAdapter().getInstance().ready();
   }, 240_000);
@@ -214,6 +218,42 @@ describe("shop journey (e2e)", () => {
       expect(response.statusCode).toBe(401);
       expect(response.headers["content-type"]).toContain("application/problem+json");
     }
+  });
+
+  it("signs up, signs in and keeps an address for the new account", async () => {
+    const credentials = { email: "meera@example.test", password: "a long passphrase" };
+    const signUp = await send({
+      method: "POST",
+      url: "/auth/sign-up",
+      payload: { ...credentials, name: "Meera Iyer", confirmAdult: true },
+    });
+    expect(signUp.statusCode).toBe(201);
+
+    const signIn = await send({ method: "POST", url: "/auth/sign-in", payload: credentials });
+    expect(signIn.statusCode).toBe(200);
+    const { accessToken } = signIn.json<{ accessToken: string }>();
+    const authorization = `Bearer ${accessToken}`;
+
+    const added = await send({
+      method: "POST",
+      url: "/me/addresses",
+      headers: { authorization },
+      payload: {
+        name: "Meera Iyer",
+        line1: "4 Sample Street",
+        city: "Kochi",
+        state: "KL",
+        pincode: "682001",
+      },
+    });
+    expect(added.statusCode).toBe(201);
+    const { id } = added.json<{ id: string }>();
+
+    const listed = await send({ method: "GET", url: "/me/addresses", headers: { authorization } });
+    expect(listed.statusCode).toBe(200);
+    expect(listed.json()).toEqual([
+      expect.objectContaining({ id, name: "Meera Iyer", pincode: "682001" }),
+    ]);
   });
 
   it("stays under the rate limit", () => {

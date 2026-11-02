@@ -1,7 +1,7 @@
 info:
-  name: Auth refresh
+  name: Refresh
   type: http
-  seq: 20
+  seq: 4
 
 http:
   method: POST
@@ -19,7 +19,8 @@ runtime:
         await bru.cookies.jar().deleteCookies(req.getUrl());
     - type: after-response
       code: |-
-        // Keep the old token for Auth refresh reuse; sign out with the new one.
+        // Keep the old cookie for Refresh reuse; sign out with the new one.
+        bru.setVar("accessToken", res.body.accessToken);
         const cookie = [].concat(res.headers["set-cookie"] ?? []).join(";");
         bru.setVar("usedRefreshToken", bru.getVar("refreshToken"));
         bru.setVar("newRefreshToken", /refresh_token=([^;]*)/.exec(cookie)?.[1] ?? "");

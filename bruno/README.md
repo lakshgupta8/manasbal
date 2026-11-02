@@ -16,13 +16,30 @@ Choose the environment at the top right of Bruno.
 | **local**   | `http://localhost:3001`             | The API running on your computer    |
 | **prod**    | `https://manasbal-api.onrender.com` | The hosted demo API (health, reads) |
 
-On **prod** the `x-demo-user` header is refused, so requests that act as a user (cart, orders, addresses, admin) answer 401 there.
+Requests that act as a user (cart, orders, addresses, admin) send the access token that **Auth → Sign in** saves, on local and on prod alike. Run the `Auth` folder first; without a token they answer 401.
 
-The ids in [`environments/local.yml`](environments/local.yml) (`demoUser`, `adminUser`, `addressId`, `variantId` and the others) belong to rows in one database. On your own database, replace them with ids that exist there, or those requests answer 401 or 404.
+The ids in [`environments/local.yml`](environments/local.yml) (`productId`, `variantId`, `sellerSlug`, `productSlug`) belong to seed rows in one database. On your own database, replace them with ids that exist there, or those requests answer 404. The **prod** environment only sets `baseUrl`, so on prod add the ids you need first.
 
 ## Sign-in requests
 
-Run the `Auth` requests in order: **sign-up** makes a new account, **sign-in** signs in with it, **refresh** swaps the refresh cookie once, **refresh reuse** replays the old cookie and must answer 401 (reuse revokes the whole session), and **sign-out** clears the cookie. They pass values to each other through runtime variables, so running one on its own may fail.
+The `Auth` folder runs first and in this order:
+
+1. **Sign up** makes a new account with a fresh email.
+2. **Sign in** signs in with it and saves the access token (`accessToken`) and the refresh cookie.
+3. **Me** reads the account back with the token.
+4. **Refresh** swaps the refresh cookie once and saves the new access token.
+5. **Refresh reuse** replays the old cookie and must answer 401 (reuse revokes the whole session).
+6. **Sign out** clears the cookie. The access token keeps working until it expires (15 minutes).
+
+They pass values to each other through runtime variables, so running one on its own may fail. Every other request with `auth: inherit` sends `Authorization: Bearer {{accessToken}}`, set once in [`opencollection.yml`](opencollection.yml). **Address add** saves the new address's id, which **Address edit** and **Address delete** then change.
+
+### Admin requests
+
+**Admin audit log forbidden** uses the signed-in buyer's token and must answer 403. **Admin audit log** needs an admin, and the seed gives no account a known password, so the run skips it until you set `adminAccessToken`:
+
+1. Run **Auth → Sign up** and **Sign in** (or use any account you signed up locally).
+2. Open the local database in Prisma Studio, `pnpm dlx prisma@7.10.1 studio --url "postgresql://manasbal:manasbal@localhost:5432/manasbal"`, then http://localhost:5555, and set that user's `role` in `users` to `admin`.
+3. Run **Sign in** again and copy `accessToken` from the answer into `adminAccessToken` in the **local** environment. Don't commit it; it expires in 15 minutes.
 
 ## Run every request
 
