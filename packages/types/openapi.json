@@ -24,7 +24,7 @@
     },
     "/auth/sign-up": {
       "post": {
-        "description": "Use made-up details. This is a demo.",
+        "description": "Use made-up details. This is a demo. When mail is on, sends a link to confirm the email address.",
         "operationId": "AuthController_signUp",
         "parameters": [],
         "requestBody": {
@@ -79,7 +79,7 @@
     },
     "/auth/sign-in": {
       "post": {
-        "description": "Answers an access token and sets the refresh_token cookie.",
+        "description": "Answers an access token and sets the refresh_token cookie. With two-step sign-in on, answers only a challenge for POST /auth/2fa/verify instead.",
         "operationId": "AuthController_signIn",
         "parameters": [],
         "requestBody": {
@@ -110,16 +110,189 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SignInResult"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/SignInResult"
+                    },
+                    {
+                      "$ref": "#/components/schemas/TwoStepChallengeResult"
+                    }
+                  ]
                 }
               }
             }
           },
           "401": {
             "description": "Email or password is wrong"
+          },
+          "403": {
+            "description": "Check your email to confirm your account"
+          },
+          "429": {
+            "description": "5 wrong tries for this email in 15 minutes: wait 15 minutes"
           }
         },
         "summary": "Sign in",
+        "tags": ["Auth"]
+      }
+    },
+    "/auth/2fa/verify": {
+      "post": {
+        "description": "Takes the challenge sign-in answered and the 6-digit code from the authenticator app, or a recovery code. Each code works once. Answers an access token and sets the refresh_token cookie, as sign-in does.",
+        "operationId": "AuthController_verifyTwoStep",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "challengeToken": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                },
+                "required": ["challengeToken", "code"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignInResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The code is not right, or sign in again"
+          },
+          "429": {
+            "description": "5 wrong codes for this account in 15 minutes: wait 15 minutes"
+          }
+        },
+        "summary": "Second step of sign-in",
+        "tags": ["Auth"]
+      }
+    },
+    "/auth/verify-email": {
+      "post": {
+        "description": "Takes the token from the link in the sign-up mail. Each link works once.",
+        "operationId": "AuthController_verifyEmail",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                },
+                "required": ["token"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "The account is confirmed"
+          },
+          "400": {
+            "description": "This link is not valid any more"
+          }
+        },
+        "summary": "Confirm an email address",
+        "tags": ["Auth"]
+      }
+    },
+    "/auth/forgot-password": {
+      "post": {
+        "description": "Always answers 202, whether or not the email has an account; only an account gets the mail. The link works once, for 1 hour.",
+        "operationId": "AuthController_forgotPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  }
+                },
+                "required": ["email"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "If the email has an account, a reset link is on its way"
+          },
+          "400": {
+            "description": "Not an email address"
+          }
+        },
+        "summary": "Ask for a password reset link",
+        "tags": ["Auth"]
+      }
+    },
+    "/auth/reset-password": {
+      "post": {
+        "description": "Takes the token from the reset link and a new password. Each link works once, and every session of the account ends.",
+        "operationId": "AuthController_resetPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 12,
+                    "maxLength": 128
+                  }
+                },
+                "required": ["token", "password"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "The password is changed; sign in again"
+          },
+          "400": {
+            "description": "This link is not valid any more, or the password is too short or too long"
+          }
+        },
+        "summary": "Set a new password",
         "tags": ["Auth"]
       }
     },
@@ -141,6 +314,9 @@
           },
           "401": {
             "description": "No usable refresh token: sign in again"
+          },
+          "403": {
+            "description": "This request must come from the Manasbal shop: the Origin header is not in WEB_ORIGINS, or is missing while the refresh_token cookie is sent"
           }
         },
         "security": [
@@ -160,6 +336,9 @@
         "responses": {
           "204": {
             "description": ""
+          },
+          "403": {
+            "description": "This request must come from the Manasbal shop: the Origin header is not in WEB_ORIGINS, or is missing while the refresh_token cookie is sent"
           }
         },
         "security": [
@@ -168,6 +347,135 @@
           }
         ],
         "summary": "Sign out",
+        "tags": ["Auth"]
+      }
+    },
+    "/auth/2fa/setup": {
+      "post": {
+        "description": "Makes a new authenticator-app secret for the signed-in user. It is not on until POST /auth/2fa/enable gets a code from the app.",
+        "operationId": "TwoStepController_setup",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwoStepSetupResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No valid access token"
+          },
+          "409": {
+            "description": "Two-step sign-in is already on"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Start two-step sign-in",
+        "tags": ["Auth"]
+      }
+    },
+    "/auth/2fa/enable": {
+      "post": {
+        "description": "Takes the 6-digit code from the authenticator app. Answers the recovery codes, which are shown only this once.",
+        "operationId": "TwoStepController_enable",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  }
+                },
+                "required": ["code"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwoStepEnabledResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The code is not right, or set-up was not started"
+          },
+          "401": {
+            "description": "No valid access token"
+          },
+          "409": {
+            "description": "Two-step sign-in is already on"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Switch on two-step sign-in",
+        "tags": ["Auth"]
+      }
+    },
+    "/auth/2fa/disable": {
+      "post": {
+        "description": "Takes a current 6-digit code from the authenticator app, or a recovery code. Removes the secret and every recovery code.",
+        "operationId": "TwoStepController_disable",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  }
+                },
+                "required": ["code"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Two-step sign-in is off"
+          },
+          "400": {
+            "description": "The code is not right"
+          },
+          "401": {
+            "description": "No valid access token"
+          },
+          "409": {
+            "description": "Two-step sign-in is not on"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Switch off two-step sign-in",
         "tags": ["Auth"]
       }
     },
@@ -414,6 +722,135 @@
         ],
         "summary": "Delete an address",
         "tags": ["Addresses"]
+      }
+    },
+    "/me/store": {
+      "patch": {
+        "description": "Changes the signed-in seller's store name; the slug (the store page's address) follows it. The change is recorded in the audit log.",
+        "operationId": "StoreController_rename",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "storeName": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 60
+                  }
+                },
+                "required": ["storeName"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OwnStore"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The name is too short, too long or has no letters"
+          },
+          "401": {
+            "description": "No valid access token"
+          },
+          "403": {
+            "description": "You can't do this with your role"
+          },
+          "404": {
+            "description": "This account has no store"
+          },
+          "409": {
+            "description": "Another store already uses this name"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Rename your store",
+        "tags": ["Me"]
+      }
+    },
+    "/me/sessions": {
+      "get": {
+        "description": "One entry per signed-in device or browser, most recently used first.",
+        "operationId": "SessionsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Session"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No valid access token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Where I am signed in",
+        "tags": ["Me"]
+      }
+    },
+    "/me/sessions/{id}": {
+      "delete": {
+        "description": "Signs that browser out: its refresh token stops working. Its access token works until it expires (15 minutes). Ending the current session is allowed.",
+        "operationId": "SessionsController_end",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The session is ended"
+          },
+          "400": {
+            "description": "The id is not a UUID"
+          },
+          "401": {
+            "description": "No valid access token"
+          },
+          "404": {
+            "description": "No session with this id"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "End a session",
+        "tags": ["Me"]
       }
     },
     "/categories": {
@@ -797,6 +1234,53 @@
         "tags": ["Orders"]
       }
     },
+    "/admin/orders/{id}": {
+      "get": {
+        "description": "One order by its id, whoever placed it. Support and admins only; every view is recorded in the audit log as order.view.",
+        "operationId": "AdminController_order",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminOrder"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The id is not a UUID"
+          },
+          "401": {
+            "description": "No valid access token"
+          },
+          "403": {
+            "description": "You can't do this with your role"
+          },
+          "404": {
+            "description": "No order with this id"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Read any order",
+        "tags": ["Admin"]
+      }
+    },
     "/admin/audit-log": {
       "get": {
         "description": "One page of recorded changes, newest first. Only admins can read it.",
@@ -839,7 +1323,7 @@
             "description": "No valid access token"
           },
           "403": {
-            "description": "The user is not an admin"
+            "description": "You can't do this with your role"
           }
         },
         "security": [
@@ -935,6 +1419,34 @@
         },
         "required": ["status", "service", "version"]
       },
+      "SignInResult": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string"
+          },
+          "expiresIn": {
+            "type": "number",
+            "description": "Seconds until the access token expires",
+            "example": 900
+          }
+        },
+        "required": ["accessToken", "expiresIn"]
+      },
+      "TwoStepChallengeResult": {
+        "type": "object",
+        "properties": {
+          "twoFactorRequired": {
+            "type": "boolean",
+            "enum": [true]
+          },
+          "challengeToken": {
+            "type": "string",
+            "description": "Send it with the code to POST /auth/2fa/verify. It works for 5 minutes."
+          }
+        },
+        "required": ["twoFactorRequired", "challengeToken"]
+      },
       "SignUpResult": {
         "type": "object",
         "properties": {
@@ -951,19 +1463,35 @@
         },
         "required": ["id", "email", "name"]
       },
-      "SignInResult": {
+      "TwoStepSetupResult": {
         "type": "object",
         "properties": {
-          "accessToken": {
-            "type": "string"
+          "otpauthUrl": {
+            "type": "string",
+            "description": "Show as a QR code for the authenticator app",
+            "example": "otpauth://totp/Manasbal:asha%40example.test?secret=JBSWY3DPEHPK3PXP&issuer=Manasbal"
           },
-          "expiresIn": {
-            "type": "number",
-            "description": "Seconds until the access token expires",
-            "example": 900
+          "secret": {
+            "type": "string",
+            "description": "The same secret, to type in by hand",
+            "example": "JBSWY3DPEHPK3PXP"
           }
         },
-        "required": ["accessToken", "expiresIn"]
+        "required": ["otpauthUrl", "secret"]
+      },
+      "TwoStepEnabledResult": {
+        "type": "object",
+        "properties": {
+          "recoveryCodes": {
+            "description": "10 one-time codes for when the app is lost. Shown only this once.",
+            "example": ["abcde-fghjk"],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["recoveryCodes"]
       },
       "Me": {
         "type": "object",
@@ -980,7 +1508,8 @@
           },
           "role": {
             "type": "string",
-            "example": "buyer"
+            "enum": ["customer", "seller", "seller_staff", "support", "admin"],
+            "example": "customer"
           }
         },
         "required": ["id", "name", "email", "role"]
@@ -1013,6 +1542,52 @@
           }
         },
         "required": ["id", "name", "line1", "city", "state", "pincode", "isDefault"]
+      },
+      "OwnStore": {
+        "type": "object",
+        "properties": {
+          "storeName": {
+            "type": "string",
+            "example": "Quill Threads"
+          },
+          "slug": {
+            "type": "string",
+            "example": "quill-threads",
+            "description": "The store page's address"
+          },
+          "status": {
+            "type": "string",
+            "example": "approved"
+          }
+        },
+        "required": ["storeName", "slug", "status"]
+      },
+      "Session": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Pass it to DELETE /me/sessions/{id}"
+          },
+          "browser": {
+            "type": "string",
+            "example": "Firefox on Windows"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastUsedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "current": {
+            "type": "boolean",
+            "description": "The session this access token belongs to"
+          }
+        },
+        "required": ["id", "browser", "startedAt", "lastUsedAt", "current"]
       },
       "Category": {
         "type": "object",
@@ -1378,6 +1953,29 @@
         },
         "required": ["items", "nextCursor"]
       },
+      "AdminOrder": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "example": "placed"
+          },
+          "totalPaise": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Whole paise"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["id", "status", "totalPaise", "createdAt"]
+      },
       "AuditEntry": {
         "type": "object",
         "properties": {
@@ -1396,10 +1994,12 @@
           },
           "targetType": {
             "type": "string",
+            "nullable": true,
             "example": "address"
           },
           "targetId": {
             "type": "string",
+            "nullable": true,
             "format": "uuid"
           },
           "requestId": {

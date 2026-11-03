@@ -1,4 +1,5 @@
-import { ARGON2_OPTIONS, PasswordService } from "./password.service.js";
+import { ARGON2_OPTIONS } from "./argon2-options.js";
+import { PasswordService } from "./password.service.js";
 
 describe("PasswordService", () => {
   const passwords = new PasswordService();

@@ -1,9 +1,15 @@
 import { Injectable } from "@nestjs/common";
 import { getDb } from "../prisma/db.js";
-import type { Actor } from "../auth/current-user.js";
 
 // The orm of getDb(), or of a transaction.
 type Orm = Pick<ReturnType<typeof getDb>, "orm">["orm"];
+
+// Who did it: an actor, or no known account (userId null), such as a sign-in with an email that
+// has no account. Never the email itself.
+export interface AuditWho {
+  userId: string | null;
+  requestId: string;
+}
 
 // What an action was done to.
 export interface AuditTarget {
@@ -18,17 +24,18 @@ export interface AuditTarget {
 export class AuditService {
   // Pass the transaction's orm so the audit row is saved or rolled back together with the change
   // it records.
+  // A null target is an event about no known record.
   async record(
-    who: Actor,
+    who: AuditWho,
     action: string,
-    target: AuditTarget,
+    target: AuditTarget | null,
     orm: Orm = getDb().orm,
   ): Promise<void> {
     await orm.public.AuditLog.create({
       actorId: who.userId,
       action,
-      targetType: target.type,
-      targetId: target.id,
+      targetType: target?.type ?? null,
+      targetId: target?.id ?? null,
       requestId: who.requestId,
       createdByVisitor: true,
     });

@@ -27,7 +27,12 @@ describe("MeService", () => {
   });
 
   it("answers the user's id, name, email and role", async () => {
-    const me = { id: USER_ID, name: "Test Buyer", email: "test.buyer@example.test", role: "buyer" };
+    const me = {
+      id: USER_ID,
+      name: "Test Buyer",
+      email: "test.buyer@example.test",
+      role: "customer",
+    };
     first.mockResolvedValue(me);
 
     await expect(service.get(USER_ID)).resolves.toBe(me);

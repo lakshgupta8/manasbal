@@ -1,6 +1,8 @@
 # @manasbal/seed
 
-Fills a database with made-up demo data: people, a catalog, coupons, orders, payments, reviews and seller settlements. Every row is flagged `is_sample`. The data comes from a fixed seed, so every run writes exactly the same rows.
+Fills a database with made-up demo data: people, a catalog, coupons, orders, payments, reviews and seller settlements. Every row is flagged `is_sample`. The data comes from a fixed seed, so every run writes exactly the same rows, except the demo logins' password hashes (argon2id uses a random salt).
+
+**Demo logins.** Every profile includes one sign-in per role, listed in the [root README](../../README.md#demo-logins). The emails and the public password live in [`src/demo-logins.ts`](src/demo-logins.ts), and nowhere else in code. The first customer and the first (biggest) seller are the demo customer and seller; seller staff, support and admin are three extra users. Their hashes are made at insert time with the API's own argon2 settings (`apps/api/src/auth/argon2-options.ts`), so the API's sign-in accepts them.
 
 ## Commands
 
@@ -13,6 +15,8 @@ Run from the repo root. Both read `DATABASE_URL` from `apps/api/.env` unless it 
 | See what a reset would write, without connecting | `pnpm seed:reset --profile demo --dry-run`            |
 
 `seed:reset` uses the `demo` profile unless `--profile` says otherwise; `seed` uses `minimal`.
+
+Both build `@manasbal/types` first: the seed uses its `Role` type and the `slugify` rule the API uses for store slugs, so seeded and renamed stores get the same kind of slug.
 
 ## ⚠️ The reset deletes everything
 
@@ -40,7 +44,7 @@ pnpm --filter @manasbal/seed seed --profile demo
 
 ## The nightly reset of the live demo
 
-`.github/workflows/seed-demo.yml` runs `pnpm seed:reset --profile demo` every night at 21:00 UTC (02:30 IST), and on demand from **Actions → Reset demo data**. Then it checks that the live API lists products again.
+`.github/workflows/seed-demo.yml` runs `pnpm seed:reset --profile demo` every night at 21:00 UTC (02:30 IST), and on demand from **Actions → Reset demo data**. Then it checks that the live API lists products again, and that the demo customer can sign in and `GET /me` answers role `customer` (the access token is masked in the log).
 
 - **Released code only:** the scheduled run checks out `main` and sets `SEED_MIGRATE_TO=prod`, so the live database never gets a migration that no released API uses. A manual run can choose another branch.
 - **Direct connection:** the `demo` environment's `DATABASE_URL` secret is Neon's direct string, with pooling off (the same string as `DIRECT_URL`). `TRUNCATE` and migrations must not go through the pooler.

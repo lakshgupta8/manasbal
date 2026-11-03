@@ -1,0 +1,37 @@
+info:
+  name: Two-step verify
+  type: http
+  seq: 14
+
+http:
+  method: POST
+  url: "{{baseUrl}}/auth/2fa/verify"
+  body:
+    type: json
+    data: |-
+      {
+        "challengeToken": "{{challengeToken}}",
+        "code": "{{nextTotpCode}}"
+      }
+  auth:
+    type: none
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        // The second step signs in as sign-in does; the requests after the folder use this token.
+        bru.setVar("accessToken", res.body.accessToken);
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.accessToken
+      operator: isString
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

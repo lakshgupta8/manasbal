@@ -20,6 +20,8 @@ const DEMO_TABLES = [
   "reviews",
   "audit_logs",
   "refresh_tokens",
+  "email_tokens",
+  "recovery_codes",
 ];
 // Written only by the seed or an admin. The marker is the seed's own: it lets the reset run.
 const SEED_ONLY = ["categories", "coupons", "_demo_marker"];

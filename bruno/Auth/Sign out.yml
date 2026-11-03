@@ -1,12 +1,15 @@
 info:
   name: Sign out
   type: http
-  seq: 6
+  seq: 7
 
 http:
   method: POST
   url: "{{baseUrl}}/auth/sign-out"
   headers:
+    # The cookie routes take requests only from the shop (WEB_ORIGINS on the API).
+    - name: Origin
+      value: "{{webOrigin}}"
     - name: Cookie
       value: "refresh_token={{newRefreshToken}}"
   auth: inherit

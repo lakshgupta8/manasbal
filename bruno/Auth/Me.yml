@@ -1,7 +1,7 @@
 info:
   name: Me
   type: http
-  seq: 3
+  seq: 4
 
 http:
   method: GET
@@ -18,7 +18,7 @@ runtime:
       value: "{{signInEmail}}"
     - expression: res.body.role
       operator: eq
-      value: buyer
+      value: customer
 
 settings:
   encodeUrl: true

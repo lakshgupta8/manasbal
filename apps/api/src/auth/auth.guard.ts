@@ -5,6 +5,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from "@nestjs/common";
+import type { JWTPayload } from "jose";
 import type { AuthedRequest } from "./current-user.js";
 import { TokensService } from "./tokens.service.js";
 
@@ -28,15 +29,17 @@ export class AuthGuard implements CanActivate {
     const token = BEARER.exec(request.headers.authorization ?? "")?.[1];
     if (token === undefined) throw new UnauthorizedException(SIGN_IN_REQUIRED);
 
-    const payload = await this.tokens.verifyAccess(token).catch(() => null);
-    const sub = payload?.sub;
-    const role = payload?.["role"];
+    // A token that does not verify reads as one with no claims, so it is refused below.
+    const payload = await this.tokens.verifyAccess(token).catch((): JWTPayload => ({}));
+    const { sub, role, sid } = payload;
     if (typeof sub !== "string" || typeof role !== "string") {
       throw new UnauthorizedException(SIGN_IN_REQUIRED);
     }
 
     request.userId = sub;
     request.role = role;
+    // The session the token was issued for; older tokens carry none.
+    if (typeof sid === "string") request.sessionId = sid;
     return true;
   }
 }
