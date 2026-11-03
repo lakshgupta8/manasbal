@@ -15,7 +15,7 @@
     "typecheck": "tsc",
     "test": "vitest run --coverage",
     "test:visual": "node scripts/visual.mjs",
-    "tokens": "node style-dictionary.config.mjs"
+    "tokens": "style-dictionary build --config style-dictionary.config.ts"
   },
   "peerDependencies": {
     "react": "^19.2.8",

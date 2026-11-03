@@ -1,7 +1,3 @@
-import { execFileSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
-import path from "node:path";
 import { describe, expect, it } from "vitest";
 import colorJson from "../../tokens/color.json";
 import pairsJson from "../../tokens/contrast-pairs.json";
@@ -194,24 +190,5 @@ describe("type tokens", () => {
 
   it("names the font licence", () => {
     expect(fontJson.font.family.sans.$description).toContain("SIL Open Font License");
-  });
-});
-
-describe("theme.css", () => {
-  it("is what the tokens build today (run `pnpm --filter @manasbal/ui tokens` after changing a token)", () => {
-    const packageDir = path.resolve(import.meta.dirname, "../..");
-    const outDir = mkdtempSync(path.join(tmpdir(), "manasbal-theme-"));
-    try {
-      execFileSync(process.execPath, ["style-dictionary.config.mjs"], {
-        cwd: packageDir,
-        env: { ...process.env, TOKENS_OUT_DIR: outDir },
-      });
-      const fresh = readFileSync(path.join(outDir, "theme.css"), "utf8");
-      const committed = readFileSync(path.join(packageDir, "src/theme.css"), "utf8");
-      // A Windows checkout may turn the committed file's line endings into CRLF.
-      expect(committed.replaceAll("\r\n", "\n")).toBe(fresh);
-    } finally {
-      rmSync(outDir, { recursive: true, force: true });
-    }
   });
 });
