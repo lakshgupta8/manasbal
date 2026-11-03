@@ -285,6 +285,90 @@
         "tags": ["Auth"]
       }
     },
+    "/auth/2fa/setup": {
+      "post": {
+        "description": "Makes a new authenticator-app secret for the signed-in user. It is not on until POST /auth/2fa/enable gets a code from the app.",
+        "operationId": "TwoStepController_setup",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwoStepSetupResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No valid access token"
+          },
+          "409": {
+            "description": "Two-step sign-in is already on"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Start two-step sign-in",
+        "tags": ["Auth"]
+      }
+    },
+    "/auth/2fa/enable": {
+      "post": {
+        "description": "Takes the 6-digit code from the authenticator app. Answers the recovery codes, which are shown only this once.",
+        "operationId": "TwoStepController_enable",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  }
+                },
+                "required": ["code"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwoStepEnabledResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The code is not right, or set-up was not started"
+          },
+          "401": {
+            "description": "No valid access token"
+          },
+          "409": {
+            "description": "Two-step sign-in is already on"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Switch on two-step sign-in",
+        "tags": ["Auth"]
+      }
+    },
     "/me": {
       "get": {
         "description": "The signed-in user's name, email and role.",
@@ -1185,6 +1269,36 @@
           }
         },
         "required": ["accessToken", "expiresIn"]
+      },
+      "TwoStepSetupResult": {
+        "type": "object",
+        "properties": {
+          "otpauthUrl": {
+            "type": "string",
+            "description": "Show as a QR code for the authenticator app",
+            "example": "otpauth://totp/Manasbal:asha%40example.test?secret=JBSWY3DPEHPK3PXP&issuer=Manasbal"
+          },
+          "secret": {
+            "type": "string",
+            "description": "The same secret, to type in by hand",
+            "example": "JBSWY3DPEHPK3PXP"
+          }
+        },
+        "required": ["otpauthUrl", "secret"]
+      },
+      "TwoStepEnabledResult": {
+        "type": "object",
+        "properties": {
+          "recoveryCodes": {
+            "description": "10 one-time codes for when the app is lost. Shown only this once.",
+            "example": ["abcde-fghjk"],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["recoveryCodes"]
       },
       "Me": {
         "type": "object",

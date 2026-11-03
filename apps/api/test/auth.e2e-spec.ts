@@ -2,6 +2,7 @@ import fastifyCookie from "@fastify/cookie";
 import { APP_FILTER } from "@nestjs/core";
 import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fastify";
 import { Test } from "@nestjs/testing";
+import { generate } from "otplib";
 import { AuditModule } from "../src/audit/audit.module.js";
 import { AuthModule } from "../src/auth/auth.module.js";
 import {
@@ -11,6 +12,9 @@ import {
   SIGN_IN_FAILED,
   SIGN_UP_FAILED,
 } from "../src/auth/auth.service.js";
+import { hashRecoveryCode } from "../src/auth/recovery-codes.js";
+import { open } from "../src/auth/secret-box.js";
+import { TWO_STEP_ALREADY_ON, WRONG_CODE } from "../src/auth/two-step.service.js";
 import { ProblemDetailsFilter } from "../src/errors/problem-details.filter.js";
 import { fastifyOptions } from "../src/logging/logging.config.js";
 import { type Mail, MailerService } from "../src/mail/mailer.service.js";
@@ -74,6 +78,8 @@ describe("/auth (e2e)", () => {
   beforeEach(async () => {
     await database.sql("delete from refresh_tokens");
     await database.sql("delete from email_tokens");
+    await database.sql("delete from recovery_codes");
+    await database.sql("delete from audit_logs");
     await database.sql("delete from users");
     sent.length = 0;
   });
@@ -434,6 +440,77 @@ describe("/auth (e2e)", () => {
         expect(expired.statusCode).toBe(400);
         expect(expired.json()).toMatchObject({ detail: LINK_INVALID });
       });
+    });
+  });
+
+  describe("two-step set-up", () => {
+    const post2fa = (path: "setup" | "enable", token?: string, payload?: object) =>
+      app.inject({
+        method: "POST",
+        url: `/auth/2fa/${path}`,
+        headers: token === undefined ? {} : { authorization: `Bearer ${token}` },
+        ...(payload === undefined ? {} : { payload }),
+      });
+
+    async function signedIn(): Promise<string> {
+      expect((await post(signUp)).statusCode).toBe(201);
+      const answer = await signIn({ email: signUp.email, password: signUp.password });
+      return answer.json<{ accessToken: string }>().accessToken;
+    }
+
+    it("sets up with an encrypted secret, enables with an app code, and stores hashed codes", async () => {
+      const token = await signedIn();
+
+      const setup = await post2fa("setup", token);
+      expect(setup.statusCode).toBe(200);
+      const { secret, otpauthUrl } = setup.json<{ secret: string; otpauthUrl: string }>();
+      expect(otpauthUrl).toMatch(/^otpauth:\/\/totp\/Manasbal:/);
+      expect(otpauthUrl).toContain("issuer=Manasbal");
+
+      // The column holds ciphertext that decrypts back to the secret, never the secret itself.
+      const stored = await database.sql("select totp_secret from users");
+      expect(stored).not.toContain(secret);
+      expect(open(stored)).toBe(secret);
+      expect(await database.sql("select totp_enabled_at is null from users")).toBe("t");
+
+      // A wrong code switches nothing on.
+      const right = await generate({ secret });
+      const wrong = await post2fa("enable", token, {
+        code: right === "000000" ? "111111" : "000000",
+      });
+      expect(wrong.statusCode).toBe(400);
+      expect(wrong.json()).toMatchObject({ detail: WRONG_CODE });
+      expect(await database.sql("select totp_enabled_at is null from users")).toBe("t");
+
+      const enabled = await post2fa("enable", token, { code: await generate({ secret }) });
+      expect(enabled.statusCode).toBe(200);
+      const { recoveryCodes } = enabled.json<{ recoveryCodes: string[] }>();
+      expect(recoveryCodes).toHaveLength(10);
+      expect(new Set(recoveryCodes).size).toBe(10);
+      expect(await database.sql("select totp_enabled_at is not null from users")).toBe("t");
+
+      const hashes = (await database.sql("select code_hash from recovery_codes"))
+        .split("\n")
+        .sort();
+      expect(hashes).toEqual(recoveryCodes.map(hashRecoveryCode).sort());
+      for (const code of recoveryCodes) expect(hashes.join()).not.toContain(code);
+      expect(
+        await database.sql("select string_agg(action, ',' order by action) from audit_logs"),
+      ).toBe("auth.2fa.enable,auth.2fa.setup");
+
+      // Once on, set-up and enable both answer 409.
+      for (const again of [
+        await post2fa("setup", token),
+        await post2fa("enable", token, { code: await generate({ secret }) }),
+      ]) {
+        expect(again.statusCode).toBe(409);
+        expect(again.json()).toMatchObject({ detail: TWO_STEP_ALREADY_ON });
+      }
+    });
+
+    it("answers 401 without an access token", async () => {
+      expect((await post2fa("setup")).statusCode).toBe(401);
+      expect((await post2fa("enable", undefined, { code: "123456" })).statusCode).toBe(401);
     });
   });
 

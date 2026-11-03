@@ -164,6 +164,46 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/auth/2fa/setup": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Start two-step sign-in
+     * @description Makes a new authenticator-app secret for the signed-in user. It is not on until POST /auth/2fa/enable gets a code from the app.
+     */
+    post: operations["TwoStepController_setup"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/auth/2fa/enable": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Switch on two-step sign-in
+     * @description Takes the 6-digit code from the authenticator app. Answers the recovery codes, which are shown only this once.
+     */
+    post: operations["TwoStepController_enable"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/me": {
     parameters: {
       query?: never;
@@ -497,6 +537,27 @@ export interface components {
        * @example 900
        */
       expiresIn: number;
+    };
+    TwoStepSetupResult: {
+      /**
+       * @description Show as a QR code for the authenticator app
+       * @example otpauth://totp/Manasbal:asha%40example.test?secret=JBSWY3DPEHPK3PXP&issuer=Manasbal
+       */
+      otpauthUrl: string;
+      /**
+       * @description The same secret, to type in by hand
+       * @example JBSWY3DPEHPK3PXP
+       */
+      secret: string;
+    };
+    TwoStepEnabledResult: {
+      /**
+       * @description 10 one-time codes for when the app is lost. Shown only this once.
+       * @example [
+       *       "abcde-fghjk"
+       *     ]
+       */
+      recoveryCodes: string[];
     };
     Me: {
       /** Format: uuid */
@@ -937,6 +998,85 @@ export interface operations {
     requestBody?: never;
     responses: {
       204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  TwoStepController_setup: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TwoStepSetupResult"];
+        };
+      };
+      /** @description No valid access token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Two-step sign-in is already on */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  TwoStepController_enable: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          code: string;
+        };
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TwoStepEnabledResult"];
+        };
+      };
+      /** @description The code is not right, or set-up was not started */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No valid access token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Two-step sign-in is already on */
+      409: {
         headers: {
           [name: string]: unknown;
         };

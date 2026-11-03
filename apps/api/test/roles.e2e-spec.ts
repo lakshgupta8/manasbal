@@ -17,7 +17,7 @@ import { startTestDatabase, type TestDatabase } from "./support/test-database.js
 // url can name :orderId, filled in with an order made below; its body must be valid, so an
 // allowed role gets 200.
 const MATRIX: {
-  method: "GET" | "PATCH";
+  method: "GET" | "PATCH" | "POST";
   url: string;
   body?: object;
   allowed: readonly Role[] | "any";
@@ -29,6 +29,8 @@ const MATRIX: {
   { method: "GET", url: "/admin/audit-log", allowed: ["admin"] },
   { method: "PATCH", url: "/me/store", body: { storeName: "Matrix Store" }, allowed: ["seller"] },
   { method: "GET", url: "/admin/orders/:orderId", allowed: ["support", "admin"] },
+  // Enabling needs a code from the app; tests/auth.e2e-spec.ts covers it.
+  { method: "POST", url: "/auth/2fa/setup", allowed: "any" },
 ];
 
 const CASES = MATRIX.flatMap(({ method, url, body, allowed }) => [
