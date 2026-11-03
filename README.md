@@ -109,6 +109,7 @@ The seed writes them ([`packages/seed/src/demo-logins.ts`](packages/seed/src/dem
 ## Documentation
 
 - [Architecture decisions](docs/adr)
+- [Sign-in threat model](docs/security/auth-threat-model.md)
 - [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
 
 ## Contributors
