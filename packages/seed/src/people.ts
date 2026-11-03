@@ -1,5 +1,5 @@
 import type { Faker } from "@faker-js/faker";
-import type { Role } from "@manasbal/types";
+import { slugify, type Role } from "@manasbal/types";
 // Prisma reads and writes timestamps as Temporal.Instant, which Node 24 doesn't have yet.
 import "temporal-polyfill/global";
 import places from "../data/places.json" with { type: "json" };
@@ -66,14 +66,6 @@ const STREETS = [
 
 // Reserved for documentation, so a seeded email can never reach anyone.
 const EMAIL_DOMAIN = "example.com";
-
-// Lower case, with anything but letters and digits turned into single hyphens.
-export function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .replaceAll(/[^a-z0-9]+/g, "-")
-    .replaceAll(/(^-|-$)/g, "");
-}
 
 function makeUser(faker: Faker, role: UserRow["role"], number: number): UserRow {
   const firstName = faker.person.firstName();

@@ -12,7 +12,8 @@ import variantRules from "../data/variants.json" with { type: "json" };
 import { insertInBatches } from "./batches.ts";
 import type { createDb } from "./db.ts";
 import { assertAllowed } from "./guardrails.ts";
-import { sellerShares, slugify, type SellerRow } from "./people.ts";
+import { slugify } from "@manasbal/types";
+import { sellerShares, type SellerRow } from "./people.ts";
 import type { SeedProfile } from "./profiles.ts";
 
 // The orm of a client, or of a transaction.

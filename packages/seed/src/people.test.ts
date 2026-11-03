@@ -1,8 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
-import { slugify as sharedSlugify } from "@manasbal/types";
 import places from "../data/places.json" with { type: "json" };
 import { assertAllowed } from "./guardrails.ts";
-import { generatePeople, insertPeople, sellerShares, slugify, type People } from "./people.ts";
+import { generatePeople, insertPeople, sellerShares, type People } from "./people.ts";
 import { PROFILES } from "./profiles.ts";
 import { createRandom } from "./random.ts";
 
@@ -114,15 +113,4 @@ describe("insertPeople", () => {
     );
     expect(calls.at(-1)?.[0]).toBe("Address");
   });
-});
-
-// The API makes store slugs with slugify from @manasbal/types. The seed keeps its own copy, since
-// the nightly reset runs the seed from source without building that package; this keeps them equal.
-describe("slugify", () => {
-  it.each(["Kadamora Velvet & Co.", "  --Quill   Threads--  ", "Ünïcode Shop 42", "!!"])(
-    "matches the API's rule for %j",
-    (name) => {
-      expect(slugify(name)).toBe(sharedSlugify(name));
-    },
-  );
 });

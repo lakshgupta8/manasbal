@@ -5,20 +5,20 @@
   "license": "Apache-2.0",
   "type": "module",
   "scripts": {
-    "seed": "node --env-file-if-exists=../../apps/api/.env src/cli.ts",
-    "seed:reset": "node --env-file-if-exists=../../apps/api/.env src/reset-cli.ts",
+    "seed": "pnpm --filter @manasbal/types build && node --env-file-if-exists=../../apps/api/.env src/cli.ts",
+    "seed:reset": "pnpm --filter @manasbal/types build && node --env-file-if-exists=../../apps/api/.env src/reset-cli.ts",
     "typecheck": "tsc",
     "test": "vitest run --coverage",
     "test:db": "vitest run --config ./vitest.config.db.ts"
   },
   "dependencies": {
     "@faker-js/faker": "^10.6.0",
+    "@manasbal/types": "workspace:*",
     "@prisma/orm-postgres": "8.0.0-rc.18",
     "temporal-polyfill": "^1.0.6"
   },
   "devDependencies": {
     "@manasbal/tsconfig": "workspace:*",
-    "@manasbal/types": "workspace:*",
     "@testcontainers/postgresql": "^12.2.1",
     "@types/node": "^24.19.2",
     "@vitest/coverage-v8": "^4.1.11",
