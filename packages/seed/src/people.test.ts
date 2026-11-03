@@ -45,7 +45,9 @@ describe("generatePeople", () => {
   it("makes one confirmed demo login per role, with the role's public email", () => {
     const logins = users.filter((user) => demoEmails.has(user.email));
 
-    expect(logins.map((user) => user.role).sort()).toEqual([...ROLES].sort());
+    expect(logins.map((user) => user.role).sort((a, b) => a.localeCompare(b))).toEqual(
+      [...ROLES].sort((a, b) => a.localeCompare(b)),
+    );
     for (const login of logins) {
       expect(login.email).toBe(DEMO_EMAILS[login.role]);
       expect(login.emailVerifiedAt).not.toBeNull();

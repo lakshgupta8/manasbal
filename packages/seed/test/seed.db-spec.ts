@@ -59,11 +59,16 @@ describe("the seed against a real database", () => {
         .map(([role, email]) => [email, role])
         .sort(([a], [b]) => a!.localeCompare(b!)),
     );
-    expect(logins.map((login) => login.role).sort()).toEqual([...ROLES].sort());
+    expect(logins.map((login) => login.role).sort((a, b) => a.localeCompare(b))).toEqual(
+      [...ROLES].sort((a, b) => a.localeCompare(b)),
+    );
+    const verified = await Promise.all(
+      logins.map((login) => verify(login.password_hash, DEMO_PASSWORD)),
+    );
+    expect(verified).toEqual(logins.map(() => true));
     for (const login of logins) {
       expect(login.email).toMatch(/@example\.com$/);
       expect(login.password_hash).toMatch(/^\$argon2id\$/);
-      expect(await verify(login.password_hash, DEMO_PASSWORD), login.email).toBe(true);
       expect(login).toMatchObject({
         is_sample: true,
         created_by_visitor: false,

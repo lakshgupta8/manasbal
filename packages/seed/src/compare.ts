@@ -23,15 +23,15 @@ export const IGNORED_COLUMNS: Readonly<Record<string, readonly string[]>> = {
 // Every row of every table in the contract, ordered by id, as plain JSON, without the ignored
 // columns.
 export async function dumpTables(query: Query, tables = contractTables()): Promise<Dump> {
-  const dump: Dump = {};
-  for (const table of tables) {
-    const drop = (IGNORED_COLUMNS[table] ?? []).map((column) => ` - '${column}'`).join("");
-    const text = await query(
-      `SELECT coalesce(json_agg(to_jsonb(t)${drop} ORDER BY t.id), '[]') FROM "${table}" t`,
-    );
-    dump[table] = JSON.parse(text) as unknown[];
-  }
-  return dump;
+  const texts = await Promise.all(
+    tables.map((table) => {
+      const drop = (IGNORED_COLUMNS[table] ?? []).map((column) => ` - '${column}'`).join("");
+      return query(
+        `SELECT coalesce(json_agg(to_jsonb(t)${drop} ORDER BY t.id), '[]') FROM "${table}" t`,
+      );
+    }),
+  );
+  return Object.fromEntries(tables.map((table, i) => [table, JSON.parse(texts[i]!) as unknown[]]));
 }
 
 // The first row that differs between two dumps, table by table, or null when they match. A table

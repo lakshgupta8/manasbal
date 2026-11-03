@@ -4,7 +4,8 @@ import type { Role } from "@manasbal/types";
 // the README and the nightly workflow reads it from here. Nothing real sits behind these
 // accounts, and the nightly reset restores them. This file holds constants only, so the
 // workflow can import it with plain Node.
-export const DEMO_PASSWORD = "quiet-mango-river-lamp";
+// NOSONAR below: a deliberately public demo password, not a secret (see the README).
+export const DEMO_PASSWORD = "quiet-mango-river-lamp"; // NOSONAR
 
 export const DEMO_EMAILS: Readonly<Record<Role, string>> = {
   customer: "customer@example.com",
