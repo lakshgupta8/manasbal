@@ -63,7 +63,7 @@ describe("generatePeople", () => {
     const sellerUserIds = new Set(demo.sellerUsers.map((user) => user.id));
 
     expect(demo.sellerUsers.every((user) => user.role === "seller")).toBe(true);
-    expect(demo.customers.every((user) => user.role === "buyer")).toBe(true);
+    expect(demo.customers.every((user) => user.role === "customer")).toBe(true);
     expect(new Set(demo.sellers.map((seller) => seller.userId))).toEqual(sellerUserIds);
     expect(new Set(demo.sellers.map((seller) => seller.storeName)).size).toBe(30);
     for (const seller of demo.sellers) {

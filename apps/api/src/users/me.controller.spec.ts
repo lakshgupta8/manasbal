@@ -66,7 +66,12 @@ describe("MeController", () => {
   });
 
   it("GET /me answers the signed-in user", async () => {
-    const me = { id: USER_ID, name: "Test Buyer", email: "test.buyer@example.test", role: "buyer" };
+    const me = {
+      id: USER_ID,
+      name: "Test Buyer",
+      email: "test.buyer@example.test",
+      role: "customer",
+    };
     service.get.mockResolvedValue(me);
 
     const response = await app.inject({ method: "GET", url: "/me" });

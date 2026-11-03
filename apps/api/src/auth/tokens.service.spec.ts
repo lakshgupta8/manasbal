@@ -1,7 +1,7 @@
 import { SignJWT } from "jose";
 import { ACCESS_TOKEN_SECONDS, hashToken, TokensService } from "./tokens.service.js";
 
-const USER = { id: "7b0c1e2a-3d4f-4a5b-8c6d-7e8f9a0b1c2d", role: "buyer" };
+const USER = { id: "7b0c1e2a-3d4f-4a5b-8c6d-7e8f9a0b1c2d", role: "customer" };
 const MINUTE = 60_000;
 
 describe("TokensService", () => {
@@ -14,7 +14,7 @@ describe("TokensService", () => {
   it("signs an access token that verifies, with the user as sub and their role", async () => {
     const payload = await tokens.verifyAccess(await tokens.signAccess(USER));
 
-    expect(payload).toMatchObject({ sub: USER.id, role: "buyer" });
+    expect(payload).toMatchObject({ sub: USER.id, role: "customer" });
     expect((payload.exp ?? 0) - (payload.iat ?? 0)).toBe(ACCESS_TOKEN_SECONDS);
   });
 

@@ -13,7 +13,7 @@ import {
 import type { AuditPage as AuditPageShape } from "@manasbal/types";
 import { DEFAULT_LIMIT, MAX_LIMIT } from "../pagination/pagination.js";
 import { AuthGuard } from "../auth/auth.guard.js";
-import { AdminGuard } from "./admin.guard.js";
+import { Roles, RolesGuard } from "../auth/roles.js";
 import { AdminService } from "./admin.service.js";
 
 // Classes rather than interfaces so the OpenAPI description knows the shape of the answer. They
@@ -53,12 +53,13 @@ export class AuditPage {
   nextCursor: string | null;
 }
 
-// Only for users whose role is admin.
+// Only for users whose role is admin; the role comes from the access token.
 @ApiTags("Admin")
 @ApiBearerAuth()
 @ApiUnauthorizedResponse({ description: "No valid access token" })
-@ApiForbiddenResponse({ description: "The user is not an admin" })
-@UseGuards(AuthGuard, AdminGuard)
+@ApiForbiddenResponse({ description: "Only an admin can see this" })
+@UseGuards(AuthGuard, RolesGuard)
+@Roles("admin")
 @Controller("admin")
 export class AdminController {
   constructor(private readonly admin: AdminService) {}

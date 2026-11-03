@@ -953,7 +953,7 @@
             "description": "No valid access token"
           },
           "403": {
-            "description": "The user is not an admin"
+            "description": "Only an admin can see this"
           }
         },
         "security": [
@@ -1094,7 +1094,8 @@
           },
           "role": {
             "type": "string",
-            "example": "buyer"
+            "enum": ["customer", "seller", "seller_staff", "support", "admin"],
+            "example": "customer"
           }
         },
         "required": ["id", "name", "email", "role"]

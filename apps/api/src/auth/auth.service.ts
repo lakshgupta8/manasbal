@@ -7,7 +7,7 @@ import {
   Logger,
   UnauthorizedException,
 } from "@nestjs/common";
-import type { SignInInput, SignUpInput } from "@manasbal/types";
+import { NEW_ACCOUNT_ROLE, type SignInInput, type SignUpInput } from "@manasbal/types";
 import { readMailSettings } from "../mail/mail-settings.js";
 import { MailerService } from "../mail/mailer.service.js";
 import { getDb } from "../prisma/db.js";
@@ -88,7 +88,7 @@ export class AuthService {
         email,
         name,
         passwordHash,
-        role: "buyer",
+        role: NEW_ACCOUNT_ROLE,
         emailVerifiedAt: mailOn ? null : Temporal.Now.instant(),
         createdByVisitor: true,
       });

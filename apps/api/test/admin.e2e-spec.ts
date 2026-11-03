@@ -12,17 +12,17 @@ describe("GET /admin/audit-log (e2e)", () => {
   let database: TestDatabase;
   let app: NestFastifyApplication;
   let admin: string;
-  let buyer: string;
+  let customer: string;
   let older: string;
   let newer: string;
 
-  // The admin signs in as an admin; AdminGuard still checks the role in the database.
+  // The role comes from the access token; RolesGuard does not look it up in the database.
   const get = async (userId: string | undefined, url: string) =>
     app.inject({
       method: "GET",
       url,
       headers:
-        userId === undefined ? {} : await bearer(userId, userId === admin ? "admin" : "buyer"),
+        userId === undefined ? {} : await bearer(userId, userId === admin ? "admin" : "customer"),
     });
 
   beforeAll(async () => {
@@ -34,11 +34,11 @@ describe("GET /admin/audit-log (e2e)", () => {
         .create({ email, passwordHash: "", name: "Test User", role })
         .then((created) => created.id);
     admin = await user("admin@example.test", "admin");
-    buyer = await user("buyer@example.test", "buyer");
+    customer = await user("customer@example.test", "customer");
 
     const entry = async (action: string, requestId: string) => {
       const created = await orm.AuditLog.select("id").create({
-        actorId: buyer,
+        actorId: customer,
         action,
         targetType: "address",
         targetId: "1a2b3c4d-0000-4000-8000-000000000001",
@@ -68,7 +68,7 @@ describe("GET /admin/audit-log (e2e)", () => {
   it("pages the log for an admin, newest first", async () => {
     const first = auditPageSchema.parse((await get(admin, "/admin/audit-log?limit=1")).json());
     expect(first.items.map((entry) => entry.id)).toEqual([newer]);
-    expect(first.items[0]).toMatchObject({ actorId: buyer, action: "address.update" });
+    expect(first.items[0]).toMatchObject({ actorId: customer, action: "address.update" });
     expect(first.nextCursor).not.toBeNull();
 
     const second = auditPageSchema.parse(
@@ -78,8 +78,8 @@ describe("GET /admin/audit-log (e2e)", () => {
     expect(second.nextCursor).toBeNull();
   });
 
-  it("answers 403 problem+json to a buyer", async () => {
-    const response = await get(buyer, "/admin/audit-log");
+  it("answers 403 problem+json to a customer", async () => {
+    const response = await get(customer, "/admin/audit-log");
 
     expect(response.statusCode).toBe(403);
     expect(response.headers["content-type"]).toContain("application/problem+json");

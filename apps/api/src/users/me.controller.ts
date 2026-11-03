@@ -7,6 +7,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
+import { ROLES } from "@manasbal/types";
 import { AuthGuard } from "../auth/auth.guard.js";
 import { CurrentUserId } from "../auth/current-user.js";
 import { MeService } from "./me.service.js";
@@ -23,7 +24,7 @@ export class Me {
   @ApiProperty()
   email: string;
 
-  @ApiProperty({ example: "buyer" })
+  @ApiProperty({ enum: [...ROLES], example: "customer" })
   role: string;
 }
 

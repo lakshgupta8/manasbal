@@ -78,7 +78,7 @@ describe("/auth (e2e)", () => {
     sent.length = 0;
   });
 
-  it("creates a visitor buyer and stores only an argon2id hash", async () => {
+  it("creates a visitor customer and stores only an argon2id hash", async () => {
     const created = await post(signUp);
 
     expect(created.statusCode).toBe(201);
@@ -90,7 +90,7 @@ describe("/auth (e2e)", () => {
     expect(hash).not.toContain(signUp.password);
     expect(
       await database.sql(`select role || ',' || created_by_visitor from users where id = '${id}'`),
-    ).toBe("buyer,true");
+    ).toBe("customer,true");
   });
 
   it("refuses a weak password", async () => {
@@ -454,7 +454,7 @@ describe("/auth (e2e)", () => {
         id: expect.any(String) as string,
         name: signUp.name,
         email: signUp.email,
-        role: "buyer",
+        role: "customer",
       });
     });
 
