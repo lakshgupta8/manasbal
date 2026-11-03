@@ -1,5 +1,12 @@
 {
   "color": {
+    "base": {
+      "white": {
+        "$type": "color",
+        "$value": "#FFFFFF",
+        "$description": "Pure white, for the light page and for text on the brand colour."
+      }
+    },
     "lake": {
       "50": { "$type": "color", "$value": "#ECF5F5" },
       "100": { "$type": "color", "$value": "#D5E8E9" },
