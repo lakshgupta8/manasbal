@@ -1,0 +1,11 @@
+[
+  ["color.grey.900", "color.grey.50"],
+  ["color.grey.800", "color.grey.100"],
+  ["color.grey.700", "color.grey.50"],
+  ["color.lake.900", "color.lake.50"],
+  ["color.lake.800", "color.lake.100"],
+  ["color.lotus.900", "color.lotus.50"],
+  ["color.lotus.800", "color.lotus.100"],
+  ["color.grey.50", "color.lake.800"],
+  ["color.grey.50", "color.lotus.800"]
+]
