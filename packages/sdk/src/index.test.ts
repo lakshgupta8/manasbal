@@ -112,6 +112,31 @@ describe("createApiClient", () => {
     expect(fetch.mock.calls[0]![0].url).toBe("http://api.test/admin/audit-log");
   });
 
+  it("starts two-step set-up with the access token and reads the typed answer", async () => {
+    const started = { otpauthUrl: "otpauth://totp/Manasbal:x?secret=JBSWY3DP", secret: "JBSWY3DP" };
+    const { api, fetch } = fakeApi(started, 200, "application/json", "a.b.c");
+
+    const { data } = await api.POST("/auth/2fa/setup");
+
+    const request = fetch.mock.calls[0]![0];
+    expect(request.method).toBe("POST");
+    expect(request.url).toBe("http://api.test/auth/2fa/setup");
+    expect(request.headers.get("authorization")).toBe("Bearer a.b.c");
+    expect(data?.otpauthUrl).toBe(started.otpauthUrl);
+  });
+
+  it("sends the app's code to enable two-step and gets the recovery codes", async () => {
+    const codes = Array.from({ length: 10 }, (_, i) => `abcde-fghj${i}`);
+    const { api, fetch } = fakeApi({ recoveryCodes: codes }, 200, "application/json", "a.b.c");
+
+    const { data } = await api.POST("/auth/2fa/enable", { body: { code: "123456" } });
+
+    const request = fetch.mock.calls[0]![0];
+    expect(request.url).toBe("http://api.test/auth/2fa/enable");
+    expect(await request.json()).toEqual({ code: "123456" });
+    expect(data?.recoveryCodes).toHaveLength(10);
+  });
+
   it("sends the access token as a bearer token only when given one", async () => {
     const signedIn = fakeApi({ items: [], subtotalPaise: 0 }, 200, "application/json", "a.b.c");
     const without = fakeApi({ items: [], subtotalPaise: 0 });

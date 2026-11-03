@@ -1,0 +1,206 @@
+[
+  {
+    "id": "table.recovery_codes",
+    "label": "Create table \"recovery_codes\"",
+    "summary": "Creates table \"recovery_codes\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "recovery_codes"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"recovery_codes\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"recovery_codes\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"recovery_codes\"",
+        "sql": "CREATE TABLE \"public\".\"recovery_codes\" (\n  \"code_hash\" text NOT NULL,\n  \"created_at\" timestamptz DEFAULT (now()) NOT NULL,\n  \"created_by_visitor\" bool DEFAULT false NOT NULL,\n  \"id\" uuid NOT NULL,\n  \"is_sample\" bool DEFAULT false NOT NULL,\n  \"used_at\" timestamptz,\n  \"user_id\" uuid NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"recovery_codes\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"recovery_codes\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.users.totp_enabled_at",
+    "label": "Add column \"totp_enabled_at\" to \"users\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "totp_enabled_at",
+        "table": "users"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"totp_enabled_at\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "users",
+          "totp_enabled_at"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"totp_enabled_at\"",
+        "sql": "ALTER TABLE \"public\".\"users\" ADD COLUMN \"totp_enabled_at\" timestamptz"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"totp_enabled_at\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "users",
+          "totp_enabled_at"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.users.totp_secret",
+    "label": "Add column \"totp_secret\" to \"users\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "totp_secret",
+        "table": "users"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"totp_secret\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "users",
+          "totp_secret"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"totp_secret\"",
+        "sql": "ALTER TABLE \"public\".\"users\" ADD COLUMN \"totp_secret\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"totp_secret\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "users",
+          "totp_secret"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.recovery_codes.recovery_codes_user_id_idx_6c952402",
+    "label": "Create index \"recovery_codes_user_id_idx_6c952402\" on \"recovery_codes\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "recovery_codes_user_id_idx_6c952402",
+        "table": "recovery_codes"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"recovery_codes_user_id_idx_6c952402\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"recovery_codes_user_id_idx_6c952402\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"recovery_codes_user_id_idx_6c952402\"",
+        "sql": "CREATE INDEX \"recovery_codes_user_id_idx_6c952402\" ON \"public\".\"recovery_codes\" (\"user_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"recovery_codes_user_id_idx_6c952402\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"recovery_codes_user_id_idx_6c952402\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.recovery_codes.recovery_codes_user_id_fkey",
+    "label": "Add foreign key \"recovery_codes_user_id_fkey\" on \"recovery_codes\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "recovery_codes_user_id_fkey",
+        "table": "recovery_codes"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"recovery_codes_user_id_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "recovery_codes_user_id_fkey",
+          "public",
+          "\"public\".\"recovery_codes\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"recovery_codes_user_id_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"recovery_codes\"\nADD CONSTRAINT \"recovery_codes_user_id_fkey\"\nFOREIGN KEY (\"user_id\")\nREFERENCES \"public\".\"users\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"recovery_codes_user_id_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "recovery_codes_user_id_fkey",
+          "public",
+          "\"public\".\"recovery_codes\""
+        ]
+      }
+    ]
+  }
+]
