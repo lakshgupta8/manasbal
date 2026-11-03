@@ -18,6 +18,9 @@ variables:
   - name: adminAccessToken
     value: ""
     description: "An admin's access token for Admin audit log (see README); leave it empty in commits"
+  - name: webOrigin
+    value: http://localhost:3000
+    description: "Sent as Origin by Refresh, Refresh reuse and Sign out: one of the API's WEB_ORIGINS"
   - name: mailpitUrl
     value: http://localhost:8025
     description: "Auth/Verify email reads the confirmation link from Mailpit"

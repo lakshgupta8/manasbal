@@ -40,4 +40,17 @@ describe("AuditService", () => {
     expect(create).toHaveBeenCalledWith(row);
     expect(defaultCreate).not.toHaveBeenCalled();
   });
+
+  it("writes an event about no known account with no actor and no target", async () => {
+    await service.record({ userId: null, requestId: "req-2" }, "auth.sign_in.failed", null);
+
+    expect(defaultCreate).toHaveBeenCalledWith({
+      actorId: null,
+      action: "auth.sign_in.failed",
+      targetType: null,
+      targetId: null,
+      requestId: "req-2",
+      createdByVisitor: true,
+    });
+  });
 });

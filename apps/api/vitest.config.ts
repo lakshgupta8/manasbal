@@ -12,6 +12,8 @@ export default defineConfig({
     env: {
       JWT_SECRET: "test-only-secret-0123456789abcdef",
       MAIL_MODE: "off",
+      // The local shop only, whatever a local .env says.
+      WEB_ORIGINS: "http://localhost:3000,http://localhost:5173",
       // 32 zero bytes, base64: encrypts two-step secrets in tests only.
       TOTP_KEY: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
     },

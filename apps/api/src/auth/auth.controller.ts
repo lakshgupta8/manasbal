@@ -8,6 +8,7 @@ import {
   Post,
   Req,
   Res,
+  UseGuards,
 } from "@nestjs/common";
 import {
   ApiAcceptedResponse,
@@ -21,6 +22,7 @@ import {
   ApiOperation,
   ApiProperty,
   ApiTags,
+  ApiTooManyRequestsResponse,
   ApiUnauthorizedResponse,
   getSchemaPath,
 } from "@nestjs/swagger";
@@ -44,6 +46,9 @@ import { AUTH_RATE_LIMIT, RATE_WINDOW_MS } from "../rate-limit/rate-limit.module
 import { ApiZodBody, ZodValidationPipe } from "../validation/zod-validation.pipe.js";
 import { AuthService } from "./auth.service.js";
 import { REFRESH_COOKIE, refreshCookieOptions } from "./cookie.js";
+import { ORIGIN_REFUSED, OriginGuard } from "./origin.guard.js";
+
+const ORIGIN_REFUSED_DOC = `${ORIGIN_REFUSED}: the Origin header is not in WEB_ORIGINS, or is missing while the refresh_token cookie is sent`;
 
 // A class rather than an interface so the OpenAPI description (and the generated SDK) knows
 // the shape of the answer. Never the password hash.
@@ -123,8 +128,9 @@ export class AuthController {
   @ApiBadRequestResponse({ description: "Invalid details, or we could not create this account" })
   signUp(
     @Body(new ZodValidationPipe(signUpInputSchema)) input: SignUpInput,
+    @Req() request: Pick<FastifyRequest, "id">,
   ): Promise<SignUpResult> {
-    return this.auth.signUp(input);
+    return this.auth.signUp(input, String(request.id));
   }
 
   @Post("sign-in")
@@ -144,13 +150,17 @@ export class AuthController {
     },
   })
   @ApiUnauthorizedResponse({ description: "Email or password is wrong" })
+  @ApiTooManyRequestsResponse({
+    description: "5 wrong tries for this email in 15 minutes: wait 15 minutes",
+  })
   @ApiForbiddenResponse({ description: "Check your email to confirm your account" })
   async signIn(
     @Body(new ZodValidationPipe(signInInputSchema)) input: SignInInput,
     @Headers("user-agent") userAgent: string | undefined,
+    @Req() request: Pick<FastifyRequest, "id">,
     @Res({ passthrough: true }) reply: Pick<FastifyReply, "setCookie">,
   ): Promise<SignInResult | TwoStepChallengeResult> {
-    const result = await this.auth.signIn(input, userAgent);
+    const result = await this.auth.signIn(input, userAgent, String(request.id));
     if ("challengeToken" in result) return result;
     return signedIn(result, reply);
   }
@@ -165,6 +175,9 @@ export class AuthController {
   @ApiZodBody(twoStepVerifyInputSchema)
   @ApiOkResponse({ type: SignInResult })
   @ApiUnauthorizedResponse({ description: "The code is not right, or sign in again" })
+  @ApiTooManyRequestsResponse({
+    description: "5 wrong codes for this account in 15 minutes: wait 15 minutes",
+  })
   async verifyTwoStep(
     @Body(new ZodValidationPipe(twoStepVerifyInputSchema)) input: TwoStepVerifyInput,
     @Headers("user-agent") userAgent: string | undefined,
@@ -185,8 +198,9 @@ export class AuthController {
   @ApiBadRequestResponse({ description: "This link is not valid any more" })
   verifyEmail(
     @Body(new ZodValidationPipe(verifyEmailInputSchema)) input: VerifyEmailInput,
+    @Req() request: Pick<FastifyRequest, "id">,
   ): Promise<void> {
-    return this.auth.verifyEmail(input.token);
+    return this.auth.verifyEmail(input.token, String(request.id));
   }
 
   @Post("forgot-password")
@@ -201,8 +215,9 @@ export class AuthController {
   @ApiBadRequestResponse({ description: "Not an email address" })
   forgotPassword(
     @Body(new ZodValidationPipe(forgotPasswordInputSchema)) input: ForgotPasswordInput,
+    @Req() request: Pick<FastifyRequest, "id">,
   ): void {
-    this.auth.forgotPassword(input.email);
+    this.auth.forgotPassword(input.email, String(request.id));
   }
 
   @Post("reset-password")
@@ -219,11 +234,13 @@ export class AuthController {
   })
   resetPassword(
     @Body(new ZodValidationPipe(resetPasswordInputSchema)) input: ResetPasswordInput,
+    @Req() request: Pick<FastifyRequest, "id">,
   ): Promise<void> {
-    return this.auth.resetPassword(input.token, input.password);
+    return this.auth.resetPassword(input.token, input.password, String(request.id));
   }
 
   @Post("refresh")
+  @UseGuards(OriginGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "Renew the access token",
@@ -233,15 +250,22 @@ export class AuthController {
   @ApiCookieAuth(REFRESH_COOKIE)
   @ApiOkResponse({ type: SignInResult })
   @ApiUnauthorizedResponse({ description: "No usable refresh token: sign in again" })
+  @ApiForbiddenResponse({ description: ORIGIN_REFUSED_DOC })
   async refresh(
-    @Req() request: Pick<FastifyRequest, "cookies">,
+    @Req() request: Pick<FastifyRequest, "cookies" | "id">,
     @Headers("user-agent") userAgent: string | undefined,
     @Res({ passthrough: true }) reply: Pick<FastifyReply, "setCookie">,
   ): Promise<SignInResult> {
-    return signedIn(await this.auth.refresh(request.cookies[REFRESH_COOKIE], userAgent), reply);
+    const session = await this.auth.refresh(
+      request.cookies[REFRESH_COOKIE],
+      userAgent,
+      String(request.id),
+    );
+    return signedIn(session, reply);
   }
 
   @Post("sign-out")
+  @UseGuards(OriginGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: "Sign out",
@@ -249,11 +273,12 @@ export class AuthController {
   })
   @ApiCookieAuth(REFRESH_COOKIE)
   @ApiNoContentResponse()
+  @ApiForbiddenResponse({ description: ORIGIN_REFUSED_DOC })
   async signOut(
-    @Req() request: Pick<FastifyRequest, "cookies">,
+    @Req() request: Pick<FastifyRequest, "cookies" | "id">,
     @Res({ passthrough: true }) reply: Pick<FastifyReply, "clearCookie">,
   ): Promise<void> {
-    await this.auth.signOut(request.cookies[REFRESH_COOKIE]);
+    await this.auth.signOut(request.cookies[REFRESH_COOKIE], String(request.id));
     // The browser drops the cookie only when its path and flags match the ones it was set with;
     // clearCookie overrides the lifetime itself.
     reply.clearCookie(REFRESH_COOKIE, refreshCookieOptions());

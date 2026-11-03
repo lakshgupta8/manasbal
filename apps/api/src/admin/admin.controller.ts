@@ -30,11 +30,11 @@ export class AuditEntry {
   @ApiProperty({ example: "address.create" })
   action: string;
 
-  @ApiProperty({ example: "address" })
-  targetType: string;
+  @ApiProperty({ type: String, nullable: true, example: "address" })
+  targetType: string | null;
 
-  @ApiProperty({ format: "uuid" })
-  targetId: string;
+  @ApiProperty({ type: String, nullable: true, format: "uuid" })
+  targetId: string | null;
 
   @ApiProperty({ description: "The x-request-id of the request that made the change" })
   requestId: string;

@@ -13,9 +13,11 @@ import {
   type SignUpInput,
   type TwoStepVerifyInput,
 } from "@manasbal/types";
+import { AuditService, type AuditWho } from "../audit/audit.service.js";
 import { readMailSettings } from "../mail/mail-settings.js";
 import { MailerService } from "../mail/mailer.service.js";
 import { getDb } from "../prisma/db.js";
+import { emailLockKey, LockoutService, userLockKey } from "./lockout.service.js";
 import { PasswordService } from "./password.service.js";
 import {
   ACCESS_TOKEN_SECONDS,
@@ -23,7 +25,7 @@ import {
   REFRESH_TOKEN_HOURS,
   TokensService,
 } from "./tokens.service.js";
-import { SIGN_IN_AGAIN, TwoStepService } from "./two-step.service.js";
+import { SIGN_IN_AGAIN, TwoStepService, WRONG_CODE } from "./two-step.service.js";
 import {
   EMAIL_TOKEN_HOURS,
   RESET_PASSWORD,
@@ -57,6 +59,9 @@ const FIELDS = ["id", "email", "name"] as const;
 // The longest user agent stored; anything after it is cut.
 const USER_AGENT_MAX = 255;
 
+// The audit target of an account's own auth events.
+const account = (id: string) => ({ type: "user", id });
+
 @Injectable()
 export class AuthService {
   // Typed as the parts it uses: a class type makes the decorator metadata emit a branch that
@@ -70,6 +75,9 @@ export class AuthService {
     >,
     @Inject(MailerService) private readonly mailer: Pick<MailerService, "send">,
     @Inject(TwoStepService) private readonly twoStep: Pick<TwoStepService, "verifySignIn">,
+    @Inject(LockoutService)
+    private readonly lockout: Pick<LockoutService, "assertOpen" | "fail" | "clear">,
+    @Inject(AuditService) private readonly audit: Pick<AuditService, "record">,
   ) {}
 
   private readonly logger = new Logger(AuthService.name);
@@ -82,7 +90,7 @@ export class AuthService {
     return this.dummy;
   }
 
-  async signUp({ email, password, name }: SignUpInput) {
+  async signUp({ email, password, name }: SignUpInput, requestId: string) {
     // Hash first, so a taken email answers no faster than a free one.
     const passwordHash = await this.passwords.hash(password);
     const users = getDb().orm.public.User;
@@ -109,6 +117,7 @@ export class AuthService {
       }
       throw error;
     }
+    await this.audit.record({ userId: user.id, requestId }, "auth.sign_up", account(user.id));
     // Only a new account gets a mail: a taken email has already been refused above.
     if (mailOn) await this.sendVerification(user);
     return user;
@@ -116,7 +125,7 @@ export class AuthService {
 
   // Confirms the address of the account the link was sent to. The token works once; an unknown,
   // used or expired one gets the same answer.
-  async verifyEmail(token: string): Promise<void> {
+  async verifyEmail(token: string, requestId: string): Promise<void> {
     const now = Temporal.Now.instant();
     const verified = await getDb().transaction(async (tx) => {
       const tokens = tx.orm.public.EmailToken;
@@ -134,6 +143,12 @@ export class AuthService {
       await tx.orm.public.User.where({ id: row.userId, emailVerifiedAt: null }).updateAndCount({
         emailVerifiedAt: now,
       });
+      await this.audit.record(
+        { userId: row.userId, requestId },
+        "auth.email.verify",
+        account(row.userId),
+        tx.orm,
+      );
       return true;
     });
     if (!verified) throw new BadRequestException(LINK_INVALID);
@@ -141,8 +156,8 @@ export class AuthService {
 
   // Answers at once, whether or not the email has an account, and does the work afterwards: the
   // answer can't depend on the account, in what it says or in how long it takes.
-  forgotPassword(email: string): void {
-    this.sendReset(email).catch((error: unknown) => {
+  forgotPassword(email: string, requestId: string): void {
+    this.sendReset(email, requestId).catch((error: unknown) => {
       const kind = error instanceof Error ? error.name : "unknown error";
       this.logger.error(`${RESET_MAIL_FAILED} (${kind})`);
     });
@@ -151,7 +166,7 @@ export class AuthService {
   // Sets a new password with the token from a reset link. The token works once; an unknown, used
   // or expired one gets the same answer. Every session ends, so a thief who had the old
   // password is signed out, and getting the mail proves the address.
-  async resetPassword(token: string, password: string): Promise<void> {
+  async resetPassword(token: string, password: string, requestId: string): Promise<void> {
     // Hashing is slow, so it happens before the transaction opens.
     const passwordHash = await this.passwords.hash(password);
     const now = Temporal.Now.instant();
@@ -177,12 +192,21 @@ export class AuthService {
       await EmailToken.where({ userId, purpose: RESET_PASSWORD, usedAt: null }).updateAndCount({
         usedAt: now,
       });
+      await this.audit.record(
+        { userId, requestId },
+        "auth.password_reset.complete",
+        account(userId),
+        tx.orm,
+      );
       return true;
     });
     if (!reset) throw new BadRequestException(LINK_INVALID);
   }
 
-  async signIn({ email, password }: SignInInput, userAgent: string | undefined) {
+  async signIn({ email, password }: SignInInput, userAgent: string | undefined, requestId: string) {
+    // A locked email answers 429 even with the right password, before the password is checked.
+    const lockKey = emailLockKey(email);
+    await this.lockout.assertOpen(lockKey);
     const db = getDb();
     const user = await db.orm.public.User.where({ email })
       .select("id", "role", "passwordHash", "emailVerifiedAt", "totpEnabledAt")
@@ -192,7 +216,14 @@ export class AuthService {
       user?.passwordHash ?? (await this.dummyHash()),
       password,
     );
-    if (user === null || !ok) throw new UnauthorizedException(SIGN_IN_FAILED);
+    if (user === null || !ok) {
+      // An unknown email and a wrong password count and are recorded the same way, with no
+      // email: the actor is the account when there is one.
+      await this.failed(lockKey, { userId: user?.id ?? null, requestId }, "auth.sign_in.failed");
+      throw new UnauthorizedException(SIGN_IN_FAILED);
+    }
+    await this.lockout.clear(lockKey);
+    const who = { userId: user.id, requestId };
     // Only after the right password, so a wrong one never tells whether the account is confirmed.
     // With mail off no link could arrive, so an older unconfirmed account is let in.
     if (user.emailVerifiedAt === null && readMailSettings().mode === "smtp") {
@@ -201,12 +232,14 @@ export class AuthService {
 
     // With two-step on, the right password earns only a challenge: no tokens until the code.
     if (user.totpEnabledAt !== null) {
+      await this.audit.record(who, "auth.2fa.challenge", account(user.id));
       return {
         twoFactorRequired: true as const,
         challengeToken: await this.tokens.signChallenge(user.id),
       };
     }
 
+    await this.audit.record(who, "auth.sign_in", account(user.id));
     // Each sign-in starts a new family; every refresh after it stays in that family.
     return this.issue(user, randomUUID(), userAgent);
   }
@@ -220,14 +253,24 @@ export class AuthService {
   ) {
     const userId = await this.tokens.verifyChallenge(challengeToken).catch(() => null);
     if (userId === null) throw new UnauthorizedException(SIGN_IN_AGAIN);
-    const user = await this.twoStep.verifySignIn({ userId, requestId }, code);
+    // Wrong codes count against the account, so a challenge can't be used to guess the code.
+    const lockKey = userLockKey(userId);
+    await this.lockout.assertOpen(lockKey);
+    const who = { userId, requestId };
+    const user = await this.twoStep.verifySignIn(who, code).catch(async (error: unknown) => {
+      if (error instanceof UnauthorizedException && error.message === WRONG_CODE) {
+        await this.failed(lockKey, who, "auth.2fa.failed");
+      }
+      throw error;
+    });
+    await this.lockout.clear(lockKey);
     return this.issue(user, randomUUID(), userAgent);
   }
 
   // Swaps a refresh token for a new access token and a new refresh token in the same family.
   // A token works once: presenting one that was already used means someone kept a copy, so
   // every token in its family is revoked, the newest one included.
-  async refresh(token: string | undefined, userAgent: string | undefined) {
+  async refresh(token: string | undefined, userAgent: string | undefined, requestId: string) {
     if (!token) throw new UnauthorizedException(REFRESH_FAILED);
     const tokens = getDb().orm.public.RefreshToken;
     const row = await tokens
@@ -235,7 +278,7 @@ export class AuthService {
       .select("id", "userId", "familyId", "expiresAt", "usedAt", "revokedAt")
       .first();
     if (row === null || row.revokedAt !== null) throw new UnauthorizedException(REFRESH_FAILED);
-    if (row.usedAt !== null) return this.reuse(row.familyId);
+    if (row.usedAt !== null) return this.reuse(row, requestId);
 
     const now = Temporal.Now.instant();
     if (Temporal.Instant.compare(row.expiresAt, now) <= 0) {
@@ -246,7 +289,7 @@ export class AuthService {
     const claimed = await tokens
       .where({ id: row.id, usedAt: null })
       .updateAndCount({ usedAt: now });
-    if (claimed === 0) return this.reuse(row.familyId);
+    if (claimed === 0) return this.reuse(row, requestId);
 
     const user = await getDb()
       .orm.public.User.where({ id: row.userId })
@@ -258,13 +301,19 @@ export class AuthService {
 
   // Ends the session the cookie belongs to, on this device and any copy of it. An unknown or
   // missing token is fine: the cookie is cleared either way.
-  async signOut(token: string | undefined): Promise<void> {
+  async signOut(token: string | undefined, requestId: string): Promise<void> {
     if (!token) return;
     const row = await getDb()
       .orm.public.RefreshToken.where({ tokenHash: hashToken(token) })
-      .select("familyId")
+      .select("userId", "familyId")
       .first();
-    if (row !== null) await this.revokeFamily(row.familyId);
+    if (row === null) return;
+    await this.revokeFamily(row.familyId);
+    await this.audit.record(
+      { userId: row.userId, requestId },
+      "auth.sign_out",
+      account(row.userId),
+    );
   }
 
   // A one-time link, stored only as its hash; visitor rows are removed by the nightly reset.
@@ -281,7 +330,7 @@ export class AuthService {
   }
 
   // Only an existing account gets a link; an unknown email ends here, unseen by the caller.
-  private async sendReset(email: string): Promise<void> {
+  private async sendReset(email: string, requestId: string): Promise<void> {
     const user = await getDb().orm.public.User.where({ email }).select("id", "email").first();
     if (user === null) return;
     const { token, hash } = this.tokens.newEmailToken();
@@ -292,12 +341,33 @@ export class AuthService {
       expiresAt: Temporal.Now.instant().add({ hours: RESET_TOKEN_HOURS }),
       createdByVisitor: true,
     });
+    await this.audit.record(
+      { userId: user.id, requestId },
+      "auth.password_reset.request",
+      account(user.id),
+    );
     await this.mailer.send(resetMail(user.email, token));
   }
 
-  private async reuse(familyId: string): Promise<never> {
-    await this.revokeFamily(familyId);
+  // Someone kept a copy of a used token: the session ends, and the event is recorded.
+  private async reuse(
+    row: { userId: string; familyId: string },
+    requestId: string,
+  ): Promise<never> {
+    await this.revokeFamily(row.familyId);
+    await this.audit.record(
+      { userId: row.userId, requestId },
+      "auth.refresh.reuse",
+      account(row.userId),
+    );
     throw new UnauthorizedException(REFRESH_FAILED);
+  }
+
+  // Records a wrong password or code and counts it; the try that locks the key is recorded too.
+  private async failed(lockKey: string, who: AuditWho, action: string): Promise<void> {
+    const target = who.userId === null ? null : account(who.userId);
+    await this.audit.record(who, action, target);
+    if (await this.lockout.fail(lockKey)) await this.audit.record(who, "auth.lockout", target);
   }
 
   private async revokeFamily(familyId: string): Promise<void> {

@@ -127,6 +127,9 @@
           },
           "403": {
             "description": "Check your email to confirm your account"
+          },
+          "429": {
+            "description": "5 wrong tries for this email in 15 minutes: wait 15 minutes"
           }
         },
         "summary": "Sign in",
@@ -173,6 +176,9 @@
           },
           "401": {
             "description": "The code is not right, or sign in again"
+          },
+          "429": {
+            "description": "5 wrong codes for this account in 15 minutes: wait 15 minutes"
           }
         },
         "summary": "Second step of sign-in",
@@ -308,6 +314,9 @@
           },
           "401": {
             "description": "No usable refresh token: sign in again"
+          },
+          "403": {
+            "description": "This request must come from the Manasbal shop: the Origin header is not in WEB_ORIGINS, or is missing while the refresh_token cookie is sent"
           }
         },
         "security": [
@@ -327,6 +336,9 @@
         "responses": {
           "204": {
             "description": ""
+          },
+          "403": {
+            "description": "This request must come from the Manasbal shop: the Origin header is not in WEB_ORIGINS, or is missing while the refresh_token cookie is sent"
           }
         },
         "security": [
@@ -1886,10 +1898,12 @@
           },
           "targetType": {
             "type": "string",
+            "nullable": true,
             "example": "address"
           },
           "targetId": {
             "type": "string",
+            "nullable": true,
             "format": "uuid"
           },
           "requestId": {
