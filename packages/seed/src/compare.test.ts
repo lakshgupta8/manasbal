@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { dumpTables, firstDifference, type Dump } from "./compare.ts";
+import { dumpTables, firstDifference, IGNORED_COLUMNS, type Dump } from "./compare.ts";
 import { contractTables } from "./reset.ts";
 
 const dump = (): Dump => ({
@@ -22,8 +22,23 @@ describe("dumpTables", () => {
     expect(result["orders"]).toEqual([{ id: "a" }]);
     expect(result["users"]).toEqual([]);
     expect(query).toHaveBeenCalledWith(
-      `SELECT coalesce(json_agg(t ORDER BY t.id), '[]') FROM "orders" t`,
+      `SELECT coalesce(json_agg(to_jsonb(t) ORDER BY t.id), '[]') FROM "orders" t`,
     );
+  });
+
+  // The demo logins' argon2id hashes are salted at random, so they differ on every seed.
+  it("leaves out users.password_hash and nothing else", async () => {
+    const query = vi.fn(async () => "[]");
+
+    await dumpTables(query, ["users", "orders"]);
+
+    expect(query.mock.calls).toEqual([
+      [
+        `SELECT coalesce(json_agg(to_jsonb(t) - 'password_hash' ORDER BY t.id), '[]') FROM "users" t`,
+      ],
+      [`SELECT coalesce(json_agg(to_jsonb(t) ORDER BY t.id), '[]') FROM "orders" t`],
+    ]);
+    expect(IGNORED_COLUMNS).toEqual({ users: ["password_hash"] });
   });
 });
 
