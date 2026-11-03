@@ -1,3 +1,5 @@
+import { verify } from "@node-rs/argon2";
+import { ROLES } from "@manasbal/types";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import {
   startTestDatabase,
@@ -5,13 +7,16 @@ import {
 } from "../../../apps/api/test/support/test-database.ts";
 import { dumpTables, firstDifference } from "../src/compare.ts";
 import { generateDataset, rowsByTable } from "../src/dataset.ts";
+import { DEMO_EMAILS, DEMO_PASSWORD } from "../src/demo-logins.ts";
 import { createDb } from "../src/db.ts";
 import { PROFILES } from "../src/profiles.ts";
 import { contractTables, truncatePlan } from "../src/reset.ts";
 import { seed } from "../src/seed.ts";
 
 // Seeds the minimal profile into a fresh, fully migrated Postgres through the same code path as
-// `pnpm seed`, checks every table's row count, then seeds again and checks nothing changed.
+// `pnpm seed`, checks every table's row count and the demo logins, then seeds again and checks
+// nothing changed. The one column that may change is users.password_hash: the demo logins'
+// argon2id hashes use a random salt (see IGNORED_COLUMNS in src/compare.ts).
 describe("the seed against a real database", () => {
   let database: TestDatabase;
   const expected = rowsByTable(generateDataset(PROFILES.minimal));
@@ -32,6 +37,45 @@ describe("the seed against a real database", () => {
       expect(count, table).toBe(expected[table]?.length ?? 0);
     }
     expect(await database.sql(`SELECT count(*) FROM "_demo_marker"`)).toBe("1");
+  });
+
+  it("writes one confirmed demo login per role whose hash verifies the public password", async () => {
+    const logins = JSON.parse(
+      await database.sql(
+        `SELECT json_agg(u ORDER BY u.email) FROM (SELECT email, role, password_hash, is_sample, created_by_visitor, email_verified_at, totp_enabled_at FROM users WHERE email_verified_at IS NOT NULL) u`,
+      ),
+    ) as {
+      email: string;
+      role: string;
+      password_hash: string;
+      is_sample: boolean;
+      created_by_visitor: boolean;
+      email_verified_at: string | null;
+      totp_enabled_at: string | null;
+    }[];
+
+    expect(logins.map(({ email, role }) => [email, role])).toEqual(
+      Object.entries(DEMO_EMAILS)
+        .map(([role, email]) => [email, role])
+        .sort(([a], [b]) => a!.localeCompare(b!)),
+    );
+    expect(logins.map((login) => login.role).sort()).toEqual([...ROLES].sort());
+    for (const login of logins) {
+      expect(login.email).toMatch(/@example\.com$/);
+      expect(login.password_hash).toMatch(/^\$argon2id\$/);
+      expect(await verify(login.password_hash, DEMO_PASSWORD), login.email).toBe(true);
+      expect(login).toMatchObject({
+        is_sample: true,
+        created_by_visitor: false,
+        totp_enabled_at: null,
+      });
+    }
+    // The demo seller owns a store.
+    expect(
+      await database.sql(
+        `SELECT count(*) FROM sellers s JOIN users u ON u.id = s.user_id WHERE u.email = 'seller@example.com'`,
+      ),
+    ).toBe("1");
   });
 
   it("writes exactly the same rows when it runs again", async () => {

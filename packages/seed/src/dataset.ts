@@ -4,7 +4,7 @@ import { insertInBatches } from "./batches.ts";
 import { generateCoupons } from "./coupons.ts";
 import type { createDb } from "./db.ts";
 import { generateOrders, insertOrders, type Orders } from "./orders.ts";
-import { generatePeople, insertPeople, type People } from "./people.ts";
+import { allUsers, generatePeople, insertPeople, type People } from "./people.ts";
 import { generateCatalog, insertCatalog, type Catalog } from "./products.ts";
 import type { SeedProfile } from "./profiles.ts";
 import { createRandom, REFERENCE_DATE } from "./random.ts";
@@ -50,7 +50,7 @@ export function generateDataset(profile: SeedProfile): Dataset {
 export function rowsByTable(data: Dataset): Record<string, readonly object[]> {
   const { people, catalog, orders } = data;
   return {
-    users: [...people.customers, ...people.sellerUsers],
+    users: allUsers(people),
     sellers: people.sellers,
     addresses: people.addresses,
     categories: catalog.categories,

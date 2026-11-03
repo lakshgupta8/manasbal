@@ -13,11 +13,22 @@ export interface Difference {
   right: unknown;
 }
 
-// Every row of every table in the contract, ordered by id, as plain JSON.
+// Columns the determinism check leaves out, by table. Only users.password_hash: the demo logins'
+// argon2id hashes use a random salt, so two seeds never write the same hash. Every other column
+// of every table must match exactly.
+export const IGNORED_COLUMNS: Readonly<Record<string, readonly string[]>> = {
+  users: ["password_hash"],
+};
+
+// Every row of every table in the contract, ordered by id, as plain JSON, without the ignored
+// columns.
 export async function dumpTables(query: Query, tables = contractTables()): Promise<Dump> {
   const dump: Dump = {};
   for (const table of tables) {
-    const text = await query(`SELECT coalesce(json_agg(t ORDER BY t.id), '[]') FROM "${table}" t`);
+    const drop = (IGNORED_COLUMNS[table] ?? []).map((column) => ` - '${column}'`).join("");
+    const text = await query(
+      `SELECT coalesce(json_agg(to_jsonb(t)${drop} ORDER BY t.id), '[]') FROM "${table}" t`,
+    );
     dump[table] = JSON.parse(text) as unknown[];
   }
   return dump;
