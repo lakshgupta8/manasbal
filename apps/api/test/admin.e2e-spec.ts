@@ -3,6 +3,7 @@ import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fa
 import { Test } from "@nestjs/testing";
 import { auditPageSchema } from "@manasbal/types";
 import { AdminModule } from "../src/admin/admin.module.js";
+import { AuditModule } from "../src/audit/audit.module.js";
 import { ProblemDetailsFilter } from "../src/errors/problem-details.filter.js";
 import { bearer } from "./support/auth.js";
 import { startTestDatabase, type TestDatabase } from "./support/test-database.js";
@@ -52,7 +53,7 @@ describe("GET /admin/audit-log (e2e)", () => {
     newer = await entry("address.update", "req-2");
 
     const moduleRef = await Test.createTestingModule({
-      imports: [AdminModule],
+      imports: [AuditModule, AdminModule],
       providers: [{ provide: APP_FILTER, useClass: ProblemDetailsFilter }],
     }).compile();
     app = moduleRef.createNestApplication<NestFastifyApplication>(new FastifyAdapter());

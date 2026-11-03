@@ -21,3 +21,12 @@ variables:
   - name: mailpitUrl
     value: http://localhost:8025
     description: "Auth/Verify email reads the confirmation link from Mailpit"
+  - name: sellerAccessToken
+    value: ""
+    description: "A seller's access token for Store update (see README); leave it empty in commits"
+  - name: supportAccessToken
+    value: ""
+    description: "A support or admin access token for Admin order (see README); leave it empty in commits"
+  - name: orderId
+    value: ""
+    description: "Any order id in your database, for Admin order"

@@ -23,7 +23,7 @@ const signedIn = {
 // part: it hands the paging query to the service.
 describe("AdminController", () => {
   let app: NestFastifyApplication;
-  const service = { list: vi.fn() };
+  const service = { list: vi.fn(), order: vi.fn() };
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -76,5 +76,40 @@ describe("AdminController", () => {
       detail: "You can't do this with your role",
     });
     expect(service.list).not.toHaveBeenCalled();
+  });
+
+  describe("GET /admin/orders/:id", () => {
+    const ORDER_ID = "5e6f7a8b-0000-4000-8000-000000000009";
+    const order = (role: string, id = ORDER_ID) =>
+      app.inject({ method: "GET", url: `/admin/orders/${id}`, headers: { "x-test-role": role } });
+
+    it.each(["support", "admin"])(
+      "lets %s read any order, as the request's actor",
+      async (role) => {
+        const found = { id: ORDER_ID, status: "placed", totalPaise: 49900, createdAt: "x" };
+        service.order.mockResolvedValue(found);
+
+        const response = await order(role);
+
+        expect(response.statusCode).toBe(200);
+        expect(response.json()).toEqual(found);
+        expect(service.order).toHaveBeenCalledWith(
+          { userId: undefined, requestId: expect.any(String) as string },
+          ORDER_ID,
+        );
+      },
+    );
+
+    it("answers 403 to a customer, before reading the order", async () => {
+      const response = await order("customer");
+
+      expect(response.statusCode).toBe(403);
+      expect(service.order).not.toHaveBeenCalled();
+    });
+
+    it("answers 400 to an id that is not a UUID", async () => {
+      expect((await order("support", "not-a-uuid")).statusCode).toBe(400);
+      expect(service.order).not.toHaveBeenCalled();
+    });
   });
 });

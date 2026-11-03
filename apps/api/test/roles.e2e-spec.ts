@@ -13,23 +13,33 @@ import { bearer } from "./support/auth.js";
 import { startTestDatabase, type TestDatabase } from "./support/test-database.js";
 
 // The role matrix: every guarded endpoint against every role, with the real guards and real
-// access tokens. To guard a new endpoint, add a row; "any" means every signed-in role.
-const MATRIX: { method: "GET"; url: string; allowed: readonly Role[] | "any" }[] = [
+// access tokens. To guard a new endpoint, add a row; "any" means every signed-in role. A row's
+// url can name :orderId, filled in with an order made below; its body must be valid, so an
+// allowed role gets 200.
+const MATRIX: {
+  method: "GET" | "PATCH";
+  url: string;
+  body?: object;
+  allowed: readonly Role[] | "any";
+}[] = [
   { method: "GET", url: "/me", allowed: "any" },
   { method: "GET", url: "/me/addresses", allowed: "any" },
   { method: "GET", url: "/cart", allowed: "any" },
   { method: "GET", url: "/orders", allowed: "any" },
   { method: "GET", url: "/admin/audit-log", allowed: ["admin"] },
+  { method: "PATCH", url: "/me/store", body: { storeName: "Matrix Store" }, allowed: ["seller"] },
+  { method: "GET", url: "/admin/orders/:orderId", allowed: ["support", "admin"] },
 ];
 
-const CASES = MATRIX.flatMap(({ method, url, allowed }) => [
+const CASES = MATRIX.flatMap(({ method, url, body, allowed }) => [
   ...ROLES.map((role) => ({
     method,
     url,
+    body,
     role,
     expected: allowed === "any" || allowed.includes(role) ? 200 : 403,
   })),
-  { method, url, role: "no token" as const, expected: 401 },
+  { method, url, body, role: "no token" as const, expected: 401 },
 ]);
 
 // Needs Docker: a throwaway Postgres with the migrations applied.
@@ -38,6 +48,7 @@ describe("role matrix (e2e)", () => {
   let app: NestFastifyApplication;
   // One user per role; GET /me reads the user's row.
   const users = new Map<Role, string>();
+  let orderId: string;
 
   beforeAll(async () => {
     database = await startTestDatabase();
@@ -50,6 +61,30 @@ describe("role matrix (e2e)", () => {
       });
       users.set(role, created.id);
     }
+    // The seller has a store to rename, and the customer an order for staff to read.
+    await database.db.orm.public.Seller.create({
+      userId: users.get("seller")!,
+      storeName: "Matrix Store",
+      slug: "matrix-store",
+      status: "approved",
+    });
+    const customer = users.get("customer")!;
+    const address = await database.db.orm.public.Address.select("id").create({
+      userId: customer,
+      name: "Test User",
+      line1: "1 Test Road",
+      city: "Pune",
+      state: "MH",
+      pincode: "411001",
+    });
+    const order = await database.db.orm.public.Order.select("id").create({
+      userId: customer,
+      addressId: address.id,
+      status: "placed",
+      totalPaise: 49900,
+      idempotencyKey: "matrix-order",
+    });
+    orderId = order.id;
 
     const moduleRef = await Test.createTestingModule({
       imports: [AuditModule, UsersModule, CartModule, OrdersModule, AdminModule],
@@ -67,10 +102,15 @@ describe("role matrix (e2e)", () => {
 
   it.each(CASES)(
     "$method $url as $role answers $expected",
-    async ({ method, url, role, expected }) => {
+    async ({ method, url, body, role, expected }) => {
       const headers = role === "no token" ? {} : await bearer(users.get(role)!, role);
 
-      const response = await app.inject({ method, url, headers });
+      const response = await app.inject({
+        method,
+        url: url.replace(":orderId", orderId),
+        headers,
+        ...(body === undefined ? {} : { payload: body }),
+      });
 
       expect(response.statusCode).toBe(expected);
       if (expected === 403) {

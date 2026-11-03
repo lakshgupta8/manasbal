@@ -530,6 +530,66 @@
         "tags": ["Addresses"]
       }
     },
+    "/me/store": {
+      "patch": {
+        "description": "Changes the signed-in seller's store name; the slug (the store page's address) follows it. The change is recorded in the audit log.",
+        "operationId": "StoreController_rename",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "storeName": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 60
+                  }
+                },
+                "required": ["storeName"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OwnStore"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The name is too short, too long or has no letters"
+          },
+          "401": {
+            "description": "No valid access token"
+          },
+          "403": {
+            "description": "You can't do this with your role"
+          },
+          "404": {
+            "description": "This account has no store"
+          },
+          "409": {
+            "description": "Another store already uses this name"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Rename your store",
+        "tags": ["Me"]
+      }
+    },
     "/categories": {
       "get": {
         "description": "The whole category tree, each level sorted by name.",
@@ -911,6 +971,53 @@
         "tags": ["Orders"]
       }
     },
+    "/admin/orders/{id}": {
+      "get": {
+        "description": "One order by its id, whoever placed it. Support and admins only; every view is recorded in the audit log as order.view.",
+        "operationId": "AdminController_order",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminOrder"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The id is not a UUID"
+          },
+          "401": {
+            "description": "No valid access token"
+          },
+          "403": {
+            "description": "You can't do this with your role"
+          },
+          "404": {
+            "description": "No order with this id"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Read any order",
+        "tags": ["Admin"]
+      }
+    },
     "/admin/audit-log": {
       "get": {
         "description": "One page of recorded changes, newest first. Only admins can read it.",
@@ -953,7 +1060,7 @@
             "description": "No valid access token"
           },
           "403": {
-            "description": "Only an admin can see this"
+            "description": "You can't do this with your role"
           }
         },
         "security": [
@@ -1128,6 +1235,25 @@
           }
         },
         "required": ["id", "name", "line1", "city", "state", "pincode", "isDefault"]
+      },
+      "OwnStore": {
+        "type": "object",
+        "properties": {
+          "storeName": {
+            "type": "string",
+            "example": "Quill Threads"
+          },
+          "slug": {
+            "type": "string",
+            "example": "quill-threads",
+            "description": "The store page's address"
+          },
+          "status": {
+            "type": "string",
+            "example": "approved"
+          }
+        },
+        "required": ["storeName", "slug", "status"]
       },
       "Category": {
         "type": "object",
@@ -1492,6 +1618,29 @@
           }
         },
         "required": ["items", "nextCursor"]
+      },
+      "AdminOrder": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "example": "placed"
+          },
+          "totalPaise": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Whole paise"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["id", "status", "totalPaise", "createdAt"]
       },
       "AuditEntry": {
         "type": "object",
