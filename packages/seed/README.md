@@ -14,6 +14,8 @@ Run from the repo root. Both read `DATABASE_URL` from `apps/api/.env` unless it 
 
 `seed:reset` uses the `demo` profile unless `--profile` says otherwise; `seed` uses `minimal`.
 
+Both build `@manasbal/types` first: the seed uses its `Role` type and the `slugify` rule the API uses for store slugs, so seeded and renamed stores get the same kind of slug.
+
 ## ⚠️ The reset deletes everything
 
 `seed:reset` empties **every table** in the database, then seeds again. It runs only when both of these are true:
