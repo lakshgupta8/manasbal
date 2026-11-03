@@ -232,6 +232,26 @@ export interface paths {
     patch: operations["AddressesController_update"];
     trace?: never;
   };
+  "/me/store": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Rename your store
+     * @description Changes the signed-in seller's store name; the slug (the store page's address) follows it. The change is recorded in the audit log.
+     */
+    patch: operations["StoreController_rename"];
+    trace?: never;
+  };
   "/categories": {
     parameters: {
       query?: never;
@@ -412,6 +432,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/admin/orders/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Read any order
+     * @description One order by its id, whoever placed it. Support and admins only; every view is recorded in the audit log as order.view.
+     */
+    get: operations["AdminController_order"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/admin/audit-log": {
     parameters: {
       query?: never;
@@ -479,6 +519,17 @@ export interface components {
       /** @example 190006 */
       pincode: string;
       isDefault: boolean;
+    };
+    OwnStore: {
+      /** @example Quill Threads */
+      storeName: string;
+      /**
+       * @description The store page's address
+       * @example quill-threads
+       */
+      slug: string;
+      /** @example approved */
+      status: string;
     };
     Category: {
       /** Format: uuid */
@@ -620,6 +671,16 @@ export interface components {
       items: components["schemas"]["OrderSummary"][];
       /** @description Pass as cursor to get the next page; null on the last page */
       nextCursor: string | null;
+    };
+    AdminOrder: {
+      /** Format: uuid */
+      id: string;
+      /** @example placed */
+      status: string;
+      /** @description Whole paise */
+      totalPaise: number;
+      /** Format: date-time */
+      createdAt: string;
     };
     AuditEntry: {
       /** Format: uuid */
@@ -1058,6 +1119,66 @@ export interface operations {
       };
     };
   };
+  StoreController_rename: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          storeName: string;
+        };
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OwnStore"];
+        };
+      };
+      /** @description The name is too short, too long or has no letters */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No valid access token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description You can't do this with your role */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description This account has no store */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Another store already uses this name */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   CategoriesController_list: {
     parameters: {
       query?: never;
@@ -1356,6 +1477,55 @@ export interface operations {
       };
     };
   };
+  AdminController_order: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AdminOrder"];
+        };
+      };
+      /** @description The id is not a UUID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No valid access token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description You can't do this with your role */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No order with this id */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   AdminController_list: {
     parameters: {
       query?: {
@@ -1392,7 +1562,7 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description Only an admin can see this */
+      /** @description You can't do this with your role */
       403: {
         headers: {
           [name: string]: unknown;

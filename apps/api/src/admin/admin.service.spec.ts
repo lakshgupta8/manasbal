@@ -1,5 +1,6 @@
+import { NotFoundException } from "@nestjs/common";
 import { encodeCursor } from "../pagination/pagination.js";
-import { AdminService } from "./admin.service.js";
+import { AdminService, NO_ORDER } from "./admin.service.js";
 
 interface AuditRow {
   id: string;
@@ -21,7 +22,16 @@ type Order = (row: Record<string, { desc(): string }>) => string;
 
 // Stands in for the ORM's query builder: each step records its call and returns the same query.
 // orderBy runs its callbacks so the service's own arrow functions are exercised.
-const { logs } = vi.hoisted(() => {
+const { logs, orders } = vi.hoisted(() => {
+  const orders = {
+    filters: [] as object[],
+    where(filter: object) {
+      orders.filters.push(filter);
+      return orders;
+    },
+    select: () => orders,
+    first: vi.fn<() => Promise<unknown>>(),
+  };
   const logs = {
     orderBy: vi.fn(function (this: unknown, callbacks: Order[]) {
       const row = new Proxy({}, { get: (_, field) => ({ desc: () => `${String(field)} desc` }) });
@@ -33,12 +43,16 @@ const { logs } = vi.hoisted(() => {
     select: vi.fn().mockReturnThis(),
     all: vi.fn<() => Promise<AuditRow[]>>(),
   };
-  return { logs };
+  return { logs, orders };
 });
 
 // The query itself needs a real database and is covered in test/admin.e2e-spec.ts.
 vi.mock("../prisma/db.js", () => ({
-  getDb: () => ({ orm: { public: { AuditLog: logs } } }),
+  getDb: () => ({
+    orm: { public: { AuditLog: logs } },
+    transaction: (work: (tx: object) => Promise<unknown>) =>
+      work({ orm: { public: { Order: orders } } }),
+  }),
 }));
 
 function row(id: string, createdAt: string, actorId: string | null = ACTOR): AuditRow {
@@ -54,7 +68,8 @@ function row(id: string, createdAt: string, actorId: string | null = ACTOR): Aud
 }
 
 describe("AdminService", () => {
-  const service = new AdminService();
+  const audit = { record: vi.fn<() => Promise<void>>() };
+  const service = new AdminService(audit);
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -111,5 +126,46 @@ describe("AdminService", () => {
       "cursor is not valid",
     );
     expect(logs.all).not.toHaveBeenCalled();
+  });
+
+  describe("order", () => {
+    const ORDER_ID = "5e6f7a8b-0000-4000-8000-000000000009";
+    const WHO = { userId: ACTOR, requestId: "req-7" };
+
+    beforeEach(() => {
+      orders.filters.length = 0;
+      orders.first.mockReset();
+      audit.record.mockReset().mockResolvedValue(undefined);
+    });
+
+    it("answers any user's order and records the view in the same transaction", async () => {
+      orders.first.mockResolvedValue({
+        id: ORDER_ID,
+        status: "placed",
+        totalPaise: 49900,
+        createdAt: { toString: () => WHEN },
+      });
+
+      await expect(service.order(WHO, ORDER_ID)).resolves.toEqual({
+        id: ORDER_ID,
+        status: "placed",
+        totalPaise: 49900,
+        createdAt: WHEN,
+      });
+      expect(orders.filters).toEqual([{ id: ORDER_ID }]);
+      expect(audit.record).toHaveBeenCalledWith(
+        WHO,
+        "order.view",
+        { type: "order", id: ORDER_ID },
+        { public: { Order: orders } },
+      );
+    });
+
+    it("answers 404 for an unknown order and records nothing", async () => {
+      orders.first.mockResolvedValue(null);
+
+      await expect(service.order(WHO, ORDER_ID)).rejects.toThrow(new NotFoundException(NO_ORDER));
+      expect(audit.record).not.toHaveBeenCalled();
+    });
   });
 });

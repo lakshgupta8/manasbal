@@ -1,0 +1,38 @@
+info:
+  name: Store update
+  type: http
+  seq: 19
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/me/store"
+  body:
+    type: json
+    data: |-
+      {
+        "storeName": "Bruno Test Store {{$timestamp}}"
+      }
+  auth:
+    type: bearer
+    token: "{{sellerAccessToken}}"
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Needs a seller's access token; see bruno/README.md. Skipped until one is set.
+        if (!bru.getEnvVar("sellerAccessToken")) bru.runner.skipRequest();
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.slug
+      operator: matches
+      value: "^bruno-test-store-[0-9]+$"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

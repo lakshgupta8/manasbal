@@ -39,13 +39,23 @@ With `MAIL_MODE=off` no mail exists, so **Verify email**, **Reset password** and
 
 They pass values to each other through runtime variables, so running one on its own may fail. Every other request with `auth: inherit` sends `Authorization: Bearer {{accessToken}}`, set once in [`opencollection.yml`](opencollection.yml). **Address add** saves the new address's id, which **Address edit** and **Address delete** then change.
 
-### Admin requests
+### Staff and seller requests
 
-**Admin audit log forbidden** uses the signed-in customer's token and must answer 403. **Admin audit log** needs an admin, and the seed gives no account a known password, so the run skips it until you set `adminAccessToken`:
+**Admin audit log forbidden** uses the signed-in customer's token and must answer 403. Three requests need another role, and the seed gives no account a known password, so the run skips each until you set its token in the **local** environment:
+
+| Request             | Role                 | Variables                          |
+| ------------------- | -------------------- | ---------------------------------- |
+| **Admin audit log** | `admin`              | `adminAccessToken`                 |
+| **Store update**    | `seller`             | `sellerAccessToken`                |
+| **Admin order**     | `support` or `admin` | `supportAccessToken` and `orderId` |
+
+To get a token for a role:
 
 1. Run **Auth → Sign up** and **Sign in** (or use any account you signed up locally).
-2. Open the local database in Prisma Studio, `pnpm dlx prisma@7.10.1 studio --url "postgresql://manasbal:manasbal@localhost:5432/manasbal"`, then http://localhost:5555, and set that user's `role` in `users` to `admin`.
-3. Run **Sign in** again and copy `accessToken` from the answer into `adminAccessToken` in the **local** environment. Don't commit it; it expires in 15 minutes.
+2. Open the local database in Prisma Studio, `pnpm dlx prisma@7.10.1 studio --url "postgresql://manasbal:manasbal@localhost:5432/manasbal"`, then http://localhost:5555, and set that user's `role` in `users`. A `seller` also needs a row in `sellers` with their `user_id` (a store name, a unique slug and status `approved`).
+3. Run **Sign in** again and copy `accessToken` from the answer into the variable. Don't commit it; it expires in 15 minutes.
+
+For **Admin order**, set `orderId` to any order in the database, for example one from the seed (Prisma Studio, `orders`). Each view adds an `order.view` row to the audit log, with the support user as the actor: **Admin audit log** shows it.
 
 ## Run every request
 

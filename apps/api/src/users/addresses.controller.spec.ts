@@ -74,7 +74,7 @@ describe("AddressesController", () => {
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [UsersModule],
+      imports: [AuditModule, UsersModule],
       providers: [{ provide: APP_FILTER, useClass: ProblemDetailsFilter }],
     })
       .overrideProvider(AddressesService)
