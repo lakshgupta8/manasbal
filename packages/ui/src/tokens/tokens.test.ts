@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import colorJson from "../../tokens/color.json";
 import pairsJson from "../../tokens/contrast-pairs.json";
+import fontJson from "../../tokens/font.json";
+import radiusJson from "../../tokens/radius.json";
+import spaceJson from "../../tokens/space.json";
 
 type ColorToken = { $type: string; $value: string };
 type ColorTokens = { color: Record<string, Record<string, ColorToken>> };
@@ -68,5 +71,78 @@ describe("contrast pairs", () => {
       throw new Error(`Unknown colour in pair: ${nameA}, ${nameB}`);
     }
     expect(contrastRatio(a.$value, b.$value)).toBeGreaterThanOrEqual(4.5);
+  });
+});
+
+type Token = { $type?: unknown; $value: unknown };
+
+// Every token in a DTCG file: an object with a $value. Keys starting with $ (like a group's
+// $description) are not tokens or groups.
+function collectTokens(group: object, path: string[] = []): [string, Token][] {
+  return Object.entries(group)
+    .filter(([key]) => !key.startsWith("$"))
+    .flatMap(([key, child]: [string, object]) =>
+      "$value" in child
+        ? [[[...path, key].join("."), child as Token]]
+        : collectTokens(child, [...path, key]),
+    );
+}
+
+const allTokens = [colorJson, spaceJson, fontJson, radiusJson].flatMap((file) =>
+  collectTokens(file),
+);
+const px = (value: string) => Number(/^(\d+)px$/.exec(value)?.[1] ?? Number.NaN);
+
+describe("every token", () => {
+  it.each(allTokens)("%s has a $type", (_name, token) => {
+    expect(token.$type).toEqual(expect.any(String));
+  });
+
+  it("has a unique name", () => {
+    const names = allTokens.map(([name]) => name);
+    expect(new Set(names).size).toBe(names.length);
+  });
+
+  it.each(allTokens.filter(([, token]) => token.$type === "dimension"))(
+    "%s is a whole number of px",
+    (_name, token) => {
+      expect(token.$value).toMatch(/^\d+px$/);
+    },
+  );
+});
+
+describe("space tokens", () => {
+  it.each(Object.entries(spaceJson.space).filter(([key]) => !key.startsWith("$")))(
+    "space.%s is a multiple of 4 and its name times 4",
+    (step, token) => {
+      const size = px((token as Token).$value as string);
+      expect(size % 4).toBe(0);
+      expect(size).toBe(Number(step) * 4);
+    },
+  );
+});
+
+describe("type tokens", () => {
+  const { size, "line-height": lineHeight } = fontJson.font;
+
+  it("heading sizes get smaller from heading 1 to heading 4", () => {
+    const headings = [1, 2, 3, 4].map((level) =>
+      px(size[`heading-${level}` as keyof typeof size].$value),
+    );
+    expect(headings).toEqual([...headings].sort((a, b) => b - a));
+    expect(new Set(headings).size).toBe(4);
+  });
+
+  it.each(Object.keys(size) as (keyof typeof size)[])(
+    "%s has a line height on the 4px grid, at least as tall as the text",
+    (name) => {
+      const height = px(lineHeight[name].$value);
+      expect(height % 4).toBe(0);
+      expect(height).toBeGreaterThanOrEqual(px(size[name].$value));
+    },
+  );
+
+  it("names the font licence", () => {
+    expect(fontJson.font.family.sans.$description).toContain("SIL Open Font License");
   });
 });
