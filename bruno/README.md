@@ -39,6 +39,8 @@ The `Auth` folder runs first and in this order:
 13. **Two-step sign in** signs in again with the password and must answer only a challenge: no access token and no cookie.
 14. **Two-step verify** sends the challenge with the next step's code and saves the new access token for the requests after the folder.
 15. **Two-step disable** switches two-step off with the recovery code and must answer 204.
+16. **Sessions** lists where the account is signed in; the newest, the session of the token in use, comes first and is flagged `current`. It saves another session's id, if there is one.
+17. **End session** ends that other session and must answer 204. It skips itself when there is no other session (with mail off).
 
 The two-step requests need `TOTP_KEY` on the API (see `.env.example`).
 

@@ -24,6 +24,7 @@ const MATRIX: {
 }[] = [
   { method: "GET", url: "/me", allowed: "any" },
   { method: "GET", url: "/me/addresses", allowed: "any" },
+  { method: "GET", url: "/me/sessions", allowed: "any" },
   { method: "GET", url: "/cart", allowed: "any" },
   { method: "GET", url: "/orders", allowed: "any" },
   { method: "GET", url: "/admin/audit-log", allowed: ["admin"] },

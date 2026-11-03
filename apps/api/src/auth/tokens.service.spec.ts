@@ -24,6 +24,15 @@ describe("TokensService", () => {
     expect((payload.exp ?? 0) - (payload.iat ?? 0)).toBe(ACCESS_TOKEN_SECONDS);
   });
 
+  it("names the session in sid when given one, and leaves it out otherwise", async () => {
+    const family = "0f1e2d3c-4b5a-4968-8776-655443322110";
+
+    expect(await tokens.verifyAccess(await tokens.signAccess(USER, family))).toMatchObject({
+      sid: family,
+    });
+    expect((await tokens.verifyAccess(await tokens.signAccess(USER)))["sid"]).toBeUndefined();
+  });
+
   it("rejects an access token after 15 minutes", async () => {
     const token = await tokens.signAccess(USER);
 

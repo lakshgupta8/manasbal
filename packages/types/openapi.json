@@ -784,6 +784,75 @@
         "tags": ["Me"]
       }
     },
+    "/me/sessions": {
+      "get": {
+        "description": "One entry per signed-in device or browser, most recently used first.",
+        "operationId": "SessionsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Session"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No valid access token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Where I am signed in",
+        "tags": ["Me"]
+      }
+    },
+    "/me/sessions/{id}": {
+      "delete": {
+        "description": "Signs that browser out: its refresh token stops working. Its access token works until it expires (15 minutes). Ending the current session is allowed.",
+        "operationId": "SessionsController_end",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The session is ended"
+          },
+          "400": {
+            "description": "The id is not a UUID"
+          },
+          "401": {
+            "description": "No valid access token"
+          },
+          "404": {
+            "description": "No session with this id"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "End a session",
+        "tags": ["Me"]
+      }
+    },
     "/categories": {
       "get": {
         "description": "The whole category tree, each level sorted by name.",
@@ -1492,6 +1561,33 @@
           }
         },
         "required": ["storeName", "slug", "status"]
+      },
+      "Session": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Pass it to DELETE /me/sessions/{id}"
+          },
+          "browser": {
+            "type": "string",
+            "example": "Firefox on Windows"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastUsedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "current": {
+            "type": "boolean",
+            "description": "The session this access token belongs to"
+          }
+        },
+        "required": ["id", "browser", "startedAt", "lastUsedAt", "current"]
       },
       "Category": {
         "type": "object",

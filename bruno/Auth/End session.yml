@@ -1,0 +1,27 @@
+info:
+  name: End session
+  type: http
+  seq: 17
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/me/sessions/{{otherSessionId}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Skipped when Sessions found no other sign-in (with mail off, the folder leaves only one).
+        if (!bru.getVar("otherSessionId")) bru.runner.skipRequest();
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "204"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

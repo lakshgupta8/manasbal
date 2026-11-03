@@ -22,8 +22,12 @@ function secret(): Uint8Array {
 @Injectable()
 export class TokensService {
   // async, so a missing JWT_SECRET is a rejected promise rather than a synchronous throw.
-  async signAccess(user: { id: string; role: string }): Promise<string> {
-    return new SignJWT({ role: user.role })
+  // sid is the session (refresh-token family) the token was issued for, so the sessions list can
+  // mark the current one. It is optional: tokens from before it have none.
+  async signAccess(user: { id: string; role: string }, sessionId?: string): Promise<string> {
+    return new SignJWT(
+      sessionId === undefined ? { role: user.role } : { role: user.role, sid: sessionId },
+    )
       .setProtectedHeader({ alg: "HS256" })
       .setSubject(user.id)
       .setIssuedAt()

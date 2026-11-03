@@ -332,6 +332,46 @@ export interface paths {
     patch: operations["StoreController_rename"];
     trace?: never;
   };
+  "/me/sessions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Where I am signed in
+     * @description One entry per signed-in device or browser, most recently used first.
+     */
+    get: operations["SessionsController_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/me/sessions/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * End a session
+     * @description Signs that browser out: its refresh token stops working. Its access token works until it expires (15 minutes). Ending the current session is allowed.
+     */
+    delete: operations["SessionsController_end"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/categories": {
     parameters: {
       query?: never;
@@ -637,6 +677,21 @@ export interface components {
       slug: string;
       /** @example approved */
       status: string;
+    };
+    Session: {
+      /**
+       * Format: uuid
+       * @description Pass it to DELETE /me/sessions/{id}
+       */
+      id: string;
+      /** @example Firefox on Windows */
+      browser: string;
+      /** Format: date-time */
+      startedAt: string;
+      /** Format: date-time */
+      lastUsedAt: string;
+      /** @description The session this access token belongs to */
+      current: boolean;
     };
     Category: {
       /** Format: uuid */
@@ -1465,6 +1520,73 @@ export interface operations {
       };
       /** @description Another store already uses this name */
       409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SessionsController_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Session"][];
+        };
+      };
+      /** @description No valid access token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SessionsController_end: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The session is ended */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The id is not a UUID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No valid access token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No session with this id */
+      404: {
         headers: {
           [name: string]: unknown;
         };

@@ -175,6 +175,37 @@ describe("createApiClient", () => {
     expect(request.headers.get("authorization")).toBe("Bearer a.b.c");
   });
 
+  it("lists the signed-in user's sessions", async () => {
+    const session = {
+      id: ID,
+      browser: "Firefox on Windows",
+      startedAt: "2026-11-03T09:00:00Z",
+      lastUsedAt: "2026-11-03T11:00:00Z",
+      current: true,
+    };
+    const { api, fetch } = fakeApi([session], 200, "application/json", "a.b.c");
+
+    const { data } = await api.GET("/me/sessions");
+
+    expect(fetch.mock.calls[0]![0].url).toBe("http://api.test/me/sessions");
+    expect(data?.[0]?.current).toBe(true);
+  });
+
+  it("ends a session by its id", async () => {
+    // A 204 has no body, so this answer is made by hand.
+    const fetch = vi.fn<(request: Request) => Promise<Response>>(
+      async () => new Response(null, { status: 204 }),
+    );
+    const api = createApiClient({ baseUrl: "http://api.test", fetch, accessToken: "a.b.c" });
+
+    const { error } = await api.DELETE("/me/sessions/{id}", { params: { path: { id: ID } } });
+
+    const request = fetch.mock.calls[0]![0];
+    expect(error).toBeUndefined();
+    expect(request.method).toBe("DELETE");
+    expect(request.url).toBe(`http://api.test/me/sessions/${ID}`);
+  });
+
   it("sends the access token as a bearer token only when given one", async () => {
     const signedIn = fakeApi({ items: [], subtotalPaise: 0 }, 200, "application/json", "a.b.c");
     const without = fakeApi({ items: [], subtotalPaise: 0 });

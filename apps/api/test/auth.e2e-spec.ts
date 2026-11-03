@@ -3,6 +3,7 @@ import { APP_FILTER } from "@nestjs/core";
 import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fastify";
 import { Test } from "@nestjs/testing";
 import { SignJWT } from "jose";
+import { sessionListSchema } from "@manasbal/types";
 import type { Redis } from "ioredis";
 import { generate } from "otplib";
 import { AuditModule } from "../src/audit/audit.module.js";
@@ -29,6 +30,7 @@ import {
 import { ProblemDetailsFilter } from "../src/errors/problem-details.filter.js";
 import { fastifyOptions } from "../src/logging/logging.config.js";
 import { type Mail, MailerService } from "../src/mail/mailer.service.js";
+import { NO_SESSION } from "../src/users/sessions.service.js";
 import { UsersModule } from "../src/users/users.module.js";
 import { VALKEY } from "../src/valkey/valkey.module.js";
 import { startTestDatabase, type TestDatabase } from "./support/test-database.js";
@@ -883,6 +885,115 @@ describe("/auth (e2e)", () => {
             method: "POST",
             url: "/auth/2fa/disable",
             payload: { code: "123456" },
+          })
+        ).statusCode,
+      ).toBe(401);
+    });
+  });
+
+  describe("sessions", () => {
+    const FIREFOX =
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:132.0) Gecko/20100101 Firefox/132.0";
+    const CHROME =
+      "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36";
+
+    // Signs in from a browser; answers its access token and refresh cookie.
+    async function from(userAgent: string, account = signUp) {
+      const answer = await app.inject({
+        method: "POST",
+        url: "/auth/sign-in",
+        headers: { "user-agent": userAgent },
+        payload: { email: account.email, password: account.password },
+      });
+      expect(answer.statusCode).toBe(200);
+      const cookie = /^refresh_token=([\w-]+);/.exec(String(answer.headers["set-cookie"]))?.[1];
+      return { access: answer.json<{ accessToken: string }>().accessToken, cookie: cookie! };
+    }
+    const list = (access: string) =>
+      app.inject({
+        method: "GET",
+        url: "/me/sessions",
+        headers: { authorization: `Bearer ${access}` },
+      });
+    const end = (access: string, id: string) =>
+      app.inject({
+        method: "DELETE",
+        url: `/me/sessions/${id}`,
+        headers: { authorization: `Bearer ${access}` },
+      });
+    // A browser sends its user agent with every refresh, as at sign-in.
+    const refreshWith = (cookie: string, userAgent = CHROME) =>
+      app.inject({
+        method: "POST",
+        url: "/auth/refresh",
+        headers: { ...SHOP, "user-agent": userAgent },
+        cookies: { refresh_token: cookie },
+      });
+
+    it("lists two sign-ins, flags the current one, and ends one of them", async () => {
+      expect((await post(signUp)).statusCode).toBe(201);
+      const laptop = await from(FIREFOX);
+      const phone = await from(CHROME);
+
+      const listed = await list(phone.access);
+      expect(listed.statusCode).toBe(200);
+      const sessions = sessionListSchema.parse(listed.json());
+      expect(sessions.map(({ browser, current }) => ({ browser, current }))).toEqual([
+        { browser: "Chrome on Android", current: true },
+        { browser: "Firefox on Windows", current: false },
+      ]);
+      // Never a token, a hash or the raw user agent.
+      expect(listed.body).not.toContain(laptop.cookie);
+      expect(listed.body).not.toContain("Gecko");
+
+      // The phone ends the laptop's session: its refresh fails, the phone's still works.
+      const laptopId = sessions[1]!.id;
+      expect((await end(phone.access, laptopId)).statusCode).toBe(204);
+      expect((await refreshWith(laptop.cookie, FIREFOX)).statusCode).toBe(401);
+      expect((await refreshWith(phone.cookie)).statusCode).toBe(200);
+      const after = sessionListSchema.parse((await list(phone.access)).json());
+      expect(after.map((session) => session.browser)).toEqual(["Chrome on Android"]);
+      expect(
+        await database.sql("select count(*) from audit_logs where action = 'auth.session.end'"),
+      ).toBe("1");
+
+      // Ending it again, or the current session, follows the same rules.
+      expect((await end(phone.access, laptopId)).statusCode).toBe(404);
+      expect((await end(phone.access, after[0]!.id)).statusCode).toBe(204);
+      expect(sessionListSchema.parse((await list(phone.access)).json())).toEqual([]);
+    });
+
+    it("answers 404 for another user's session and leaves it alone", async () => {
+      const other = { ...signUp, email: "other.buyer@example.test" };
+      expect((await post(signUp)).statusCode).toBe(201);
+      expect((await post(other)).statusCode).toBe(201);
+      const mine = await from(FIREFOX);
+      const theirs = await from(CHROME, other);
+      const theirId = sessionListSchema.parse((await list(theirs.access)).json())[0]!.id;
+
+      const answer = await end(mine.access, theirId);
+
+      expect(answer.statusCode).toBe(404);
+      expect(answer.json()).toMatchObject({ detail: NO_SESSION });
+      expect((await end(mine.access, "00000000-0000-4000-8000-000000000000")).statusCode).toBe(404);
+      expect((await end(mine.access, "not-a-uuid")).statusCode).toBe(400);
+      expect((await refreshWith(theirs.cookie)).statusCode).toBe(200);
+      // Each user sees only their own session.
+      expect(sessionListSchema.parse((await list(mine.access)).json())).toHaveLength(1);
+    });
+
+    it("leaves out expired sessions, and needs an access token", async () => {
+      expect((await post(signUp)).statusCode).toBe(201);
+      const { access } = await from(FIREFOX);
+      await database.sql("update refresh_tokens set expires_at = now() - interval '1 second'");
+
+      expect(sessionListSchema.parse((await list(access)).json())).toEqual([]);
+      expect((await app.inject({ method: "GET", url: "/me/sessions" })).statusCode).toBe(401);
+      expect(
+        (
+          await app.inject({
+            method: "DELETE",
+            url: "/me/sessions/00000000-0000-4000-8000-000000000000",
           })
         ).statusCode,
       ).toBe(401);
