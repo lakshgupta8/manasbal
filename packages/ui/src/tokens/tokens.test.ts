@@ -1,14 +1,12 @@
-import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import colorJson from "../../tokens/color.json";
+import pairsJson from "../../tokens/contrast-pairs.json";
 
 type ColorToken = { $type: string; $value: string };
 type ColorTokens = { color: Record<string, Record<string, ColorToken>> };
 
-const readJson = <T>(name: string): T =>
-  JSON.parse(readFileSync(new URL(`./${name}`, import.meta.url), "utf8")) as T;
-
-const tokens = readJson<ColorTokens>("color.json");
-const pairs = readJson<[string, string][]>("contrast-pairs.json");
+const tokens: ColorTokens = colorJson;
+const pairs = pairsJson as [string, string][];
 
 const scales = Object.entries(tokens.color);
 const expectedSteps = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
@@ -49,6 +47,16 @@ describe("colour scales", () => {
       .map(Number)
       .sort((a, b) => a - b);
     expect(steps).toEqual(expectedSteps);
+  });
+});
+
+// A grey has red, green and blue almost equal (a slightly cool grey is fine); a step that drifts
+// towards a hue, like the teal #12343B this scale once had, is named wrong.
+describe("grey scale", () => {
+  const greys = [...colors].filter(([name]) => name.startsWith("color.grey."));
+  it.each(greys)("%s is a neutral grey", (_name, token) => {
+    const [r, g, b] = [1, 3, 5].map((start) => parseInt(token.$value.slice(start, start + 2), 16));
+    expect(Math.max(r!, g!, b!) - Math.min(r!, g!, b!)).toBeLessThanOrEqual(12);
   });
 });
 
