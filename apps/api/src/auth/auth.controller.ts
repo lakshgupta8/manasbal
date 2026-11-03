@@ -14,6 +14,7 @@ import {
   ApiBadRequestResponse,
   ApiCookieAuth,
   ApiCreatedResponse,
+  ApiExtraModels,
   ApiForbiddenResponse,
   ApiNoContentResponse,
   ApiOkResponse,
@@ -21,6 +22,7 @@ import {
   ApiProperty,
   ApiTags,
   ApiUnauthorizedResponse,
+  getSchemaPath,
 } from "@nestjs/swagger";
 import { Throttle } from "@nestjs/throttler";
 import type { FastifyReply, FastifyRequest } from "fastify";
@@ -29,11 +31,13 @@ import {
   resetPasswordInputSchema,
   signInInputSchema,
   signUpInputSchema,
+  twoStepVerifyInputSchema,
   verifyEmailInputSchema,
   type ForgotPasswordInput,
   type ResetPasswordInput,
   type SignInInput,
   type SignUpInput,
+  type TwoStepVerifyInput,
   type VerifyEmailInput,
 } from "@manasbal/types";
 import { AUTH_RATE_LIMIT, RATE_WINDOW_MS } from "../rate-limit/rate-limit.module.js";
@@ -63,9 +67,31 @@ export class SignInResult {
   expiresIn: number;
 }
 
+// Sign-in's answer when the password is right and two-step sign-in is on: no tokens and no
+// cookie yet. Mirrors twoStepChallengeSchema in @manasbal/types.
+export class TwoStepChallengeResult {
+  @ApiProperty({ enum: [true] })
+  twoFactorRequired: true;
+
+  @ApiProperty({
+    description: "Send it with the code to POST /auth/2fa/verify. It works for 5 minutes.",
+  })
+  challengeToken: string;
+}
+
+// The refresh token goes into the cookie; the rest is the answer.
+function signedIn(
+  { refreshToken, ...answer }: SignInResult & { refreshToken: string },
+  reply: Pick<FastifyReply, "setCookie">,
+): SignInResult {
+  reply.setCookie(REFRESH_COOKIE, refreshToken, refreshCookieOptions());
+  return answer;
+}
+
 // Signing up and, later, signing in. The limit on the class covers every /auth/* route: it is
 // far tighter than the API-wide one, to slow down password guessing and account spam.
 @ApiTags("Auth")
+@ApiExtraModels(SignInResult, TwoStepChallengeResult)
 @Throttle({ default: { limit: AUTH_RATE_LIMIT, ttl: RATE_WINDOW_MS } })
 @Controller("auth")
 export class AuthController {
@@ -82,6 +108,7 @@ export class AuthController {
       | "verifyEmail"
       | "forgotPassword"
       | "resetPassword"
+      | "verifyTwoStep"
     >,
   ) {}
 
@@ -104,20 +131,47 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "Sign in",
-    description: "Answers an access token and sets the refresh_token cookie.",
+    description:
+      "Answers an access token and sets the refresh_token cookie. With two-step sign-in on, answers only a challenge for POST /auth/2fa/verify instead.",
   })
   @ApiZodBody(signInInputSchema)
-  @ApiOkResponse({ type: SignInResult })
+  @ApiOkResponse({
+    schema: {
+      oneOf: [
+        { $ref: getSchemaPath(SignInResult) },
+        { $ref: getSchemaPath(TwoStepChallengeResult) },
+      ],
+    },
+  })
   @ApiUnauthorizedResponse({ description: "Email or password is wrong" })
   @ApiForbiddenResponse({ description: "Check your email to confirm your account" })
   async signIn(
     @Body(new ZodValidationPipe(signInInputSchema)) input: SignInInput,
     @Headers("user-agent") userAgent: string | undefined,
     @Res({ passthrough: true }) reply: Pick<FastifyReply, "setCookie">,
+  ): Promise<SignInResult | TwoStepChallengeResult> {
+    const result = await this.auth.signIn(input, userAgent);
+    if ("challengeToken" in result) return result;
+    return signedIn(result, reply);
+  }
+
+  @Post("2fa/verify")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "Second step of sign-in",
+    description:
+      "Takes the challenge sign-in answered and the 6-digit code from the authenticator app, or a recovery code. Each code works once. Answers an access token and sets the refresh_token cookie, as sign-in does.",
+  })
+  @ApiZodBody(twoStepVerifyInputSchema)
+  @ApiOkResponse({ type: SignInResult })
+  @ApiUnauthorizedResponse({ description: "The code is not right, or sign in again" })
+  async verifyTwoStep(
+    @Body(new ZodValidationPipe(twoStepVerifyInputSchema)) input: TwoStepVerifyInput,
+    @Headers("user-agent") userAgent: string | undefined,
+    @Req() request: Pick<FastifyRequest, "id">,
+    @Res({ passthrough: true }) reply: Pick<FastifyReply, "setCookie">,
   ): Promise<SignInResult> {
-    const { refreshToken, ...answer } = await this.auth.signIn(input, userAgent);
-    reply.setCookie(REFRESH_COOKIE, refreshToken, refreshCookieOptions());
-    return answer;
+    return signedIn(await this.auth.verifyTwoStep(input, userAgent, String(request.id)), reply);
   }
 
   @Post("verify-email")
@@ -184,12 +238,7 @@ export class AuthController {
     @Headers("user-agent") userAgent: string | undefined,
     @Res({ passthrough: true }) reply: Pick<FastifyReply, "setCookie">,
   ): Promise<SignInResult> {
-    const { refreshToken, ...answer } = await this.auth.refresh(
-      request.cookies[REFRESH_COOKIE],
-      userAgent,
-    );
-    reply.setCookie(REFRESH_COOKIE, refreshToken, refreshCookieOptions());
-    return answer;
+    return signedIn(await this.auth.refresh(request.cookies[REFRESH_COOKIE], userAgent), reply);
   }
 
   @Post("sign-out")

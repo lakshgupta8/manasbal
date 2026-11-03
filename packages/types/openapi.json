@@ -79,7 +79,7 @@
     },
     "/auth/sign-in": {
       "post": {
-        "description": "Answers an access token and sets the refresh_token cookie.",
+        "description": "Answers an access token and sets the refresh_token cookie. With two-step sign-in on, answers only a challenge for POST /auth/2fa/verify instead.",
         "operationId": "AuthController_signIn",
         "parameters": [],
         "requestBody": {
@@ -110,7 +110,14 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SignInResult"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/SignInResult"
+                    },
+                    {
+                      "$ref": "#/components/schemas/TwoStepChallengeResult"
+                    }
+                  ]
                 }
               }
             }
@@ -123,6 +130,52 @@
           }
         },
         "summary": "Sign in",
+        "tags": ["Auth"]
+      }
+    },
+    "/auth/2fa/verify": {
+      "post": {
+        "description": "Takes the challenge sign-in answered and the 6-digit code from the authenticator app, or a recovery code. Each code works once. Answers an access token and sets the refresh_token cookie, as sign-in does.",
+        "operationId": "AuthController_verifyTwoStep",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "challengeToken": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  },
+                  "code": {
+                    "type": "string"
+                  }
+                },
+                "required": ["challengeToken", "code"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignInResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The code is not right, or sign in again"
+          }
+        },
+        "summary": "Second step of sign-in",
         "tags": ["Auth"]
       }
     },
@@ -366,6 +419,51 @@
           }
         ],
         "summary": "Switch on two-step sign-in",
+        "tags": ["Auth"]
+      }
+    },
+    "/auth/2fa/disable": {
+      "post": {
+        "description": "Takes a current 6-digit code from the authenticator app, or a recovery code. Removes the secret and every recovery code.",
+        "operationId": "TwoStepController_disable",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  }
+                },
+                "required": ["code"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Two-step sign-in is off"
+          },
+          "400": {
+            "description": "The code is not right"
+          },
+          "401": {
+            "description": "No valid access token"
+          },
+          "409": {
+            "description": "Two-step sign-in is not on"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Switch off two-step sign-in",
         "tags": ["Auth"]
       }
     },
@@ -1240,6 +1338,34 @@
         },
         "required": ["status", "service", "version"]
       },
+      "SignInResult": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string"
+          },
+          "expiresIn": {
+            "type": "number",
+            "description": "Seconds until the access token expires",
+            "example": 900
+          }
+        },
+        "required": ["accessToken", "expiresIn"]
+      },
+      "TwoStepChallengeResult": {
+        "type": "object",
+        "properties": {
+          "twoFactorRequired": {
+            "type": "boolean",
+            "enum": [true]
+          },
+          "challengeToken": {
+            "type": "string",
+            "description": "Send it with the code to POST /auth/2fa/verify. It works for 5 minutes."
+          }
+        },
+        "required": ["twoFactorRequired", "challengeToken"]
+      },
       "SignUpResult": {
         "type": "object",
         "properties": {
@@ -1255,20 +1381,6 @@
           }
         },
         "required": ["id", "email", "name"]
-      },
-      "SignInResult": {
-        "type": "object",
-        "properties": {
-          "accessToken": {
-            "type": "string"
-          },
-          "expiresIn": {
-            "type": "number",
-            "description": "Seconds until the access token expires",
-            "example": 900
-          }
-        },
-        "required": ["accessToken", "expiresIn"]
       },
       "TwoStepSetupResult": {
         "type": "object",

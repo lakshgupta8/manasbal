@@ -137,6 +137,44 @@ describe("createApiClient", () => {
     expect(data?.recoveryCodes).toHaveLength(10);
   });
 
+  it("tells a two-step challenge from a session after sign-in", async () => {
+    const { api } = fakeApi({ twoFactorRequired: true, challengeToken: "c.h.t" });
+
+    const { data } = await api.POST("/auth/sign-in", {
+      body: { email: "a@example.test", password: "made-up-password" },
+    });
+
+    expect(data && "challengeToken" in data ? data.challengeToken : undefined).toBe("c.h.t");
+  });
+
+  it("sends the challenge and a code for the second step and gets the access token", async () => {
+    const { api, fetch } = fakeApi({ accessToken: "a.b.c", expiresIn: 900 });
+
+    const { data } = await api.POST("/auth/2fa/verify", {
+      body: { challengeToken: "c.h.t", code: "abcde-fghjk" },
+    });
+
+    const request = fetch.mock.calls[0]![0];
+    expect(request.url).toBe("http://api.test/auth/2fa/verify");
+    expect(await request.json()).toEqual({ challengeToken: "c.h.t", code: "abcde-fghjk" });
+    expect(data?.accessToken).toBe("a.b.c");
+  });
+
+  it("sends a code to switch two-step off", async () => {
+    // A 204 has no body, so this answer is made by hand.
+    const fetch = vi.fn<(request: Request) => Promise<Response>>(
+      async () => new Response(null, { status: 204 }),
+    );
+    const api = createApiClient({ baseUrl: "http://api.test", fetch, accessToken: "a.b.c" });
+
+    const { error } = await api.POST("/auth/2fa/disable", { body: { code: "123456" } });
+
+    const request = fetch.mock.calls[0]![0];
+    expect(error).toBeUndefined();
+    expect(request.url).toBe("http://api.test/auth/2fa/disable");
+    expect(request.headers.get("authorization")).toBe("Bearer a.b.c");
+  });
+
   it("sends the access token as a bearer token only when given one", async () => {
     const signedIn = fakeApi({ items: [], subtotalPaise: 0 }, 200, "application/json", "a.b.c");
     const without = fakeApi({ items: [], subtotalPaise: 0 });

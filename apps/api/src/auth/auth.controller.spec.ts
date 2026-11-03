@@ -12,6 +12,7 @@ describe("AuthController", () => {
     verifyEmail: vi.fn(),
     forgotPassword: vi.fn(),
     resetPassword: vi.fn(),
+    verifyTwoStep: vi.fn(),
   };
   const controller = new AuthController(service);
 
@@ -42,6 +43,36 @@ describe("AuthController", () => {
 
     expect(answer).toEqual({ accessToken: "access.jwt", expiresIn: 900 });
     expect(service.signIn).toHaveBeenCalledWith(input, "Test Browser");
+    expect(reply.setCookie).toHaveBeenCalledWith(
+      REFRESH_COOKIE,
+      "cookie-token",
+      refreshCookieOptions(),
+    );
+  });
+
+  it("answers a two-step challenge as it is, and sets no cookie", async () => {
+    const input = { email: "test.buyer@example.test", password: "a long passphrase" };
+    const challenge = { twoFactorRequired: true, challengeToken: "challenge.jwt" };
+    service.signIn.mockResolvedValue(challenge);
+    const reply = { setCookie: vi.fn() };
+
+    await expect(controller.signIn(input, undefined, reply)).resolves.toBe(challenge);
+    expect(reply.setCookie).not.toHaveBeenCalled();
+  });
+
+  it("signs in after the second step, with the cookie as sign-in sets it", async () => {
+    const input = { challengeToken: "challenge.jwt", code: "123456" };
+    service.verifyTwoStep.mockResolvedValue({
+      accessToken: "access.jwt",
+      expiresIn: 900,
+      refreshToken: "cookie-token",
+    });
+    const reply = { setCookie: vi.fn() };
+
+    const answer = await controller.verifyTwoStep(input, "Test Browser", { id: "req-1" }, reply);
+
+    expect(answer).toEqual({ accessToken: "access.jwt", expiresIn: 900 });
+    expect(service.verifyTwoStep).toHaveBeenCalledWith(input, "Test Browser", "req-1");
     expect(reply.setCookie).toHaveBeenCalledWith(
       REFRESH_COOKIE,
       "cookie-token",

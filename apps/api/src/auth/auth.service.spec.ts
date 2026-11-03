@@ -14,6 +14,7 @@ import {
   SIGN_UP_FAILED,
 } from "./auth.service.js";
 import { hashToken } from "./tokens.service.js";
+import { SIGN_IN_AGAIN, WRONG_CODE } from "./two-step.service.js";
 
 const USER_ID = "7b0c1e2a-3d4f-4a5b-8c6d-7e8f9a0b1c2d";
 const HASH = "$argon2id$v=19$m=19456,t=2,p=1$stub";
@@ -65,9 +66,20 @@ describe("AuthService", () => {
     signAccess: vi.fn<(user: { id: string; role: string }) => Promise<string>>(),
     newRefresh: vi.fn<() => { token: string; hash: string }>(),
     newEmailToken: vi.fn<() => { token: string; hash: string }>(),
+    signChallenge: vi.fn<(userId: string) => Promise<string>>(),
+    verifyChallenge: vi.fn<(token: string) => Promise<string>>(),
+  };
+  const twoStep = {
+    verifySignIn:
+      vi.fn<
+        (
+          who: { userId: string; requestId: string },
+          code: string,
+        ) => Promise<{ id: string; role: string }>
+      >(),
   };
   const mailer = { send: vi.fn<(mail: { to: string; text: string }) => Promise<void>>() };
-  let service = new AuthService(passwords, tokens, mailer);
+  let service = new AuthService(passwords, tokens, mailer, twoStep);
 
   beforeEach(() => {
     User = fakeCollection();
@@ -80,8 +92,11 @@ describe("AuthService", () => {
     tokens.newRefresh.mockReset().mockReturnValue({ token: "cookie-token", hash: "stored-hash" });
     tokens.newEmailToken.mockReset().mockReturnValue({ token: "link-token", hash: "link-hash" });
     mailer.send.mockReset().mockResolvedValue(undefined);
+    tokens.signChallenge.mockReset().mockResolvedValue("challenge.jwt");
+    tokens.verifyChallenge.mockReset();
+    twoStep.verifySignIn.mockReset();
     // A fresh service each time, so the cached dummy hash never carries over between tests.
-    service = new AuthService(passwords, tokens, mailer);
+    service = new AuthService(passwords, tokens, mailer, twoStep);
   });
 
   it("creates a confirmed customer with the hash when mail is off, and sends nothing", async () => {
@@ -174,6 +189,7 @@ describe("AuthService", () => {
       role: "customer",
       passwordHash: HASH,
       emailVerifiedAt: confirmedAt,
+      totpEnabledAt: null,
     };
     const unconfirmed = { ...user, emailVerifiedAt: null };
 
@@ -203,6 +219,31 @@ describe("AuthService", () => {
       expect(JSON.stringify(row)).not.toContain("cookie-token");
       const hours = before.until(row["expiresAt"] as Temporal.Instant).total({ unit: "hours" });
       expect(hours / 24).toBeCloseTo(14, 2);
+    });
+
+    it("answers only a challenge when two-step is on: no tokens, nothing stored", async () => {
+      User.first.mockResolvedValue({ ...user, totpEnabledAt: confirmedAt });
+      passwords.verify.mockResolvedValue(true);
+
+      await expect(service.signIn(credentials, "Test Browser")).resolves.toEqual({
+        twoFactorRequired: true,
+        challengeToken: "challenge.jwt",
+      });
+
+      expect(tokens.signChallenge).toHaveBeenCalledWith(USER_ID);
+      expect(tokens.signAccess).not.toHaveBeenCalled();
+      expect(tokens.newRefresh).not.toHaveBeenCalled();
+      expect(RefreshToken.create).not.toHaveBeenCalled();
+    });
+
+    it("gives a two-step account the generic answer for a wrong password, and no challenge", async () => {
+      User.first.mockResolvedValue({ ...user, totpEnabledAt: confirmedAt });
+      passwords.verify.mockResolvedValue(false);
+
+      await expect(service.signIn(credentials, undefined)).rejects.toThrow(
+        new UnauthorizedException(SIGN_IN_FAILED),
+      );
+      expect(tokens.signChallenge).not.toHaveBeenCalled();
     });
 
     it("refuses a wrong password with the generic answer, and stores nothing", async () => {
@@ -289,6 +330,55 @@ describe("AuthService", () => {
         ([row]) => (row as { userAgent?: string }).userAgent,
       );
       expect(agents).toEqual(["x".repeat(255), undefined]);
+    });
+  });
+
+  describe("verifyTwoStep", () => {
+    const input = { challengeToken: "challenge.jwt", code: "123456" };
+
+    it("signs in the challenge's user with a new session, as sign-in does", async () => {
+      tokens.verifyChallenge.mockResolvedValue(USER_ID);
+      twoStep.verifySignIn.mockResolvedValue({ id: USER_ID, role: "customer" });
+      RefreshToken.create.mockResolvedValue({});
+
+      await expect(service.verifyTwoStep(input, "Test Browser", "req-1")).resolves.toEqual({
+        accessToken: "access.jwt",
+        expiresIn: 900,
+        refreshToken: "cookie-token",
+      });
+
+      expect(tokens.verifyChallenge).toHaveBeenCalledWith("challenge.jwt");
+      expect(twoStep.verifySignIn).toHaveBeenCalledWith(
+        { userId: USER_ID, requestId: "req-1" },
+        "123456",
+      );
+      expect(tokens.signAccess).toHaveBeenCalledWith({ id: USER_ID, role: "customer" });
+      expect(RefreshToken.create.mock.calls[0]?.[0]).toMatchObject({
+        userId: USER_ID,
+        tokenHash: "stored-hash",
+        userAgent: "Test Browser",
+      });
+    });
+
+    it("answers 401 for an expired, forged or wrong-purpose challenge, and checks no code", async () => {
+      tokens.verifyChallenge.mockRejectedValue(new Error("Not a two-step challenge"));
+
+      await expect(service.verifyTwoStep(input, undefined, "req-1")).rejects.toThrow(
+        new UnauthorizedException(SIGN_IN_AGAIN),
+      );
+      expect(twoStep.verifySignIn).not.toHaveBeenCalled();
+      expect(RefreshToken.create).not.toHaveBeenCalled();
+    });
+
+    it("issues nothing when the code is wrong", async () => {
+      tokens.verifyChallenge.mockResolvedValue(USER_ID);
+      twoStep.verifySignIn.mockRejectedValue(new UnauthorizedException(WRONG_CODE));
+
+      await expect(service.verifyTwoStep(input, undefined, "req-1")).rejects.toThrow(
+        new UnauthorizedException(WRONG_CODE),
+      );
+      expect(tokens.signAccess).not.toHaveBeenCalled();
+      expect(RefreshToken.create).not.toHaveBeenCalled();
     });
   });
 

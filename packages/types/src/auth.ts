@@ -29,6 +29,15 @@ export const signInInputSchema = z
 
 export type SignInInput = z.infer<typeof signInInputSchema>;
 
+// What sign-in (and the second step, and refresh) answers once signed in. The refresh token is
+// never in the body: it goes only into the httpOnly cookie.
+export const signInSessionSchema = z.object({
+  accessToken: z.string().min(1),
+  expiresIn: z.number().int().positive(),
+});
+
+export type SignInSession = z.infer<typeof signInSessionSchema>;
+
 // The token from the link in the confirmation mail.
 export const verifyEmailInputSchema = z
   .object({

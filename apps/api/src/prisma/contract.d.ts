@@ -18,7 +18,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'e8061134ca080bbfd247a103cf8de488426d4e45c05b21d7075eeeb8be0da118'>;
+  StorageHashBase<'95b4eb5fefd1121897e8da1274767e768b734ca369649ac6f82a404b0fa6f2b2'>;
 export type ExecutionHash =
   ExecutionHashBase<'423336f569a82d162692569cabd764ba1f05a109bf1bf71838a091e84c54e730'>;
 export type ProfileHash =
@@ -436,6 +436,7 @@ export type FieldOutputTypes = {
       readonly passwordHash: CodecTypes['pg/text@1']['output'];
       readonly role: CodecTypes['pg/text@1']['output'];
       readonly totpEnabledAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
+      readonly totpLastStep: CodecTypes['pg/int4@1']['output'] | null;
       readonly totpSecret: CodecTypes['pg/text@1']['output'] | null;
     };
     readonly Variant: {
@@ -654,6 +655,7 @@ export type FieldInputTypes = {
       readonly passwordHash: CodecTypes['pg/text@1']['input'];
       readonly role: CodecTypes['pg/text@1']['input'];
       readonly totpEnabledAt: CodecTypes['pg/timestamptz-temporal@1']['input'] | null;
+      readonly totpLastStep: CodecTypes['pg/int4@1']['input'] | null;
       readonly totpSecret: CodecTypes['pg/text@1']['input'] | null;
     };
     readonly Variant: {
@@ -872,6 +874,7 @@ export type StorageColumnTypes = {
       readonly password_hash: CodecTypes['pg/text@1']['output'];
       readonly role: CodecTypes['pg/text@1']['output'];
       readonly totp_enabled_at: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
+      readonly totp_last_step: CodecTypes['pg/int4@1']['output'] | null;
       readonly totp_secret: CodecTypes['pg/text@1']['output'] | null;
     };
     readonly variants: {
@@ -1090,6 +1093,7 @@ export type StorageColumnInputTypes = {
       readonly password_hash: CodecTypes['pg/text@1']['input'];
       readonly role: CodecTypes['pg/text@1']['input'];
       readonly totp_enabled_at: CodecTypes['pg/timestamptz-temporal@1']['input'] | null;
+      readonly totp_last_step: CodecTypes['pg/int4@1']['input'] | null;
       readonly totp_secret: CodecTypes['pg/text@1']['input'] | null;
     };
     readonly variants: {
@@ -1369,6 +1373,7 @@ export namespace Models {
     passwordHash: CodecTypes['pg/text@1']['output'];
     role: CodecTypes['pg/text@1']['output'];
     totpEnabledAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
+    totpLastStep: CodecTypes['pg/int4@1']['output'] | null;
     totpSecret: CodecTypes['pg/text@1']['output'] | null;
     addresses: public_Address[];
     auditLogs: public_AuditLog[];
@@ -3247,6 +3252,12 @@ type ContractBase = Omit<
                   readonly nullable: true;
                   readonly many: false;
                 };
+                readonly totp_last_step: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
                 readonly totp_secret: {
                   readonly dataType: 'pg/text';
                   readonly codecId: 'pg/text@1';
@@ -4951,6 +4962,10 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/timestamptz-temporal@1';
                 };
               };
+              readonly totpLastStep: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
               readonly totpSecret: {
                 readonly nullable: true;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
@@ -5070,6 +5085,7 @@ type ContractBase = Omit<
                 readonly passwordHash: { readonly column: 'password_hash' };
                 readonly role: { readonly column: 'role' };
                 readonly totpEnabledAt: { readonly column: 'totp_enabled_at' };
+                readonly totpLastStep: { readonly column: 'totp_last_step' };
                 readonly totpSecret: { readonly column: 'totp_secret' };
               };
             };

@@ -55,9 +55,29 @@ export interface paths {
     put?: never;
     /**
      * Sign in
-     * @description Answers an access token and sets the refresh_token cookie.
+     * @description Answers an access token and sets the refresh_token cookie. With two-step sign-in on, answers only a challenge for POST /auth/2fa/verify instead.
      */
     post: operations["AuthController_signIn"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/auth/2fa/verify": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Second step of sign-in
+     * @description Takes the challenge sign-in answered and the 6-digit code from the authenticator app, or a recovery code. Each code works once. Answers an access token and sets the refresh_token cookie, as sign-in does.
+     */
+    post: operations["AuthController_verifyTwoStep"];
     delete?: never;
     options?: never;
     head?: never;
@@ -198,6 +218,26 @@ export interface paths {
      * @description Takes the 6-digit code from the authenticator app. Answers the recovery codes, which are shown only this once.
      */
     post: operations["TwoStepController_enable"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/auth/2fa/disable": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Switch off two-step sign-in
+     * @description Takes a current 6-digit code from the authenticator app, or a recovery code. Removes the secret and every recovery code.
+     */
+    post: operations["TwoStepController_disable"];
     delete?: never;
     options?: never;
     head?: never;
@@ -524,12 +564,6 @@ export interface components {
       /** @example dev */
       version: string;
     };
-    SignUpResult: {
-      /** Format: uuid */
-      id: string;
-      email: string;
-      name: string;
-    };
     SignInResult: {
       accessToken: string;
       /**
@@ -537,6 +571,18 @@ export interface components {
        * @example 900
        */
       expiresIn: number;
+    };
+    TwoStepChallengeResult: {
+      /** @enum {boolean} */
+      twoFactorRequired: true;
+      /** @description Send it with the code to POST /auth/2fa/verify. It works for 5 minutes. */
+      challengeToken: string;
+    };
+    SignUpResult: {
+      /** Format: uuid */
+      id: string;
+      email: string;
+      name: string;
     };
     TwoStepSetupResult: {
       /**
@@ -849,7 +895,8 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["SignInResult"];
+          "application/json":
+            components["schemas"]["SignInResult"] | components["schemas"]["TwoStepChallengeResult"];
         };
       };
       /** @description Email or password is wrong */
@@ -861,6 +908,39 @@ export interface operations {
       };
       /** @description Check your email to confirm your account */
       403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AuthController_verifyTwoStep: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          challengeToken: string;
+          code: string;
+        };
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SignInResult"];
+        };
+      };
+      /** @description The code is not right, or sign in again */
+      401: {
         headers: {
           [name: string]: unknown;
         };
@@ -1076,6 +1156,51 @@ export interface operations {
         content?: never;
       };
       /** @description Two-step sign-in is already on */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  TwoStepController_disable: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          code: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Two-step sign-in is off */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The code is not right */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No valid access token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Two-step sign-in is not on */
       409: {
         headers: {
           [name: string]: unknown;

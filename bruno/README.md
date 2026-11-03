@@ -34,6 +34,13 @@ The `Auth` folder runs first and in this order:
 8. **Forgot password** asks for a reset link for the same account and must answer 202 (it answers 202 for any email).
 9. **Reset password** reads the link from the newest reset mail to that account in Mailpit (it waits up to 3 seconds, since the API sends it just after answering) and sets the password to `made-up-new-password-456`. The reset ends every session of the account.
 10. **Sign in with new password** signs in with it and saves the new access token for the requests after the folder.
+11. **Two-step set up** starts two-step sign-in and saves the authenticator secret.
+12. **Two-step enable** works out the app's code from the secret, as an authenticator app would (no phone needed), and switches two-step on. It also works out the next 30-second step's code for **Two-step verify**, since a code works only once, and saves a recovery code.
+13. **Two-step sign in** signs in again with the password and must answer only a challenge: no access token and no cookie.
+14. **Two-step verify** sends the challenge with the next step's code and saves the new access token for the requests after the folder.
+15. **Two-step disable** switches two-step off with the recovery code and must answer 204.
+
+The two-step requests need `TOTP_KEY` on the API (see `.env.example`).
 
 With `MAIL_MODE=off` no mail exists, so **Verify email**, **Reset password** and **Sign in with new password** skip themselves.
 
