@@ -23,7 +23,7 @@ function fakeCollection() {
     },
     select: () => collection,
     first: vi.fn<() => Promise<unknown>>(),
-    create: vi.fn<(row: object) => Promise<unknown>>(),
+    createAndCount: vi.fn<(rows: object[]) => Promise<number>>(),
     updateAndCount: vi.fn<(patch: object) => Promise<number>>(),
   };
   return collection;
@@ -102,7 +102,8 @@ describe("TwoStepService", () => {
       expect(recoveryCodes).toHaveLength(10);
       expect(new Set(recoveryCodes).size).toBe(10);
       expect(User.filters).toEqual([{ id: USER_ID }, { id: USER_ID, totpEnabledAt: null }]);
-      const stored = RecoveryCode.create.mock.calls.map(([row]) => row);
+      expect(RecoveryCode.createAndCount).toHaveBeenCalledOnce();
+      const stored = RecoveryCode.createAndCount.mock.calls[0]?.[0];
       expect(stored).toEqual(
         recoveryCodes.map((code) => ({
           userId: USER_ID,
@@ -126,7 +127,7 @@ describe("TwoStepService", () => {
 
       await expect(service.enable(WHO, wrong)).rejects.toThrow(new BadRequestException(WRONG_CODE));
       expect(User.updateAndCount).not.toHaveBeenCalled();
-      expect(RecoveryCode.create).not.toHaveBeenCalled();
+      expect(RecoveryCode.createAndCount).not.toHaveBeenCalled();
       expect(audit.record).not.toHaveBeenCalled();
     });
 
@@ -148,7 +149,7 @@ describe("TwoStepService", () => {
       await expect(service.enable(WHO, await generate({ secret }))).rejects.toThrow(
         new ConflictException(TWO_STEP_ALREADY_ON),
       );
-      expect(RecoveryCode.create).not.toHaveBeenCalled();
+      expect(RecoveryCode.createAndCount).not.toHaveBeenCalled();
     });
 
     it("answers 400 when set-up was never started", async () => {

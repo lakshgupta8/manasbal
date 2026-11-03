@@ -35,7 +35,7 @@ export class TwoStepService {
 
   // A new secret, stored encrypted but not switched on until a code from the app proves it was
   // added. Running set-up again replaces an unconfirmed secret.
-  async setup(who: Actor): Promise<TwoStepSetup> {
+  setup(who: Actor): Promise<TwoStepSetup> {
     return getDb().transaction(async (tx) => {
       const users = tx.orm.public.User;
       const user = await users.where({ id: who.userId }).select("email", "totpEnabledAt").first();
@@ -50,7 +50,7 @@ export class TwoStepService {
   }
 
   // Switches two-step on with a code from the app, and answers the recovery codes, once.
-  async enable(who: Actor, code: string): Promise<TwoStepEnabled> {
+  enable(who: Actor, code: string): Promise<TwoStepEnabled> {
     return getDb().transaction(async (tx) => {
       const { RecoveryCode, User } = tx.orm.public;
       const user = await User.where({ id: who.userId })
@@ -75,14 +75,14 @@ export class TwoStepService {
       if (claimed === 0) throw new ConflictException(TWO_STEP_ALREADY_ON);
 
       const recoveryCodes = newRecoveryCodes();
-      for (const recoveryCode of recoveryCodes) {
-        // Visitor rows are removed by the nightly reset.
-        await RecoveryCode.create({
+      // One insert for all of them. Visitor rows are removed by the nightly reset.
+      await RecoveryCode.createAndCount(
+        recoveryCodes.map((recoveryCode) => ({
           userId: who.userId,
           codeHash: hashRecoveryCode(recoveryCode),
           createdByVisitor: true,
-        });
-      }
+        })),
+      );
       await this.audit.record(who, "auth.2fa.enable", { type: "user", id: who.userId }, tx.orm);
       return { recoveryCodes };
     });
