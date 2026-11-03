@@ -7,7 +7,12 @@ import {
   Logger,
   UnauthorizedException,
 } from "@nestjs/common";
-import { NEW_ACCOUNT_ROLE, type SignInInput, type SignUpInput } from "@manasbal/types";
+import {
+  NEW_ACCOUNT_ROLE,
+  type SignInInput,
+  type SignUpInput,
+  type TwoStepVerifyInput,
+} from "@manasbal/types";
 import { readMailSettings } from "../mail/mail-settings.js";
 import { MailerService } from "../mail/mailer.service.js";
 import { getDb } from "../prisma/db.js";
@@ -18,6 +23,7 @@ import {
   REFRESH_TOKEN_HOURS,
   TokensService,
 } from "./tokens.service.js";
+import { SIGN_IN_AGAIN, TwoStepService } from "./two-step.service.js";
 import {
   EMAIL_TOKEN_HOURS,
   RESET_PASSWORD,
@@ -58,8 +64,12 @@ export class AuthService {
   constructor(
     @Inject(PasswordService) private readonly passwords: Pick<PasswordService, "hash" | "verify">,
     @Inject(TokensService)
-    private readonly tokens: Pick<TokensService, "signAccess" | "newRefresh" | "newEmailToken">,
+    private readonly tokens: Pick<
+      TokensService,
+      "signAccess" | "newRefresh" | "newEmailToken" | "signChallenge" | "verifyChallenge"
+    >,
     @Inject(MailerService) private readonly mailer: Pick<MailerService, "send">,
+    @Inject(TwoStepService) private readonly twoStep: Pick<TwoStepService, "verifySignIn">,
   ) {}
 
   private readonly logger = new Logger(AuthService.name);
@@ -175,7 +185,7 @@ export class AuthService {
   async signIn({ email, password }: SignInInput, userAgent: string | undefined) {
     const db = getDb();
     const user = await db.orm.public.User.where({ email })
-      .select("id", "role", "passwordHash", "emailVerifiedAt")
+      .select("id", "role", "passwordHash", "emailVerifiedAt", "totpEnabledAt")
       .first();
     // An unknown email still costs one hash check, so both failures take about the same time.
     const ok = await this.passwords.verify(
@@ -189,7 +199,28 @@ export class AuthService {
       throw new ForbiddenException(EMAIL_NOT_CONFIRMED);
     }
 
+    // With two-step on, the right password earns only a challenge: no tokens until the code.
+    if (user.totpEnabledAt !== null) {
+      return {
+        twoFactorRequired: true as const,
+        challengeToken: await this.tokens.signChallenge(user.id),
+      };
+    }
+
     // Each sign-in starts a new family; every refresh after it stays in that family.
+    return this.issue(user, randomUUID(), userAgent);
+  }
+
+  // The second step of sign-in: the challenge from the password step and a code. A right code
+  // signs in exactly as sign-in does without two-step.
+  async verifyTwoStep(
+    { challengeToken, code }: TwoStepVerifyInput,
+    userAgent: string | undefined,
+    requestId: string,
+  ) {
+    const userId = await this.tokens.verifyChallenge(challengeToken).catch(() => null);
+    if (userId === null) throw new UnauthorizedException(SIGN_IN_AGAIN);
+    const user = await this.twoStep.verifySignIn({ userId, requestId }, code);
     return this.issue(user, randomUUID(), userAgent);
   }
 

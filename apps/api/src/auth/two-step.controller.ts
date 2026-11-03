@@ -3,6 +3,7 @@ import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiConflictResponse,
+  ApiNoContentResponse,
   ApiOkResponse,
   ApiOperation,
   ApiProperty,
@@ -12,7 +13,9 @@ import {
 import { Throttle } from "@nestjs/throttler";
 import {
   RECOVERY_CODE_COUNT,
+  twoStepDisableInputSchema,
   twoStepEnableInputSchema,
+  type TwoStepDisableInput,
   type TwoStepEnabled,
   type TwoStepEnableInput,
   type TwoStepSetup,
@@ -45,8 +48,9 @@ export class TwoStepEnabledResult {
   recoveryCodes: string[];
 }
 
-// Switching on two-step sign-in with an authenticator app. The same tight limit as /auth/*, since
-// enable checks codes.
+// Switching two-step sign-in with an authenticator app on and off. The same tight limit as
+// /auth/*, since enable and disable check codes. The second step of sign-in itself,
+// POST /auth/2fa/verify, is in AuthController: it takes a challenge, not an access token.
 @ApiTags("Auth")
 @ApiBearerAuth()
 @ApiUnauthorizedResponse({ description: "No valid access token" })
@@ -57,7 +61,8 @@ export class TwoStepController {
   // Typed as the part it uses: a class type makes the decorator metadata emit a branch that never
   // runs. @Inject still names the provider.
   constructor(
-    @Inject(TwoStepService) private readonly twoStep: Pick<TwoStepService, "setup" | "enable">,
+    @Inject(TwoStepService)
+    private readonly twoStep: Pick<TwoStepService, "setup" | "enable" | "disable">,
   ) {}
 
   @Post("setup")
@@ -89,5 +94,23 @@ export class TwoStepController {
     @Body(new ZodValidationPipe(twoStepEnableInputSchema)) input: TwoStepEnableInput,
   ): Promise<TwoStepEnabled> {
     return this.twoStep.enable(who, input.code);
+  }
+
+  @Post("disable")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: "Switch off two-step sign-in",
+    description:
+      "Takes a current 6-digit code from the authenticator app, or a recovery code. Removes the secret and every recovery code.",
+  })
+  @ApiZodBody(twoStepDisableInputSchema)
+  @ApiNoContentResponse({ description: "Two-step sign-in is off" })
+  @ApiBadRequestResponse({ description: "The code is not right" })
+  @ApiConflictResponse({ description: "Two-step sign-in is not on" })
+  disable(
+    @CurrentActor() who: Actor,
+    @Body(new ZodValidationPipe(twoStepDisableInputSchema)) input: TwoStepDisableInput,
+  ): Promise<void> {
+    return this.twoStep.disable(who, input.code);
   }
 }

@@ -1,5 +1,11 @@
 import { SignJWT } from "jose";
-import { ACCESS_TOKEN_SECONDS, hashToken, TokensService } from "./tokens.service.js";
+import {
+  ACCESS_TOKEN_SECONDS,
+  CHALLENGE_PURPOSE,
+  CHALLENGE_SECONDS,
+  hashToken,
+  TokensService,
+} from "./tokens.service.js";
 
 const USER = { id: "7b0c1e2a-3d4f-4a5b-8c6d-7e8f9a0b1c2d", role: "customer" };
 const MINUTE = 60_000;
@@ -58,5 +64,52 @@ describe("TokensService", () => {
     expect(token).toMatch(/^[\w-]{43}$/);
     expect(hash).toBe(hashToken(token));
     expect(tokens.newEmailToken().token).not.toBe(token);
+  });
+
+  describe("two-step challenges", () => {
+    it("signs a 5-minute challenge whose user id verifies", async () => {
+      const challenge = await tokens.signChallenge(USER.id);
+
+      expect(await tokens.verifyChallenge(challenge)).toBe(USER.id);
+      const payload = JSON.parse(Buffer.from(challenge.split(".")[1]!, "base64url").toString()) as {
+        purpose: string;
+        exp: number;
+        iat: number;
+        role?: string;
+      };
+      expect(payload.purpose).toBe(CHALLENGE_PURPOSE);
+      expect(payload.exp - payload.iat).toBe(CHALLENGE_SECONDS);
+      expect(payload.role).toBeUndefined();
+    });
+
+    it("rejects a challenge after 5 minutes", async () => {
+      const challenge = await tokens.signChallenge(USER.id);
+
+      await expect(
+        tokens.verifyChallenge(challenge, new Date(Date.now() + 6 * MINUTE)),
+      ).rejects.toThrow(/exp/);
+    });
+
+    it("never takes a challenge as an access token", async () => {
+      const challenge = await tokens.signChallenge(USER.id);
+
+      await expect(tokens.verifyAccess(challenge)).rejects.toThrow("Not an access token");
+    });
+
+    it("never takes an access token as a challenge", async () => {
+      await expect(tokens.verifyChallenge(await tokens.signAccess(USER))).rejects.toThrow(
+        "Not a two-step challenge",
+      );
+    });
+
+    it("rejects a challenge without a user", async () => {
+      const secret = new TextEncoder().encode(process.env["JWT_SECRET"]);
+      const noSub = await new SignJWT({ purpose: CHALLENGE_PURPOSE })
+        .setProtectedHeader({ alg: "HS256" })
+        .setExpirationTime("5m")
+        .sign(secret);
+
+      await expect(tokens.verifyChallenge(noSub)).rejects.toThrow("Not a two-step challenge");
+    });
   });
 });

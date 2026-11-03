@@ -1,0 +1,48 @@
+info:
+  name: Two-step sign in
+  type: http
+  seq: 13
+
+http:
+  method: POST
+  url: "{{baseUrl}}/auth/sign-in"
+  body:
+    type: json
+    data: |-
+      {
+        "email": "{{signInEmail}}",
+        "password": "{{currentPassword}}"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // The password Reset password set, or the sign-up one when mail is off and it was skipped.
+        bru.setVar(
+          "currentPassword",
+          bru.getVar("passwordReset") === "yes" ? "made-up-new-password-456" : "made-up-password-123",
+        );
+    - type: after-response
+      code: |-
+        // With two-step on, the right password answers only a challenge: no token, no cookie.
+        bru.setVar("challengeToken", res.body.challengeToken);
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.twoFactorRequired
+      operator: eq
+      value: "true"
+    - expression: res.body.challengeToken
+      operator: isString
+    - expression: res.body.accessToken
+      operator: isUndefined
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

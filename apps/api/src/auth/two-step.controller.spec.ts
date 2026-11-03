@@ -1,7 +1,7 @@
 import { TwoStepController } from "./two-step.controller.js";
 
 describe("TwoStepController", () => {
-  const service = { setup: vi.fn(), enable: vi.fn() };
+  const service = { setup: vi.fn(), enable: vi.fn(), disable: vi.fn() };
   const controller = new TwoStepController(service);
   const who = { userId: "7b0c1e2a-3d4f-4a5b-8c6d-7e8f9a0b1c2d", requestId: "req-1" };
 
@@ -19,5 +19,12 @@ describe("TwoStepController", () => {
 
     await expect(controller.enable(who, { code: "123456" })).resolves.toBe(enabled);
     expect(service.enable).toHaveBeenCalledWith(who, "123456");
+  });
+
+  it("passes the code to disable", async () => {
+    service.disable.mockResolvedValue(undefined);
+
+    await expect(controller.disable(who, { code: "abcde-fghjk" })).resolves.toBeUndefined();
+    expect(service.disable).toHaveBeenCalledWith(who, "abcde-fghjk");
   });
 });

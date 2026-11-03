@@ -18,6 +18,8 @@ model User {
   // The authenticator-app secret, encrypted with TOTP_KEY (AES-256-GCM); never stored plain.
   totpSecret       String?   @map("totp_secret")
   totpEnabledAt    DateTime? @map("totp_enabled_at")
+  // The time step of the last 6-digit code accepted, so the same code cannot be used twice.
+  totpLastStep     Int?      @map("totp_last_step")
   seller           Seller?
   addresses        Address[]
   orders           Order[]

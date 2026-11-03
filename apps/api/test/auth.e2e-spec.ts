@@ -2,6 +2,7 @@ import fastifyCookie from "@fastify/cookie";
 import { APP_FILTER } from "@nestjs/core";
 import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fastify";
 import { Test } from "@nestjs/testing";
+import { SignJWT } from "jose";
 import { generate } from "otplib";
 import { AuditModule } from "../src/audit/audit.module.js";
 import { AuthModule } from "../src/auth/auth.module.js";
@@ -14,7 +15,14 @@ import {
 } from "../src/auth/auth.service.js";
 import { hashRecoveryCode } from "../src/auth/recovery-codes.js";
 import { open } from "../src/auth/secret-box.js";
-import { TWO_STEP_ALREADY_ON, WRONG_CODE } from "../src/auth/two-step.service.js";
+import { REFRESH_COOKIE } from "../src/auth/cookie.js";
+import { CHALLENGE_PURPOSE } from "../src/auth/tokens.service.js";
+import {
+  SIGN_IN_AGAIN,
+  TWO_STEP_ALREADY_ON,
+  TWO_STEP_OFF,
+  WRONG_CODE,
+} from "../src/auth/two-step.service.js";
 import { ProblemDetailsFilter } from "../src/errors/problem-details.filter.js";
 import { fastifyOptions } from "../src/logging/logging.config.js";
 import { type Mail, MailerService } from "../src/mail/mailer.service.js";
@@ -511,6 +519,190 @@ describe("/auth (e2e)", () => {
     it("answers 401 without an access token", async () => {
       expect((await post2fa("setup")).statusCode).toBe(401);
       expect((await post2fa("enable", undefined, { code: "123456" })).statusCode).toBe(401);
+    });
+  });
+
+  describe("two-step sign-in", () => {
+    const credentials = { email: signUp.email, password: signUp.password };
+    const bearerHeader = (token: string) => ({ authorization: `Bearer ${token}` });
+    const verify = (challengeToken: string, code: string) =>
+      app.inject({
+        method: "POST",
+        url: "/auth/2fa/verify",
+        payload: { challengeToken, code },
+        headers: { "user-agent": "Test Browser" },
+      });
+    const challenge = async () => {
+      const answer = await signIn(credentials);
+      expect(answer.statusCode).toBe(200);
+      expect(answer.headers["set-cookie"]).toBeUndefined();
+      const body = answer.json<{ twoFactorRequired: boolean; challengeToken: string }>();
+      expect(body).toEqual({
+        twoFactorRequired: true,
+        challengeToken: expect.any(String) as string,
+      });
+      return body.challengeToken;
+    };
+    const actions = () =>
+      database.sql("select string_agg(action, ',' order by created_at, action) from audit_logs");
+
+    // Signs up, switches two-step on, and answers what the user's phone and paper hold.
+    async function withTwoStep() {
+      expect((await post(signUp)).statusCode).toBe(201);
+      const first = await signIn(credentials);
+      // Without two-step, sign-in is unchanged: tokens and the cookie at once.
+      expect(first.statusCode).toBe(200);
+      expect(first.json()).toEqual({ accessToken: expect.any(String) as string, expiresIn: 900 });
+      expect(String(first.headers["set-cookie"])).toContain(`${REFRESH_COOKIE}=`);
+      const token = first.json<{ accessToken: string }>().accessToken;
+
+      const setup = await app.inject({
+        method: "POST",
+        url: "/auth/2fa/setup",
+        headers: bearerHeader(token),
+      });
+      const { secret } = setup.json<{ secret: string }>();
+      const enableCode = await generate({ secret });
+      const enabled = await app.inject({
+        method: "POST",
+        url: "/auth/2fa/enable",
+        headers: bearerHeader(token),
+        payload: { code: enableCode },
+      });
+      expect(enabled.statusCode).toBe(200);
+      const { recoveryCodes } = enabled.json<{ recoveryCodes: string[] }>();
+      return { token, secret, enableCode, recoveryCodes };
+    }
+
+    it("asks for the code after the password, and lets each code in only once", async () => {
+      const { secret, enableCode, recoveryCodes } = await withTwoStep();
+
+      // A wrong code, and the code that switched two-step on, are both refused.
+      const right = await generate({ secret });
+      for (const code of [right === "000000" ? "111111" : "000000", enableCode]) {
+        const refused = await verify(await challenge(), code);
+        expect(refused.statusCode).toBe(401);
+        expect(refused.json()).toMatchObject({ detail: WRONG_CODE });
+        expect(refused.headers["set-cookie"]).toBeUndefined();
+      }
+
+      // The next step's code (in the clock tolerance) signs in, exactly as sign-in does.
+      const nextCode = await generate({ secret, epoch: Math.floor(Date.now() / 1000) + 30 });
+      const signedIn = await verify(await challenge(), nextCode);
+      expect(signedIn.statusCode).toBe(200);
+      expect(signedIn.json()).toEqual({
+        accessToken: expect.any(String) as string,
+        expiresIn: 900,
+      });
+      expect(String(signedIn.headers["set-cookie"])).toContain(`${REFRESH_COOKIE}=`);
+      const me = await app.inject({
+        method: "GET",
+        url: "/me",
+        headers: bearerHeader(signedIn.json<{ accessToken: string }>().accessToken),
+      });
+      expect(me.statusCode).toBe(200);
+
+      // The same code again is a replay.
+      const replay = await verify(await challenge(), nextCode);
+      expect(replay.statusCode).toBe(401);
+      expect(replay.json()).toMatchObject({ detail: WRONG_CODE });
+
+      // A recovery code works once, typed any way; the second use gets the same answer.
+      const recovery = recoveryCodes[0]!;
+      expect((await verify(await challenge(), recovery.toUpperCase())).statusCode).toBe(200);
+      const again = await verify(await challenge(), recovery);
+      expect(again.statusCode).toBe(401);
+      expect(again.json()).toMatchObject({ detail: WRONG_CODE });
+      expect(
+        await database.sql("select count(*) from recovery_codes where used_at is not null"),
+      ).toBe("1");
+
+      // Two verifies racing with one recovery code: only one signs in.
+      const [a, b] = await Promise.all([
+        verify(await challenge(), recoveryCodes[1]!),
+        verify(await challenge(), recoveryCodes[1]!),
+      ]);
+      expect([a.statusCode, b.statusCode].sort()).toEqual([200, 401]);
+
+      expect(await actions()).toBe(
+        "auth.2fa.setup,auth.2fa.enable,auth.2fa.verify,auth.2fa.recovery_used,auth.2fa.verify,auth.2fa.recovery_used,auth.2fa.verify",
+      );
+      // One sign-in before two-step, and three through the second step.
+      expect(await database.sql("select count(*) from refresh_tokens")).toBe("4");
+    });
+
+    it("never takes a challenge as an access token, or an access token as a challenge", async () => {
+      const { token } = await withTwoStep();
+      const challengeToken = await challenge();
+
+      const asAccess = await app.inject({
+        method: "GET",
+        url: "/me",
+        headers: bearerHeader(challengeToken),
+      });
+      expect(asAccess.statusCode).toBe(401);
+
+      const asChallenge = await verify(token, "123456");
+      expect(asChallenge.statusCode).toBe(401);
+      expect(asChallenge.json()).toMatchObject({ detail: SIGN_IN_AGAIN });
+    });
+
+    it("refuses an expired challenge", async () => {
+      const { secret } = await withTwoStep();
+      const userId = await database.sql("select id from users");
+      const expired = await new SignJWT({ purpose: CHALLENGE_PURPOSE })
+        .setProtectedHeader({ alg: "HS256" })
+        .setSubject(userId)
+        .setIssuedAt(Math.floor(Date.now() / 1000) - 600)
+        .setExpirationTime(Math.floor(Date.now() / 1000) - 300)
+        .sign(new TextEncoder().encode(process.env["JWT_SECRET"]));
+
+      const answer = await verify(expired, await generate({ secret }));
+
+      expect(answer.statusCode).toBe(401);
+      expect(answer.json()).toMatchObject({ detail: SIGN_IN_AGAIN });
+    });
+
+    it("switches off with a code, after which sign-in needs only the password", async () => {
+      const { token, recoveryCodes } = await withTwoStep();
+      const disable = (code: string) =>
+        app.inject({
+          method: "POST",
+          url: "/auth/2fa/disable",
+          headers: bearerHeader(token),
+          payload: { code },
+        });
+
+      const wrong = await disable("aaaaa-aaaaa");
+      expect(wrong.statusCode).toBe(400);
+      expect(wrong.json()).toMatchObject({ detail: WRONG_CODE });
+
+      expect((await disable(recoveryCodes[0]!)).statusCode).toBe(204);
+      expect(
+        await database.sql(
+          "select (totp_secret is null and totp_enabled_at is null and totp_last_step is null)::text from users",
+        ),
+      ).toBe("true");
+      expect(await database.sql("select count(*) from recovery_codes")).toBe("0");
+      expect(
+        await database.sql("select count(*) from audit_logs where action = 'auth.2fa.disable'"),
+      ).toBe("1");
+
+      const again = await disable(recoveryCodes[1]!);
+      expect(again.statusCode).toBe(409);
+      expect(again.json()).toMatchObject({ detail: TWO_STEP_OFF });
+
+      const plain = await signIn(credentials);
+      expect(plain.json()).toEqual({ accessToken: expect.any(String) as string, expiresIn: 900 });
+      expect(
+        (
+          await app.inject({
+            method: "POST",
+            url: "/auth/2fa/disable",
+            payload: { code: "123456" },
+          })
+        ).statusCode,
+      ).toBe(401);
     });
   });
 

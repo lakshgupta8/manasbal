@@ -2562,6 +2562,13 @@
                   "kind": "scalar"
                 }
               },
+              "totpLastStep": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
               "totpSecret": {
                 "nullable": true,
                 "type": {
@@ -2740,6 +2747,9 @@
                 },
                 "totpEnabledAt": {
                   "column": "totp_enabled_at"
+                },
+                "totpLastStep": {
+                  "column": "totp_last_step"
                 },
                 "totpSecret": {
                   "column": "totp_secret"
@@ -4983,6 +4993,11 @@
                   "dataType": "pg/timestamptz",
                   "nullable": true
                 },
+                "totp_last_step": {
+                  "codecId": "pg/int4@1",
+                  "dataType": "pg/int4",
+                  "nullable": true
+                },
                 "totp_secret": {
                   "codecId": "pg/text@1",
                   "dataType": "pg/text",
@@ -5105,7 +5120,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "e8061134ca080bbfd247a103cf8de488426d4e45c05b21d7075eeeb8be0da118"
+    "storageHash": "95b4eb5fefd1121897e8da1274767e768b734ca369649ac6f82a404b0fa6f2b2"
   },
   "execution": {
     "executionHash": "423336f569a82d162692569cabd764ba1f05a109bf1bf71838a091e84c54e730",

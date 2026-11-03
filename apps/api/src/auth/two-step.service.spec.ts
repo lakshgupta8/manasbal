@@ -4,8 +4,10 @@ import { hashRecoveryCode } from "./recovery-codes.js";
 import { open, seal } from "./secret-box.js";
 import {
   ACCOUNT_GONE,
+  SIGN_IN_AGAIN,
   TWO_STEP_ALREADY_ON,
   TWO_STEP_NOT_SET_UP,
+  TWO_STEP_OFF,
   TwoStepService,
   WRONG_CODE,
 } from "./two-step.service.js";
@@ -13,18 +15,29 @@ import {
 const USER_ID = "7b0c1e2a-3d4f-4a5b-8c6d-7e8f9a0b1c2d";
 const WHO = { userId: USER_ID, requestId: "req-1" };
 
-// A stand-in for one ORM collection: where() records its filters; the terminal calls are mocks.
+// What a where callback sees: each column condition comes back as readable text.
+const ROW = {
+  totpLastStep: {
+    isNull: () => "totpLastStep is null",
+    lt: (step: number) => `totpLastStep < ${step}`,
+  },
+};
+const TOOLS = { fns: { or: (...conditions: unknown[]) => ({ or: conditions }) } };
+
+// A stand-in for one ORM collection: where() records its filters (a callback's as the condition
+// it builds); the terminal calls are mocks.
 function fakeCollection() {
   const collection = {
     filters: [] as object[],
-    where(filter: object) {
-      collection.filters.push(filter);
+    where(filter: Record<string, unknown> | ((row: typeof ROW, tools: typeof TOOLS) => object)) {
+      collection.filters.push(typeof filter === "function" ? filter(ROW, TOOLS) : filter);
       return collection;
     },
     select: () => collection,
     first: vi.fn<() => Promise<unknown>>(),
     createAndCount: vi.fn<(rows: object[]) => Promise<number>>(),
     updateAndCount: vi.fn<(patch: object) => Promise<number>>(),
+    deleteAndCount: vi.fn<() => Promise<number>>(),
   };
   return collection;
 }
@@ -102,6 +115,9 @@ describe("TwoStepService", () => {
       expect(recoveryCodes).toHaveLength(10);
       expect(new Set(recoveryCodes).size).toBe(10);
       expect(User.filters).toEqual([{ id: USER_ID }, { id: USER_ID, totpEnabledAt: null }]);
+      expect(User.updateAndCount.mock.calls[0]?.[0]).toMatchObject({
+        totpLastStep: Math.floor(Date.now() / 30_000),
+      });
       expect(RecoveryCode.createAndCount).toHaveBeenCalledOnce();
       const stored = RecoveryCode.createAndCount.mock.calls[0]?.[0];
       expect(stored).toEqual(
@@ -164,6 +180,184 @@ describe("TwoStepService", () => {
       User.first.mockResolvedValue(null);
 
       await expect(service.enable(WHO, "123456")).rejects.toThrow(
+        new UnauthorizedException(ACCOUNT_GONE),
+      );
+    });
+  });
+
+  // The time step a code made now belongs to.
+  const stepNow = () => Math.floor(Date.now() / 30_000);
+  const auditTx = () => ({ public: { User, RecoveryCode } });
+  const TARGET = { type: "user", id: USER_ID };
+
+  describe("verifySignIn", () => {
+    const secret = generateSecret();
+    const enabled = (totpLastStep: number | null = null) => ({
+      id: USER_ID,
+      role: "customer",
+      totpSecret: seal(secret),
+      totpEnabledAt: Temporal.Now.instant(),
+      totpLastStep,
+    });
+
+    it("takes a right app code, stores its time step, and audits the sign-in", async () => {
+      User.first.mockResolvedValue(enabled());
+      User.updateAndCount.mockResolvedValue(1);
+      const step = stepNow();
+
+      await expect(service.verifySignIn(WHO, await generate({ secret }))).resolves.toEqual({
+        id: USER_ID,
+        role: "customer",
+      });
+
+      // The step only moves forward, in one conditional update.
+      expect(User.filters).toEqual([
+        { id: USER_ID },
+        { id: USER_ID },
+        { or: ["totpLastStep is null", `totpLastStep < ${step}`] },
+      ]);
+      expect(User.updateAndCount).toHaveBeenCalledWith({ totpLastStep: step });
+      expect(RecoveryCode.updateAndCount).not.toHaveBeenCalled();
+      expect(audit.record).toHaveBeenCalledOnce();
+      expect(audit.record).toHaveBeenCalledWith(WHO, "auth.2fa.verify", TARGET, auditTx());
+    });
+
+    it("refuses the same app code a second time", async () => {
+      User.first.mockResolvedValue(enabled(stepNow()));
+
+      await expect(service.verifySignIn(WHO, await generate({ secret }))).rejects.toThrow(
+        new UnauthorizedException(WRONG_CODE),
+      );
+      expect(User.updateAndCount).not.toHaveBeenCalled();
+      expect(audit.record).not.toHaveBeenCalled();
+    });
+
+    it("lets only one of two sign-ins racing with the same code through", async () => {
+      User.first.mockResolvedValue(enabled());
+      // Both read the old step; the database lets only the first update move it.
+      User.updateAndCount.mockResolvedValueOnce(1).mockResolvedValueOnce(0);
+      const code = await generate({ secret });
+
+      const results = await Promise.allSettled([
+        service.verifySignIn(WHO, code),
+        service.verifySignIn(WHO, code),
+      ]);
+
+      expect(results.map((result) => result.status)).toEqual(["fulfilled", "rejected"]);
+      expect((results[1] as PromiseRejectedResult).reason).toEqual(
+        new UnauthorizedException(WRONG_CODE),
+      );
+      expect(audit.record).toHaveBeenCalledOnce();
+    });
+
+    it("refuses a wrong app code", async () => {
+      User.first.mockResolvedValue(enabled());
+      const right = await generate({ secret });
+
+      await expect(
+        service.verifySignIn(WHO, right === "000000" ? "111111" : "000000"),
+      ).rejects.toThrow(new UnauthorizedException(WRONG_CODE));
+      expect(User.updateAndCount).not.toHaveBeenCalled();
+    });
+
+    it("takes an unused recovery code once, marks it used, and audits both", async () => {
+      User.first.mockResolvedValue(enabled());
+      RecoveryCode.updateAndCount.mockResolvedValueOnce(1).mockResolvedValueOnce(0);
+
+      await expect(service.verifySignIn(WHO, "ABCDE-fghjk")).resolves.toEqual({
+        id: USER_ID,
+        role: "customer",
+      });
+      expect(RecoveryCode.filters).toEqual([
+        { userId: USER_ID, codeHash: hashRecoveryCode("abcdefghjk"), usedAt: null },
+      ]);
+      const patch = RecoveryCode.updateAndCount.mock.calls[0]?.[0] as { usedAt: unknown };
+      expect(patch.usedAt).toBeInstanceOf(Temporal.Instant);
+      expect(audit.record.mock.calls.map((call) => (call as unknown[])[1])).toEqual([
+        "auth.2fa.recovery_used",
+        "auth.2fa.verify",
+      ]);
+
+      // The second use finds no unused code, and gets the same answer as a wrong app code.
+      await expect(service.verifySignIn(WHO, "abcde-fghjk")).rejects.toThrow(
+        new UnauthorizedException(WRONG_CODE),
+      );
+      expect(User.updateAndCount).not.toHaveBeenCalled();
+      expect(audit.record).toHaveBeenCalledTimes(2);
+    });
+
+    it.each([
+      ["the account is gone", null],
+      ["two-step was switched off", { ...enabled(), totpEnabledAt: null }],
+      ["no secret is stored", { ...enabled(), totpSecret: null }],
+    ])("answers 401 sign in again when %s", async (_case, user) => {
+      User.first.mockResolvedValue(user);
+
+      await expect(service.verifySignIn(WHO, "123456")).rejects.toThrow(
+        new UnauthorizedException(SIGN_IN_AGAIN),
+      );
+    });
+  });
+
+  describe("disable", () => {
+    const secret = generateSecret();
+    const enabled = () => ({
+      totpSecret: seal(secret),
+      totpEnabledAt: Temporal.Now.instant(),
+      totpLastStep: null,
+    });
+
+    it("switches off with a right code, removing the secret and every recovery code", async () => {
+      User.first.mockResolvedValue(enabled());
+      User.updateAndCount.mockResolvedValue(1);
+      RecoveryCode.deleteAndCount.mockResolvedValue(9);
+
+      await expect(service.disable(WHO, await generate({ secret }))).resolves.toBeUndefined();
+
+      expect(User.updateAndCount).toHaveBeenLastCalledWith({
+        totpSecret: null,
+        totpEnabledAt: null,
+        totpLastStep: null,
+      });
+      expect(RecoveryCode.filters).toEqual([{ userId: USER_ID }]);
+      expect(RecoveryCode.deleteAndCount).toHaveBeenCalledOnce();
+      expect(audit.record).toHaveBeenCalledWith(WHO, "auth.2fa.disable", TARGET, auditTx());
+    });
+
+    it("refuses a wrong code with 400 and changes nothing", async () => {
+      User.first.mockResolvedValue(enabled());
+      RecoveryCode.updateAndCount.mockResolvedValue(0);
+
+      await expect(service.disable(WHO, "abcde-fghjk")).rejects.toThrow(
+        new BadRequestException(WRONG_CODE),
+      );
+      expect(User.updateAndCount).not.toHaveBeenCalled();
+      expect(RecoveryCode.deleteAndCount).not.toHaveBeenCalled();
+      expect(audit.record).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ["never switched on", { totpSecret: null, totpEnabledAt: null, totpLastStep: null }],
+      [
+        "set up but not switched on",
+        { totpSecret: "v1.x", totpEnabledAt: null, totpLastStep: null },
+      ],
+      [
+        "on without a secret",
+        { totpSecret: null, totpEnabledAt: Temporal.Now.instant(), totpLastStep: null },
+      ],
+    ])("answers 409 when two-step is %s", async (_case, user) => {
+      User.first.mockResolvedValue(user);
+
+      await expect(service.disable(WHO, "123456")).rejects.toThrow(
+        new ConflictException(TWO_STEP_OFF),
+      );
+    });
+
+    it("answers 401 when the account is gone", async () => {
+      User.first.mockResolvedValue(null);
+
+      await expect(service.disable(WHO, "123456")).rejects.toThrow(
         new UnauthorizedException(ACCOUNT_GONE),
       );
     });

@@ -4,6 +4,11 @@ import { jwtVerify, SignJWT, type JWTPayload } from "jose";
 
 export const ACCESS_TOKEN_SECONDS = 15 * 60;
 export const REFRESH_TOKEN_HOURS = 14 * 24;
+export const CHALLENGE_SECONDS = 5 * 60;
+
+// The claim that marks a two-step challenge. An access token never has a purpose, so neither can
+// stand in for the other.
+export const CHALLENGE_PURPOSE = "2fa-challenge";
 
 // The signing key, read on use so a missing JWT_SECRET fails the first sign-in loudly.
 function secret(): Uint8Array {
@@ -26,14 +31,31 @@ export class TokensService {
       .sign(secret());
   }
 
-  // Pinning the algorithm stops a token signed any other way from being accepted. `now` lets a
-  // test check the expiry without fake timers.
+  // `now` lets a test check the expiry without fake timers.
   async verifyAccess(token: string, now?: Date): Promise<JWTPayload> {
-    const { payload } = await jwtVerify(token, secret(), {
-      algorithms: ["HS256"],
-      currentDate: now,
-    });
+    const payload = await verifyToken(token, now);
+    if (payload["purpose"] !== undefined) throw new Error("Not an access token");
     return payload;
+  }
+
+  // The token sign-in answers when the password is right and two-step is on. It can do nothing
+  // but the second step, for 5 minutes.
+  async signChallenge(userId: string): Promise<string> {
+    return new SignJWT({ purpose: CHALLENGE_PURPOSE })
+      .setProtectedHeader({ alg: "HS256" })
+      .setSubject(userId)
+      .setIssuedAt()
+      .setExpirationTime(`${CHALLENGE_SECONDS}s`)
+      .sign(secret());
+  }
+
+  // The user id of a valid challenge. Anything else throws, an access token included.
+  async verifyChallenge(token: string, now?: Date): Promise<string> {
+    const payload = await verifyToken(token, now);
+    if (payload["purpose"] !== CHALLENGE_PURPOSE || typeof payload.sub !== "string") {
+      throw new Error("Not a two-step challenge");
+    }
+    return payload.sub;
   }
 
   // 32 random bytes for the cookie; only the SHA-256 hash is stored.
@@ -45,6 +67,15 @@ export class TokensService {
   newEmailToken(): { token: string; hash: string } {
     return newToken();
   }
+}
+
+// Pinning the algorithm stops a token signed any other way from being accepted.
+async function verifyToken(token: string, now: Date | undefined): Promise<JWTPayload> {
+  const { payload } = await jwtVerify(token, secret(), {
+    algorithms: ["HS256"],
+    currentDate: now,
+  });
+  return payload;
 }
 
 function newToken(): { token: string; hash: string } {
