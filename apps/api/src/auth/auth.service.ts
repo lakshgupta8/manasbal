@@ -19,6 +19,7 @@ import { MailerService } from "../mail/mailer.service.js";
 import { getDb } from "../prisma/db.js";
 import { emailLockKey, LockoutService, userLockKey } from "./lockout.service.js";
 import { PasswordService } from "./password.service.js";
+import { revokeFamily } from "./revoke-family.js";
 import {
   ACCESS_TOKEN_SECONDS,
   hashToken,
@@ -275,7 +276,7 @@ export class AuthService {
     const tokens = getDb().orm.public.RefreshToken;
     const row = await tokens
       .where({ tokenHash: hashToken(token) })
-      .select("id", "userId", "familyId", "expiresAt", "usedAt", "revokedAt")
+      .select("id", "userId", "familyId", "expiresAt", "usedAt", "revokedAt", "userAgent")
       .first();
     if (row === null || row.revokedAt !== null) throw new UnauthorizedException(REFRESH_FAILED);
     if (row.usedAt !== null) return this.reuse(row, requestId);
@@ -296,7 +297,8 @@ export class AuthService {
       .select("id", "role")
       .first();
     if (user === null) throw new UnauthorizedException(REFRESH_FAILED);
-    return this.issue(user, row.familyId, userAgent);
+    // A refresh without a user agent keeps the session's, so the sessions list can still name it.
+    return this.issue(user, row.familyId, userAgent ?? row.userAgent ?? undefined);
   }
 
   // Ends the session the cookie belongs to, on this device and any copy of it. An unknown or
@@ -308,7 +310,7 @@ export class AuthService {
       .select("userId", "familyId")
       .first();
     if (row === null) return;
-    await this.revokeFamily(row.familyId);
+    await revokeFamily(row.familyId);
     await this.audit.record(
       { userId: row.userId, requestId },
       "auth.sign_out",
@@ -354,7 +356,7 @@ export class AuthService {
     row: { userId: string; familyId: string },
     requestId: string,
   ): Promise<never> {
-    await this.revokeFamily(row.familyId);
+    await revokeFamily(row.familyId);
     await this.audit.record(
       { userId: row.userId, requestId },
       "auth.refresh.reuse",
@@ -368,12 +370,6 @@ export class AuthService {
     const target = who.userId === null ? null : account(who.userId);
     await this.audit.record(who, action, target);
     if (await this.lockout.fail(lockKey)) await this.audit.record(who, "auth.lockout", target);
-  }
-
-  private async revokeFamily(familyId: string): Promise<void> {
-    await getDb()
-      .orm.public.RefreshToken.where({ familyId, revokedAt: null })
-      .updateAndCount({ revokedAt: Temporal.Now.instant() });
   }
 
   // A new refresh token in the family, stored only as its hash, and an access token. Visitor
@@ -392,7 +388,8 @@ export class AuthService {
       userAgent: userAgent?.slice(0, USER_AGENT_MAX),
       createdByVisitor: true,
     });
-    const accessToken = await this.tokens.signAccess(user);
+    // The family id goes into the access token as its session, for the sessions list.
+    const accessToken = await this.tokens.signAccess(user, familyId);
     return { accessToken, expiresIn: ACCESS_TOKEN_SECONDS, refreshToken: refresh.token };
   }
 }

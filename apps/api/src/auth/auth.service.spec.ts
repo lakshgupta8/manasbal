@@ -20,6 +20,7 @@ import { SIGN_IN_AGAIN, WRONG_CODE } from "./two-step.service.js";
 
 const USER_ID = "7b0c1e2a-3d4f-4a5b-8c6d-7e8f9a0b1c2d";
 const REQ = "req-1";
+const UUID = /^[0-9a-f-]{36}$/;
 const HASH = "$argon2id$v=19$m=19456,t=2,p=1$stub";
 
 const input = {
@@ -247,7 +248,7 @@ describe("AuthService", () => {
 
       expect(User.filters).toEqual([{ email: input.email }]);
       expect(passwords.verify).toHaveBeenCalledWith(HASH, input.password);
-      expect(tokens.signAccess).toHaveBeenCalledWith(user);
+      expect(tokens.signAccess).toHaveBeenCalledWith(user, expect.stringMatching(UUID));
       const row = RefreshToken.create.mock.calls[0]?.[0] as Record<string, unknown>;
       expect(row).toMatchObject({
         userId: USER_ID,
@@ -476,7 +477,10 @@ describe("AuthService", () => {
         { userId: USER_ID, requestId: "req-1" },
         "123456",
       );
-      expect(tokens.signAccess).toHaveBeenCalledWith({ id: USER_ID, role: "customer" });
+      expect(tokens.signAccess).toHaveBeenCalledWith(
+        { id: USER_ID, role: "customer" },
+        expect.stringMatching(UUID),
+      );
       expect(lockout.assertOpen).toHaveBeenCalledWith(userLockKey(USER_ID));
       expect(lockout.clear).toHaveBeenCalledWith(userLockKey(USER_ID));
       expect(RefreshToken.create.mock.calls[0]?.[0]).toMatchObject({
@@ -782,7 +786,23 @@ describe("AuthService", () => {
           userAgent: "Test Browser",
         }),
       );
-      expect(tokens.signAccess).toHaveBeenCalledWith({ id: USER_ID, role: "customer" });
+      expect(tokens.signAccess).toHaveBeenCalledWith({ id: USER_ID, role: "customer" }, FAMILY_ID);
+    });
+
+    it("keeps the session's user agent when the refresh sends none", async () => {
+      User.first.mockResolvedValue({ id: USER_ID, role: "customer" });
+      RefreshToken.updateAndCount.mockResolvedValue(1);
+      RefreshToken.first
+        .mockResolvedValueOnce(stored({ userAgent: "Session Browser" }))
+        .mockResolvedValueOnce(stored({ userAgent: null }));
+
+      await service.refresh("old-token", undefined, REQ);
+      await service.refresh("old-token", undefined, REQ);
+
+      const agents = RefreshToken.create.mock.calls.map(
+        ([row]) => (row as { userAgent?: string }).userAgent,
+      );
+      expect(agents).toEqual(["Session Browser", undefined]);
     });
 
     it("refuses a missing cookie without looking anything up", async () => {

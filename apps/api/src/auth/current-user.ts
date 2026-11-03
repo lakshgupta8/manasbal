@@ -5,6 +5,8 @@ import type { FastifyRequest } from "fastify";
 export interface AuthedRequest extends FastifyRequest {
   userId?: string;
   role?: string;
+  // The refresh-token family the access token was issued for, when it says.
+  sessionId?: string;
 }
 
 // The id of the user AuthGuard let in.
