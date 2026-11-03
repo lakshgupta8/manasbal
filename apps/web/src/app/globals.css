@@ -1,30 +1,20 @@
-/* Ink on white: 13.29:1 contrast; light text on dark background: 15.5:1 (WCAG AA). */
+/* Colours, spacing and type come from the design tokens in @manasbal/ui (theme.css, light and dark).
+   Ink on white: 15.1:1 contrast; light text on the dark page: 13.6:1 (WCAG AA). */
 @import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #12343b;
-}
+@import "@manasbal/ui/theme.css";
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-ink: #12343b;
-  --color-lake: #167e86;
-  --color-lotus: #d9406f;
+  --color-background: var(--mb-color-surface-page);
+  --color-foreground: var(--mb-color-text-default);
+  --color-ink: var(--mb-color-brand-ink);
+  --color-lake: var(--mb-color-brand-primary);
+  --color-lotus: var(--mb-color-brand-accent);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0b1a1d;
-    --foreground: #e8f1f2;
-  }
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--color-background);
+  color: var(--color-foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
 }

@@ -7,5 +7,11 @@
   ["color.lotus.900", "color.lotus.50"],
   ["color.lotus.800", "color.lotus.100"],
   ["color.grey.50", "color.lake.800"],
-  ["color.grey.50", "color.lotus.800"]
+  ["color.grey.50", "color.lotus.800"],
+  ["color.text.default", "color.surface.page"],
+  ["color.text.default", "color.surface.card"],
+  ["color.text.muted", "color.surface.page"],
+  ["color.text.muted", "color.surface.card"],
+  ["color.text.on-brand", "color.brand.primary"],
+  ["color.text.on-brand", "color.brand.ink"]
 ]

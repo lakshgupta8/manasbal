@@ -1,9 +1,15 @@
+import { execFileSync } from "node:child_process";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import colorJson from "../../tokens/color.json";
 import pairsJson from "../../tokens/contrast-pairs.json";
 import fontJson from "../../tokens/font.json";
 import radiusJson from "../../tokens/radius.json";
+import semanticJson from "../../tokens/semantic.json";
 import spaceJson from "../../tokens/space.json";
+import uiPairsJson from "../../tokens/ui-contrast-pairs.json";
 
 type ColorToken = { $type: string; $value: string };
 type ColorTokens = { color: Record<string, Record<string, ColorToken>> };
@@ -11,7 +17,8 @@ type ColorTokens = { color: Record<string, Record<string, ColorToken>> };
 const tokens: ColorTokens = colorJson;
 const pairs = pairsJson as [string, string][];
 
-const scales = Object.entries(tokens.color);
+// base holds single colours (white); every other group is a ten-step scale.
+const scales = Object.entries(tokens.color).filter(([scale]) => scale !== "base");
 const expectedSteps = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
 
 const colors = new Map<string, ColorToken>();
@@ -63,14 +70,57 @@ describe("grey scale", () => {
   });
 });
 
+type SemanticToken = { $value: string; $extensions: { manasbal: { dark: string } } };
+type Mode = "light" | "dark";
+
+const semantic = new Map(
+  collectTokens(semanticJson).map(([name, token]) => [name, token as unknown as SemanticToken]),
+);
+const alias = (value: string) => /^\{(.+)\}$/.exec(value)?.[1];
+
+// The hex value a colour name has in a theme. A meaning-layer name points at a plain colour, which
+// is the same in both themes.
+function resolve(name: string, mode: Mode): string {
+  const meaning = semantic.get(name);
+  if (meaning) {
+    const target = mode === "light" ? meaning.$value : meaning.$extensions.manasbal.dark;
+    return resolve(alias(target) ?? target, mode);
+  }
+  const plain = colors.get(name);
+  if (!plain) {
+    throw new Error(`Unknown colour: ${name}`);
+  }
+  return plain.$value;
+}
+
+const modes: Mode[] = ["light", "dark"];
+const inBothModes = (list: [string, string][]) =>
+  list.flatMap(([a, b]) => modes.map((mode) => [a, b, mode] as const));
+
 describe("contrast pairs", () => {
-  it.each(pairs)("%s on %s reaches a 4.5:1 contrast ratio", (nameA, nameB) => {
-    const a = colors.get(nameA);
-    const b = colors.get(nameB);
-    if (!a || !b) {
-      throw new Error(`Unknown colour in pair: ${nameA}, ${nameB}`);
+  it.each(inBothModes(pairs))("%s on %s reaches 4.5:1 (%s)", (nameA, nameB, mode) => {
+    expect(contrastRatio(resolve(nameA, mode), resolve(nameB, mode))).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it.each(inBothModes(uiPairsJson as [string, string][]))(
+    "%s on %s reaches 3:1 for a control or brand edge (%s)",
+    (nameA, nameB, mode) => {
+      expect(contrastRatio(resolve(nameA, mode), resolve(nameB, mode))).toBeGreaterThanOrEqual(3);
+    },
+  );
+
+  it("refuses an unknown colour name", () => {
+    expect(() => resolve("color.nope", "light")).toThrow("Unknown colour: color.nope");
+  });
+});
+
+describe("meaning layer", () => {
+  it.each([...semantic])("%s points at a plain colour in light and dark", (_name, token) => {
+    for (const value of [token.$value, token.$extensions.manasbal.dark]) {
+      const target = alias(value);
+      expect(target).toBeDefined();
+      expect(colors.has(target!)).toBe(true);
     }
-    expect(contrastRatio(a.$value, b.$value)).toBeGreaterThanOrEqual(4.5);
   });
 });
 
@@ -88,7 +138,7 @@ function collectTokens(group: object, path: string[] = []): [string, Token][] {
     );
 }
 
-const allTokens = [colorJson, spaceJson, fontJson, radiusJson].flatMap((file) =>
+const allTokens = [colorJson, semanticJson, spaceJson, fontJson, radiusJson].flatMap((file) =>
   collectTokens(file),
 );
 const px = (value: string) => Number(/^(\d+)px$/.exec(value)?.[1] ?? Number.NaN);
@@ -144,5 +194,24 @@ describe("type tokens", () => {
 
   it("names the font licence", () => {
     expect(fontJson.font.family.sans.$description).toContain("SIL Open Font License");
+  });
+});
+
+describe("theme.css", () => {
+  it("is what the tokens build today (run `pnpm --filter @manasbal/ui tokens` after changing a token)", () => {
+    const packageDir = path.resolve(import.meta.dirname, "../..");
+    const outDir = mkdtempSync(path.join(tmpdir(), "manasbal-theme-"));
+    try {
+      execFileSync(process.execPath, ["style-dictionary.config.mjs"], {
+        cwd: packageDir,
+        env: { ...process.env, TOKENS_OUT_DIR: outDir },
+      });
+      const fresh = readFileSync(path.join(outDir, "theme.css"), "utf8");
+      const committed = readFileSync(path.join(packageDir, "src/theme.css"), "utf8");
+      // A Windows checkout may turn the committed file's line endings into CRLF.
+      expect(committed.replaceAll("\r\n", "\n")).toBe(fresh);
+    } finally {
+      rmSync(outDir, { recursive: true, force: true });
+    }
   });
 });

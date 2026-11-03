@@ -1,0 +1,68 @@
+{
+  "color": {
+    "$description": "Meaning layer: what a colour is for. $value is the light theme; $extensions.manasbal.dark is the dark theme. Components use these names, so changing a theme never touches a component.",
+    "text": {
+      "default": {
+        "$type": "color",
+        "$value": "{color.lake.900}",
+        "$extensions": { "manasbal": { "dark": "{color.lake.50}" } }
+      },
+      "muted": {
+        "$type": "color",
+        "$value": "{color.grey.600}",
+        "$extensions": { "manasbal": { "dark": "{color.lake.200}" } }
+      },
+      "on-brand": {
+        "$type": "color",
+        "$value": "{color.base.white}",
+        "$description": "Text on the brand colour.",
+        "$extensions": { "manasbal": { "dark": "{color.base.white}" } }
+      }
+    },
+    "surface": {
+      "page": {
+        "$type": "color",
+        "$value": "{color.base.white}",
+        "$extensions": { "manasbal": { "dark": "{color.lake.900}" } }
+      },
+      "card": {
+        "$type": "color",
+        "$value": "{color.grey.50}",
+        "$extensions": { "manasbal": { "dark": "{color.lake.800}" } }
+      }
+    },
+    "border": {
+      "default": {
+        "$type": "color",
+        "$value": "{color.grey.200}",
+        "$description": "Decorative divider; never the only thing that shows an edge.",
+        "$extensions": { "manasbal": { "dark": "{color.lake.700}" } }
+      },
+      "strong": {
+        "$type": "color",
+        "$value": "{color.grey.500}",
+        "$description": "Edge of a control, such as an input; at least 3:1 on the page and on a card.",
+        "$extensions": { "manasbal": { "dark": "{color.lake.400}" } }
+      }
+    },
+    "brand": {
+      "primary": {
+        "$type": "color",
+        "$value": "{color.lake.500}",
+        "$description": "Brand fill, behind on-brand text.",
+        "$extensions": { "manasbal": { "dark": "{color.lake.500}" } }
+      },
+      "ink": {
+        "$type": "color",
+        "$value": "{color.lake.900}",
+        "$description": "Deep brand colour for headings and the storefront's demo banner.",
+        "$extensions": { "manasbal": { "dark": "{color.lake.900}" } }
+      },
+      "accent": {
+        "$type": "color",
+        "$value": "{color.lotus.500}",
+        "$extensions": { "manasbal": { "dark": "{color.lotus.400}" } }
+      }
+    }
+  }
+}
