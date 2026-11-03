@@ -41,7 +41,7 @@ They pass values to each other through runtime variables, so running one on its 
 
 ### Admin requests
 
-**Admin audit log forbidden** uses the signed-in buyer's token and must answer 403. **Admin audit log** needs an admin, and the seed gives no account a known password, so the run skips it until you set `adminAccessToken`:
+**Admin audit log forbidden** uses the signed-in customer's token and must answer 403. **Admin audit log** needs an admin, and the seed gives no account a known password, so the run skips it until you set `adminAccessToken`:
 
 1. Run **Auth → Sign up** and **Sign in** (or use any account you signed up locally).
 2. Open the local database in Prisma Studio, `pnpm dlx prisma@7.10.1 studio --url "postgresql://manasbal:manasbal@localhost:5432/manasbal"`, then http://localhost:5555, and set that user's `role` in `users` to `admin`.

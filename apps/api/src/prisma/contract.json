@@ -4749,7 +4749,7 @@
                   "dataType": "pg/text",
                   "default": {
                     "kind": "literal",
-                    "value": "buyer"
+                    "value": "customer"
                   },
                   "nullable": false
                 }
@@ -4870,7 +4870,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "4bdfe0358c09c5608154925d70b91d7659066abd228903ff69eb74d453be2128"
+    "storageHash": "6f27640e70389006667532c04cec01ff3a48959155f7031caca8fb196e6c6fee"
   },
   "execution": {
     "executionHash": "da5247b2def99b27f05442865168a9a909d7a23701d40e06a7e7bad1d8d5f998",

@@ -1,4 +1,5 @@
 import type { Faker } from "@faker-js/faker";
+import type { Role } from "@manasbal/types";
 // Prisma reads and writes timestamps as Temporal.Instant, which Node 24 doesn't have yet.
 import "temporal-polyfill/global";
 import places from "../data/places.json" with { type: "json" };
@@ -16,7 +17,7 @@ export interface UserRow {
   // Empty until sign-in exists (Week 5); the demo logins get real hashes in Week 6.
   passwordHash: string;
   name: string;
-  role: "buyer" | "seller";
+  role: Extract<Role, "customer" | "seller">;
   isSample: true;
   createdAt: Temporal.Instant;
 }
@@ -120,7 +121,7 @@ function storeNamesFor(faker: Faker, count: number): string[] {
 // Customers with one or two addresses each, and the sellers with their own user accounts.
 export function generatePeople(faker: Faker, profile: SeedProfile): People {
   const customers = Array.from({ length: profile.customers }, (_, i) =>
-    makeUser(faker, "buyer", i + 1),
+    makeUser(faker, "customer", i + 1),
   );
   const addresses = customers.flatMap((customer) =>
     Array.from({ length: faker.number.int({ min: 1, max: 2 }) }, (_, i) =>

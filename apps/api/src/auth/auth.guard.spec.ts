@@ -47,7 +47,7 @@ describe("AuthGuard", () => {
   });
 
   it("refuses an expired token", async () => {
-    const token = await tokens.signAccess({ id: USER_ID, role: "buyer" });
+    const token = await tokens.signAccess({ id: USER_ID, role: "customer" });
     // Checked 16 minutes from now, past the token's 15-minute life.
     const later = new Date(Date.now() + 16 * 60_000);
     const checking = new AuthGuard({ verifyAccess: (t) => tokens.verifyAccess(t, later) });
@@ -71,7 +71,7 @@ describe("AuthGuard", () => {
 
   it("refuses a token without a role or without a subject", async () => {
     const noRole = await sign({}, USER_ID);
-    const noSub = await sign({ role: "buyer" });
+    const noSub = await sign({ role: "customer" });
 
     for (const token of [noRole, noSub]) {
       const { context, request } = contextFor(`Bearer ${token}`);

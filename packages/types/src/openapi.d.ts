@@ -463,8 +463,11 @@ export interface components {
       id: string;
       name: string;
       email: string;
-      /** @example buyer */
-      role: string;
+      /**
+       * @example customer
+       * @enum {string}
+       */
+      role: "customer" | "seller" | "seller_staff" | "support" | "admin";
     };
     Address: {
       /** Format: uuid */
@@ -1389,7 +1392,7 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description The user is not an admin */
+      /** @description Only an admin can see this */
       403: {
         headers: {
           [name: string]: unknown;

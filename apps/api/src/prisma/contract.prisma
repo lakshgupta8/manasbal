@@ -10,7 +10,7 @@ model User {
   email            String   @unique
   passwordHash     String   @map("password_hash")
   name             String
-  role             String   @default("buyer")
+  role             String   @default("customer")
   isSample         Boolean  @default(false) @map("is_sample")
   createdByVisitor Boolean  @default(false) @map("created_by_visitor")
   createdAt        DateTime @default(now()) @map("created_at")

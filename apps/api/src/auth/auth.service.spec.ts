@@ -84,7 +84,7 @@ describe("AuthService", () => {
     service = new AuthService(passwords, tokens, mailer);
   });
 
-  it("creates a confirmed buyer with the hash when mail is off, and sends nothing", async () => {
+  it("creates a confirmed customer with the hash when mail is off, and sends nothing", async () => {
     const created = { id: USER_ID, email: input.email, name: input.name };
     User.first.mockResolvedValue(null);
     User.create.mockResolvedValue(created);
@@ -99,7 +99,7 @@ describe("AuthService", () => {
       email: input.email,
       name: input.name,
       passwordHash: HASH,
-      role: "buyer",
+      role: "customer",
       createdByVisitor: true,
     });
     const verifiedAt = row["emailVerifiedAt"] as Temporal.Instant;
@@ -108,7 +108,7 @@ describe("AuthService", () => {
     expect(mailer.send).not.toHaveBeenCalled();
   });
 
-  it("with mail on, creates an unconfirmed buyer and mails a link stored only as its hash", async () => {
+  it("with mail on, creates an unconfirmed customer and mails a link stored only as its hash", async () => {
     vi.stubEnv("MAIL_MODE", "smtp");
     const created = { id: USER_ID, email: input.email, name: input.name };
     User.first.mockResolvedValue(null);
@@ -169,7 +169,12 @@ describe("AuthService", () => {
   describe("signIn", () => {
     const credentials = { email: input.email, password: input.password };
     const confirmedAt = Temporal.Instant.from("2026-11-01T10:00:00Z");
-    const user = { id: USER_ID, role: "buyer", passwordHash: HASH, emailVerifiedAt: confirmedAt };
+    const user = {
+      id: USER_ID,
+      role: "customer",
+      passwordHash: HASH,
+      emailVerifiedAt: confirmedAt,
+    };
     const unconfirmed = { ...user, emailVerifiedAt: null };
 
     it("answers an access token and stores only the refresh token's hash", async () => {
@@ -489,7 +494,7 @@ describe("AuthService", () => {
     it("marks the token used and issues a new pair in the same family", async () => {
       RefreshToken.first.mockResolvedValue(stored());
       RefreshToken.updateAndCount.mockResolvedValue(1);
-      User.first.mockResolvedValue({ id: USER_ID, role: "buyer" });
+      User.first.mockResolvedValue({ id: USER_ID, role: "customer" });
 
       await expect(service.refresh("old-token", "Test Browser")).resolves.toEqual({
         accessToken: "access.jwt",
@@ -511,7 +516,7 @@ describe("AuthService", () => {
           userAgent: "Test Browser",
         }),
       );
-      expect(tokens.signAccess).toHaveBeenCalledWith({ id: USER_ID, role: "buyer" });
+      expect(tokens.signAccess).toHaveBeenCalledWith({ id: USER_ID, role: "customer" });
     });
 
     it("refuses a missing cookie without looking anything up", async () => {
