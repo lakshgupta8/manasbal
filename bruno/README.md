@@ -44,6 +44,10 @@ The two-step requests need `TOTP_KEY` on the API (see `.env.example`).
 
 With `MAIL_MODE=off` no mail exists, so **Verify email**, **Reset password** and **Sign in with new password** skip themselves.
 
+**Refresh**, **Refresh reuse** and **Sign out** send `Origin: {{webOrigin}}`: the API takes the refresh cookie only from the shop's origins (`WEB_ORIGINS`) and answers 403 to any other. The **local** environment sets it to `http://localhost:3000`; on **prod**, set it to one of the production `WEB_ORIGINS` first.
+
+After 5 wrong passwords for one email within 15 minutes, sign-in answers 429 for that email for 15 minutes, so a run with many wrong tries can lock the test account; it unlocks by itself.
+
 They pass values to each other through runtime variables, so running one on its own may fail. Every other request with `auth: inherit` sends `Authorization: Bearer {{accessToken}}`, set once in [`opencollection.yml`](opencollection.yml). **Address add** saves the new address's id, which **Address edit** and **Address delete** then change.
 
 ### Staff and seller requests

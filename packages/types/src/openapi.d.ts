@@ -797,9 +797,9 @@ export interface components {
       /** @example address.create */
       action: string;
       /** @example address */
-      targetType: string;
+      targetType: string | null;
       /** Format: uuid */
-      targetId: string;
+      targetId: string | null;
       /** @description The x-request-id of the request that made the change */
       requestId: string;
       /** Format: date-time */
@@ -913,6 +913,13 @@ export interface operations {
         };
         content?: never;
       };
+      /** @description 5 wrong tries for this email in 15 minutes: wait 15 minutes */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
   AuthController_verifyTwoStep: {
@@ -941,6 +948,13 @@ export interface operations {
       };
       /** @description The code is not right, or sign in again */
       401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description 5 wrong codes for this account in 15 minutes: wait 15 minutes */
+      429: {
         headers: {
           [name: string]: unknown;
         };
@@ -1066,6 +1080,13 @@ export interface operations {
         };
         content?: never;
       };
+      /** @description This request must come from the Manasbal shop: the Origin header is not in WEB_ORIGINS, or is missing while the refresh_token cookie is sent */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
   AuthController_signOut: {
@@ -1078,6 +1099,13 @@ export interface operations {
     requestBody?: never;
     responses: {
       204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description This request must come from the Manasbal shop: the Origin header is not in WEB_ORIGINS, or is missing while the refresh_token cookie is sent */
+      403: {
         headers: {
           [name: string]: unknown;
         };

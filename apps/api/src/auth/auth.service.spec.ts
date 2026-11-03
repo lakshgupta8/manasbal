@@ -13,10 +13,13 @@ import {
   SIGN_IN_FAILED,
   SIGN_UP_FAILED,
 } from "./auth.service.js";
+import { TooManyTriesException } from "../errors/too-many-tries.exception.js";
+import { emailLockKey, userLockKey } from "./lockout.service.js";
 import { hashToken } from "./tokens.service.js";
 import { SIGN_IN_AGAIN, WRONG_CODE } from "./two-step.service.js";
 
 const USER_ID = "7b0c1e2a-3d4f-4a5b-8c6d-7e8f9a0b1c2d";
+const REQ = "req-1";
 const HASH = "$argon2id$v=19$m=19456,t=2,p=1$stub";
 
 const input = {
@@ -79,7 +82,28 @@ describe("AuthService", () => {
       >(),
   };
   const mailer = { send: vi.fn<(mail: { to: string; text: string }) => Promise<void>>() };
-  let service = new AuthService(passwords, tokens, mailer, twoStep);
+  const lockout = {
+    assertOpen: vi.fn<(key: string) => Promise<void>>(),
+    fail: vi.fn<(key: string) => Promise<boolean>>(),
+    clear: vi.fn<(key: string) => Promise<void>>(),
+  };
+  const audit = {
+    record:
+      vi.fn<
+        (
+          who: { userId: string | null; requestId: string },
+          action: string,
+          target: { type: string; id: string } | null,
+          orm?: unknown,
+        ) => Promise<void>
+      >(),
+  };
+  const create = () => new AuthService(passwords, tokens, mailer, twoStep, lockout, audit);
+  let service = create();
+  // The actions recorded, in order, and every recorded argument as one string to search.
+  const recorded = () => audit.record.mock.calls.map((call) => call[1]);
+  const everything = () => JSON.stringify(audit.record.mock.calls.map((call) => call.slice(0, 3)));
+  const ACCOUNT = { type: "user", id: USER_ID };
 
   beforeEach(() => {
     User = fakeCollection();
@@ -96,7 +120,11 @@ describe("AuthService", () => {
     tokens.verifyChallenge.mockReset();
     twoStep.verifySignIn.mockReset();
     // A fresh service each time, so the cached dummy hash never carries over between tests.
-    service = new AuthService(passwords, tokens, mailer, twoStep);
+    lockout.assertOpen.mockReset().mockResolvedValue(undefined);
+    lockout.fail.mockReset().mockResolvedValue(false);
+    lockout.clear.mockReset().mockResolvedValue(undefined);
+    audit.record.mockReset().mockResolvedValue(undefined);
+    service = create();
   });
 
   it("creates a confirmed customer with the hash when mail is off, and sends nothing", async () => {
@@ -105,7 +133,7 @@ describe("AuthService", () => {
     User.create.mockResolvedValue(created);
     const before = Temporal.Now.instant();
 
-    await expect(service.signUp(input)).resolves.toBe(created);
+    await expect(service.signUp(input, REQ)).resolves.toBe(created);
 
     expect(passwords.hash).toHaveBeenCalledWith(input.password);
     expect(User.filters).toEqual([{ email: input.email }]);
@@ -121,6 +149,12 @@ describe("AuthService", () => {
     expect(Temporal.Instant.compare(verifiedAt, before)).toBeGreaterThanOrEqual(0);
     expect(EmailToken.create).not.toHaveBeenCalled();
     expect(mailer.send).not.toHaveBeenCalled();
+    expect(audit.record).toHaveBeenCalledWith(
+      { userId: USER_ID, requestId: REQ },
+      "auth.sign_up",
+      ACCOUNT,
+    );
+    expect(everything()).not.toContain(input.email);
   });
 
   it("with mail on, creates an unconfirmed customer and mails a link stored only as its hash", async () => {
@@ -130,7 +164,7 @@ describe("AuthService", () => {
     User.create.mockResolvedValue(created);
     const before = Temporal.Now.instant();
 
-    await expect(service.signUp(input)).resolves.toBe(created);
+    await expect(service.signUp(input, REQ)).resolves.toBe(created);
 
     expect(User.create.mock.calls[0]?.[0]).toMatchObject({ emailVerifiedAt: null });
     const token = EmailToken.create.mock.calls[0]?.[0] as Record<string, unknown>;
@@ -152,7 +186,9 @@ describe("AuthService", () => {
     vi.stubEnv("MAIL_MODE", "smtp");
     User.first.mockResolvedValue({ id: USER_ID });
 
-    await expect(service.signUp(input)).rejects.toThrow(new BadRequestException(SIGN_UP_FAILED));
+    await expect(service.signUp(input, REQ)).rejects.toThrow(
+      new BadRequestException(SIGN_UP_FAILED),
+    );
     expect(EmailToken.create).not.toHaveBeenCalled();
     expect(mailer.send).not.toHaveBeenCalled();
   });
@@ -160,7 +196,9 @@ describe("AuthService", () => {
   it("gives the generic answer for a taken email, and creates nothing", async () => {
     User.first.mockResolvedValue({ id: USER_ID });
 
-    await expect(service.signUp(input)).rejects.toThrow(new BadRequestException(SIGN_UP_FAILED));
+    await expect(service.signUp(input, REQ)).rejects.toThrow(
+      new BadRequestException(SIGN_UP_FAILED),
+    );
     expect(passwords.hash).toHaveBeenCalled();
     expect(User.create).not.toHaveBeenCalled();
   });
@@ -169,7 +207,9 @@ describe("AuthService", () => {
     User.first.mockResolvedValueOnce(null).mockResolvedValueOnce({ id: USER_ID });
     User.create.mockRejectedValue(new Error("unique violation"));
 
-    await expect(service.signUp(input)).rejects.toThrow(new BadRequestException(SIGN_UP_FAILED));
+    await expect(service.signUp(input, REQ)).rejects.toThrow(
+      new BadRequestException(SIGN_UP_FAILED),
+    );
   });
 
   it("rethrows a create error that is not a taken email", async () => {
@@ -177,7 +217,7 @@ describe("AuthService", () => {
     User.first.mockResolvedValue(null);
     User.create.mockRejectedValue(failure);
 
-    await expect(service.signUp(input)).rejects.toBe(failure);
+    await expect(service.signUp(input, REQ)).rejects.toBe(failure);
     expect(User.first).toHaveBeenCalledTimes(2);
   });
 
@@ -199,7 +239,7 @@ describe("AuthService", () => {
       RefreshToken.create.mockResolvedValue({});
       const before = Temporal.Now.instant();
 
-      await expect(service.signIn(credentials, "Test Browser")).resolves.toEqual({
+      await expect(service.signIn(credentials, "Test Browser", REQ)).resolves.toEqual({
         accessToken: "access.jwt",
         expiresIn: 900,
         refreshToken: "cookie-token",
@@ -221,16 +261,96 @@ describe("AuthService", () => {
       expect(hours / 24).toBeCloseTo(14, 2);
     });
 
+    it("records the sign-in and clears the email's failures, with no email in the record", async () => {
+      User.first.mockResolvedValue(user);
+      passwords.verify.mockResolvedValue(true);
+      RefreshToken.create.mockResolvedValue({});
+
+      await service.signIn(credentials, undefined, REQ);
+
+      expect(lockout.assertOpen).toHaveBeenCalledWith(emailLockKey(input.email));
+      expect(lockout.clear).toHaveBeenCalledWith(emailLockKey(input.email));
+      expect(lockout.fail).not.toHaveBeenCalled();
+      expect(audit.record).toHaveBeenCalledWith(
+        { userId: USER_ID, requestId: REQ },
+        "auth.sign_in",
+        ACCOUNT,
+      );
+      expect(everything()).not.toContain(input.email);
+      expect(everything()).not.toContain(input.password);
+    });
+
+    it("answers 429 for a locked email before checking the password, even a right one", async () => {
+      lockout.assertOpen.mockRejectedValue(new TooManyTriesException("locked", 900));
+
+      await expect(service.signIn(credentials, undefined, REQ)).rejects.toThrow(
+        TooManyTriesException,
+      );
+      expect(User.first).not.toHaveBeenCalled();
+      expect(passwords.verify).not.toHaveBeenCalled();
+      expect(RefreshToken.create).not.toHaveBeenCalled();
+    });
+
+    it("counts and records a wrong password against the account", async () => {
+      User.first.mockResolvedValue(user);
+      passwords.verify.mockResolvedValue(false);
+
+      await expect(service.signIn(credentials, undefined, REQ)).rejects.toThrow(
+        new UnauthorizedException(SIGN_IN_FAILED),
+      );
+      expect(lockout.fail).toHaveBeenCalledWith(emailLockKey(input.email));
+      expect(lockout.clear).not.toHaveBeenCalled();
+      expect(audit.record).toHaveBeenCalledWith(
+        { userId: USER_ID, requestId: REQ },
+        "auth.sign_in.failed",
+        ACCOUNT,
+      );
+      expect(recorded()).toEqual(["auth.sign_in.failed"]);
+    });
+
+    it("counts an unknown email the same way, recorded with no actor, no target and no email", async () => {
+      User.first.mockResolvedValue(null);
+      passwords.verify.mockResolvedValue(false);
+
+      await expect(service.signIn(credentials, undefined, REQ)).rejects.toThrow(
+        new UnauthorizedException(SIGN_IN_FAILED),
+      );
+      expect(lockout.fail).toHaveBeenCalledWith(emailLockKey(input.email));
+      expect(audit.record).toHaveBeenCalledWith(
+        { userId: null, requestId: REQ },
+        "auth.sign_in.failed",
+        null,
+      );
+      expect(everything()).not.toContain(input.email);
+    });
+
+    it("records the lockout when the fifth failure locks the email", async () => {
+      User.first.mockResolvedValue(null);
+      passwords.verify.mockResolvedValue(false);
+      lockout.fail.mockResolvedValue(true);
+
+      await expect(service.signIn(credentials, undefined, REQ)).rejects.toThrow(
+        UnauthorizedException,
+      );
+      expect(recorded()).toEqual(["auth.sign_in.failed", "auth.lockout"]);
+      expect(audit.record).toHaveBeenLastCalledWith(
+        { userId: null, requestId: REQ },
+        "auth.lockout",
+        null,
+      );
+    });
+
     it("answers only a challenge when two-step is on: no tokens, nothing stored", async () => {
       User.first.mockResolvedValue({ ...user, totpEnabledAt: confirmedAt });
       passwords.verify.mockResolvedValue(true);
 
-      await expect(service.signIn(credentials, "Test Browser")).resolves.toEqual({
+      await expect(service.signIn(credentials, "Test Browser", REQ)).resolves.toEqual({
         twoFactorRequired: true,
         challengeToken: "challenge.jwt",
       });
 
       expect(tokens.signChallenge).toHaveBeenCalledWith(USER_ID);
+      expect(recorded()).toEqual(["auth.2fa.challenge"]);
       expect(tokens.signAccess).not.toHaveBeenCalled();
       expect(tokens.newRefresh).not.toHaveBeenCalled();
       expect(RefreshToken.create).not.toHaveBeenCalled();
@@ -240,7 +360,7 @@ describe("AuthService", () => {
       User.first.mockResolvedValue({ ...user, totpEnabledAt: confirmedAt });
       passwords.verify.mockResolvedValue(false);
 
-      await expect(service.signIn(credentials, undefined)).rejects.toThrow(
+      await expect(service.signIn(credentials, undefined, REQ)).rejects.toThrow(
         new UnauthorizedException(SIGN_IN_FAILED),
       );
       expect(tokens.signChallenge).not.toHaveBeenCalled();
@@ -250,7 +370,7 @@ describe("AuthService", () => {
       User.first.mockResolvedValue(user);
       passwords.verify.mockResolvedValue(false);
 
-      await expect(service.signIn(credentials, undefined)).rejects.toThrow(
+      await expect(service.signIn(credentials, undefined, REQ)).rejects.toThrow(
         new UnauthorizedException(SIGN_IN_FAILED),
       );
       expect(RefreshToken.create).not.toHaveBeenCalled();
@@ -262,7 +382,7 @@ describe("AuthService", () => {
       User.first.mockResolvedValue(unconfirmed);
       passwords.verify.mockResolvedValue(true);
 
-      await expect(service.signIn(credentials, undefined)).rejects.toThrow(
+      await expect(service.signIn(credentials, undefined, REQ)).rejects.toThrow(
         new ForbiddenException(EMAIL_NOT_CONFIRMED),
       );
       expect(RefreshToken.create).not.toHaveBeenCalled();
@@ -274,7 +394,7 @@ describe("AuthService", () => {
       User.first.mockResolvedValue(unconfirmed);
       passwords.verify.mockResolvedValue(false);
 
-      await expect(service.signIn(credentials, undefined)).rejects.toThrow(
+      await expect(service.signIn(credentials, undefined, REQ)).rejects.toThrow(
         new UnauthorizedException(SIGN_IN_FAILED),
       );
     });
@@ -284,7 +404,7 @@ describe("AuthService", () => {
       User.first.mockResolvedValue(user);
       passwords.verify.mockResolvedValue(true);
 
-      await expect(service.signIn(credentials, undefined)).resolves.toMatchObject({
+      await expect(service.signIn(credentials, undefined, REQ)).resolves.toMatchObject({
         accessToken: "access.jwt",
       });
     });
@@ -293,7 +413,7 @@ describe("AuthService", () => {
       User.first.mockResolvedValue(unconfirmed);
       passwords.verify.mockResolvedValue(true);
 
-      await expect(service.signIn(credentials, undefined)).resolves.toMatchObject({
+      await expect(service.signIn(credentials, undefined, REQ)).resolves.toMatchObject({
         accessToken: "access.jwt",
       });
     });
@@ -303,7 +423,7 @@ describe("AuthService", () => {
       passwords.hash.mockResolvedValue("dummy-hash");
       passwords.verify.mockResolvedValue(false);
 
-      await expect(service.signIn(credentials, undefined)).rejects.toThrow(
+      await expect(service.signIn(credentials, undefined, REQ)).rejects.toThrow(
         new UnauthorizedException(SIGN_IN_FAILED),
       );
       expect(passwords.verify).toHaveBeenCalledOnce();
@@ -314,8 +434,12 @@ describe("AuthService", () => {
       User.first.mockResolvedValue(null);
       passwords.verify.mockResolvedValue(false);
 
-      await expect(service.signIn(credentials, undefined)).rejects.toThrow(UnauthorizedException);
-      await expect(service.signIn(credentials, undefined)).rejects.toThrow(UnauthorizedException);
+      await expect(service.signIn(credentials, undefined, REQ)).rejects.toThrow(
+        UnauthorizedException,
+      );
+      await expect(service.signIn(credentials, undefined, REQ)).rejects.toThrow(
+        UnauthorizedException,
+      );
       expect(passwords.hash).toHaveBeenCalledOnce();
     });
 
@@ -323,8 +447,8 @@ describe("AuthService", () => {
       User.first.mockResolvedValue(user);
       passwords.verify.mockResolvedValue(true);
 
-      await service.signIn(credentials, "x".repeat(300));
-      await service.signIn(credentials, undefined);
+      await service.signIn(credentials, "x".repeat(300), REQ);
+      await service.signIn(credentials, undefined, REQ);
 
       const agents = RefreshToken.create.mock.calls.map(
         ([row]) => (row as { userAgent?: string }).userAgent,
@@ -353,6 +477,8 @@ describe("AuthService", () => {
         "123456",
       );
       expect(tokens.signAccess).toHaveBeenCalledWith({ id: USER_ID, role: "customer" });
+      expect(lockout.assertOpen).toHaveBeenCalledWith(userLockKey(USER_ID));
+      expect(lockout.clear).toHaveBeenCalledWith(userLockKey(USER_ID));
       expect(RefreshToken.create.mock.calls[0]?.[0]).toMatchObject({
         userId: USER_ID,
         tokenHash: "stored-hash",
@@ -370,15 +496,45 @@ describe("AuthService", () => {
       expect(RefreshToken.create).not.toHaveBeenCalled();
     });
 
-    it("issues nothing when the code is wrong", async () => {
+    it("issues nothing when the code is wrong, and counts it against the account", async () => {
       tokens.verifyChallenge.mockResolvedValue(USER_ID);
       twoStep.verifySignIn.mockRejectedValue(new UnauthorizedException(WRONG_CODE));
+      lockout.fail.mockResolvedValue(true);
 
       await expect(service.verifyTwoStep(input, undefined, "req-1")).rejects.toThrow(
         new UnauthorizedException(WRONG_CODE),
       );
       expect(tokens.signAccess).not.toHaveBeenCalled();
       expect(RefreshToken.create).not.toHaveBeenCalled();
+      expect(lockout.fail).toHaveBeenCalledWith(userLockKey(USER_ID));
+      expect(lockout.clear).not.toHaveBeenCalled();
+      expect(recorded()).toEqual(["auth.2fa.failed", "auth.lockout"]);
+      expect(audit.record).toHaveBeenCalledWith(
+        { userId: USER_ID, requestId: "req-1" },
+        "auth.2fa.failed",
+        ACCOUNT,
+      );
+    });
+
+    it("answers 429 once the account's codes are locked, without checking the code", async () => {
+      tokens.verifyChallenge.mockResolvedValue(USER_ID);
+      lockout.assertOpen.mockRejectedValue(new TooManyTriesException("locked", 900));
+
+      await expect(service.verifyTwoStep(input, undefined, "req-1")).rejects.toThrow(
+        TooManyTriesException,
+      );
+      expect(twoStep.verifySignIn).not.toHaveBeenCalled();
+    });
+
+    it("counts nothing when the code was not the problem", async () => {
+      tokens.verifyChallenge.mockResolvedValue(USER_ID);
+      for (const error of [new UnauthorizedException(SIGN_IN_AGAIN), new Error("database down")]) {
+        twoStep.verifySignIn.mockRejectedValueOnce(error);
+
+        await expect(service.verifyTwoStep(input, undefined, "req-1")).rejects.toThrow(error);
+      }
+      expect(lockout.fail).not.toHaveBeenCalled();
+      expect(audit.record).not.toHaveBeenCalled();
     });
   });
 
@@ -398,7 +554,7 @@ describe("AuthService", () => {
       EmailToken.updateAndCount.mockResolvedValue(1);
       User.updateAndCount.mockResolvedValue(1);
 
-      await expect(service.verifyEmail("link-token")).resolves.toBeUndefined();
+      await expect(service.verifyEmail("link-token", REQ)).resolves.toBeUndefined();
 
       expect(EmailToken.filters).toEqual([
         { tokenHash: hashToken("link-token"), purpose: "verify-email" },
@@ -407,6 +563,12 @@ describe("AuthService", () => {
       expect(User.filters).toEqual([{ id: USER_ID, emailVerifiedAt: null }]);
       const patch = EmailToken.updateAndCount.mock.calls[0]?.[0] as { usedAt: unknown };
       expect(User.updateAndCount).toHaveBeenCalledWith({ emailVerifiedAt: patch.usedAt });
+      expect(audit.record).toHaveBeenCalledWith(
+        { userId: USER_ID, requestId: REQ },
+        "auth.email.verify",
+        ACCOUNT,
+        expect.anything(),
+      );
     });
 
     it.each([
@@ -419,7 +581,7 @@ describe("AuthService", () => {
     ])("refuses $case and confirms nothing", async ({ row }) => {
       EmailToken.first.mockResolvedValue(row);
 
-      await expect(service.verifyEmail("link-token")).rejects.toThrow(refused);
+      await expect(service.verifyEmail("link-token", REQ)).rejects.toThrow(refused);
       expect(EmailToken.updateAndCount).not.toHaveBeenCalled();
       expect(User.updateAndCount).not.toHaveBeenCalled();
     });
@@ -428,7 +590,7 @@ describe("AuthService", () => {
       EmailToken.first.mockResolvedValue(stored());
       EmailToken.updateAndCount.mockResolvedValue(0);
 
-      await expect(service.verifyEmail("link-token")).rejects.toThrow(refused);
+      await expect(service.verifyEmail("link-token", REQ)).rejects.toThrow(refused);
       expect(User.updateAndCount).not.toHaveBeenCalled();
     });
   });
@@ -444,7 +606,7 @@ describe("AuthService", () => {
       User.first.mockResolvedValue({ id: USER_ID, email: input.email });
       const before = Temporal.Now.instant();
 
-      expect(service.forgotPassword(input.email)).toBeUndefined();
+      expect(service.forgotPassword(input.email, REQ)).toBeUndefined();
 
       await vi.waitFor(() => expect(mailer.send).toHaveBeenCalled());
       expect(User.filters).toEqual([{ email: input.email }]);
@@ -461,17 +623,24 @@ describe("AuthService", () => {
       const mail = mailer.send.mock.calls[0]?.[0];
       expect(mail?.to).toBe(input.email);
       expect(mail?.text).toContain("/reset-password?token=link-token");
+      expect(audit.record).toHaveBeenCalledWith(
+        { userId: USER_ID, requestId: REQ },
+        "auth.password_reset.request",
+        ACCOUNT,
+      );
+      expect(everything()).not.toContain(input.email);
     });
 
     it("stores and sends nothing for an unknown email", async () => {
       User.first.mockResolvedValue(null);
 
-      expect(service.forgotPassword("nobody@example.test")).toBeUndefined();
+      expect(service.forgotPassword("nobody@example.test", REQ)).toBeUndefined();
 
       await vi.waitFor(() => expect(User.first).toHaveBeenCalled());
       await Promise.resolve();
       expect(EmailToken.create).not.toHaveBeenCalled();
       expect(mailer.send).not.toHaveBeenCalled();
+      expect(audit.record).not.toHaveBeenCalled();
     });
 
     it("logs a failed send without the address or the token", async () => {
@@ -479,7 +648,7 @@ describe("AuthService", () => {
       User.first.mockResolvedValue({ id: USER_ID, email: input.email });
       mailer.send.mockRejectedValue(new TypeError(`could not reach ${input.email}`));
 
-      expect(service.forgotPassword(input.email)).toBeUndefined();
+      expect(service.forgotPassword(input.email, REQ)).toBeUndefined();
 
       await vi.waitFor(() => expect(error).toHaveBeenCalled());
       expect(error).toHaveBeenCalledWith(`${RESET_MAIL_FAILED} (TypeError)`);
@@ -491,7 +660,7 @@ describe("AuthService", () => {
       const error = logged();
       User.first.mockRejectedValue("connection lost");
 
-      service.forgotPassword(input.email);
+      service.forgotPassword(input.email, REQ);
 
       await vi.waitFor(() =>
         expect(error).toHaveBeenCalledWith(`${RESET_MAIL_FAILED} (unknown error)`),
@@ -516,7 +685,7 @@ describe("AuthService", () => {
       EmailToken.updateAndCount.mockResolvedValue(1);
 
       await expect(
-        service.resetPassword("link-token", "a new long passphrase"),
+        service.resetPassword("link-token", "a new long passphrase", REQ),
       ).resolves.toBeUndefined();
 
       expect(passwords.hash).toHaveBeenCalledWith("a new long passphrase");
@@ -534,6 +703,13 @@ describe("AuthService", () => {
       expect(RefreshToken.filters).toEqual([{ userId: USER_ID, revokedAt: null }]);
       expect(RefreshToken.updateAndCount).toHaveBeenCalledWith({ revokedAt: usedAt });
       expect(EmailToken.updateAndCount).toHaveBeenLastCalledWith({ usedAt });
+      expect(audit.record).toHaveBeenCalledWith(
+        { userId: USER_ID, requestId: REQ },
+        "auth.password_reset.complete",
+        ACCOUNT,
+        expect.anything(),
+      );
+      expect(everything()).not.toContain("a new long passphrase");
     });
 
     it.each([
@@ -546,9 +722,9 @@ describe("AuthService", () => {
     ])("refuses $case and changes nothing", async ({ row }) => {
       EmailToken.first.mockResolvedValue(row);
 
-      await expect(service.resetPassword("link-token", "a new long passphrase")).rejects.toThrow(
-        refused,
-      );
+      await expect(
+        service.resetPassword("link-token", "a new long passphrase", REQ),
+      ).rejects.toThrow(refused);
       expect(EmailToken.updateAndCount).not.toHaveBeenCalled();
       expect(User.updateAndCount).not.toHaveBeenCalled();
       expect(RefreshToken.updateAndCount).not.toHaveBeenCalled();
@@ -558,9 +734,9 @@ describe("AuthService", () => {
       EmailToken.first.mockResolvedValue(stored());
       EmailToken.updateAndCount.mockResolvedValue(0);
 
-      await expect(service.resetPassword("link-token", "a new long passphrase")).rejects.toThrow(
-        refused,
-      );
+      await expect(
+        service.resetPassword("link-token", "a new long passphrase", REQ),
+      ).rejects.toThrow(refused);
       expect(User.updateAndCount).not.toHaveBeenCalled();
       expect(RefreshToken.updateAndCount).not.toHaveBeenCalled();
     });
@@ -586,7 +762,7 @@ describe("AuthService", () => {
       RefreshToken.updateAndCount.mockResolvedValue(1);
       User.first.mockResolvedValue({ id: USER_ID, role: "customer" });
 
-      await expect(service.refresh("old-token", "Test Browser")).resolves.toEqual({
+      await expect(service.refresh("old-token", "Test Browser", REQ)).resolves.toEqual({
         accessToken: "access.jwt",
         expiresIn: 900,
         refreshToken: "cookie-token",
@@ -610,21 +786,21 @@ describe("AuthService", () => {
     });
 
     it("refuses a missing cookie without looking anything up", async () => {
-      await expect(service.refresh(undefined, undefined)).rejects.toThrow(refused);
+      await expect(service.refresh(undefined, undefined, REQ)).rejects.toThrow(refused);
       expect(RefreshToken.first).not.toHaveBeenCalled();
     });
 
     it("refuses an unknown token", async () => {
       RefreshToken.first.mockResolvedValue(null);
 
-      await expect(service.refresh("made-up", undefined)).rejects.toThrow(refused);
+      await expect(service.refresh("made-up", undefined, REQ)).rejects.toThrow(refused);
       expect(RefreshToken.updateAndCount).not.toHaveBeenCalled();
     });
 
     it("refuses a revoked token", async () => {
       RefreshToken.first.mockResolvedValue(stored({ revokedAt: Temporal.Now.instant() }));
 
-      await expect(service.refresh("old-token", undefined)).rejects.toThrow(refused);
+      await expect(service.refresh("old-token", undefined, REQ)).rejects.toThrow(refused);
       expect(RefreshToken.updateAndCount).not.toHaveBeenCalled();
       expect(RefreshToken.create).not.toHaveBeenCalled();
     });
@@ -632,7 +808,12 @@ describe("AuthService", () => {
     it("revokes the whole family when a used token comes back", async () => {
       RefreshToken.first.mockResolvedValue(stored({ usedAt: Temporal.Now.instant() }));
 
-      await expect(service.refresh("old-token", undefined)).rejects.toThrow(refused);
+      await expect(service.refresh("old-token", undefined, REQ)).rejects.toThrow(refused);
+      expect(audit.record).toHaveBeenCalledWith(
+        { userId: USER_ID, requestId: REQ },
+        "auth.refresh.reuse",
+        ACCOUNT,
+      );
       expect(RefreshToken.filters).toContainEqual({ familyId: FAMILY_ID, revokedAt: null });
       const patch = RefreshToken.updateAndCount.mock.calls[0]?.[0] as Record<string, unknown>;
       expect(patch["revokedAt"]).toBeInstanceOf(Temporal.Instant);
@@ -644,7 +825,7 @@ describe("AuthService", () => {
         stored({ expiresAt: Temporal.Now.instant().subtract({ seconds: 1 }) }),
       );
 
-      await expect(service.refresh("old-token", undefined)).rejects.toThrow(refused);
+      await expect(service.refresh("old-token", undefined, REQ)).rejects.toThrow(refused);
       expect(RefreshToken.updateAndCount).not.toHaveBeenCalled();
     });
 
@@ -653,7 +834,7 @@ describe("AuthService", () => {
       // The claim finds the token already used; the revocation then updates the family.
       RefreshToken.updateAndCount.mockResolvedValueOnce(0).mockResolvedValueOnce(2);
 
-      await expect(service.refresh("old-token", undefined)).rejects.toThrow(refused);
+      await expect(service.refresh("old-token", undefined, REQ)).rejects.toThrow(refused);
       expect(RefreshToken.filters).toContainEqual({ familyId: FAMILY_ID, revokedAt: null });
       expect(RefreshToken.create).not.toHaveBeenCalled();
     });
@@ -663,17 +844,22 @@ describe("AuthService", () => {
       RefreshToken.updateAndCount.mockResolvedValue(1);
       User.first.mockResolvedValue(null);
 
-      await expect(service.refresh("old-token", undefined)).rejects.toThrow(refused);
+      await expect(service.refresh("old-token", undefined, REQ)).rejects.toThrow(refused);
       expect(RefreshToken.create).not.toHaveBeenCalled();
     });
   });
 
   describe("signOut", () => {
     it("revokes the family of the cookie's token", async () => {
-      RefreshToken.first.mockResolvedValue({ familyId: "family-1" });
+      RefreshToken.first.mockResolvedValue({ userId: USER_ID, familyId: "family-1" });
 
-      await service.signOut("old-token");
+      await service.signOut("old-token", REQ);
 
+      expect(audit.record).toHaveBeenCalledWith(
+        { userId: USER_ID, requestId: REQ },
+        "auth.sign_out",
+        ACCOUNT,
+      );
       expect(RefreshToken.filters).toEqual([
         { tokenHash: hashToken("old-token") },
         { familyId: "family-1", revokedAt: null },
@@ -684,11 +870,12 @@ describe("AuthService", () => {
     it("does nothing for a missing or unknown token", async () => {
       RefreshToken.first.mockResolvedValue(null);
 
-      await service.signOut(undefined);
-      await service.signOut("made-up");
+      await service.signOut(undefined, REQ);
+      await service.signOut("made-up", REQ);
 
       expect(RefreshToken.first).toHaveBeenCalledOnce();
       expect(RefreshToken.updateAndCount).not.toHaveBeenCalled();
+      expect(audit.record).not.toHaveBeenCalled();
     });
   });
 });

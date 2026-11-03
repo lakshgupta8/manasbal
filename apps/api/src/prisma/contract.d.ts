@@ -18,7 +18,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'95b4eb5fefd1121897e8da1274767e768b734ca369649ac6f82a404b0fa6f2b2'>;
+  StorageHashBase<'cb40b11c2753b51ead95c48da3d5e5e307626283d04086c216e92cc3a1c0df1d'>;
 export type ExecutionHash =
   ExecutionHashBase<'423336f569a82d162692569cabd764ba1f05a109bf1bf71838a091e84c54e730'>;
 export type ProfileHash =
@@ -254,8 +254,8 @@ export type FieldOutputTypes = {
       readonly id: CodecTypes['pg/uuid@1']['output'];
       readonly isSample: CodecTypes['pg/bool@1']['output'];
       readonly requestId: CodecTypes['pg/text@1']['output'];
-      readonly targetId: CodecTypes['pg/uuid@1']['output'];
-      readonly targetType: CodecTypes['pg/text@1']['output'];
+      readonly targetId: CodecTypes['pg/uuid@1']['output'] | null;
+      readonly targetType: CodecTypes['pg/text@1']['output'] | null;
     };
     readonly Cart: {
       readonly createdByVisitor: CodecTypes['pg/bool@1']['output'];
@@ -473,8 +473,8 @@ export type FieldInputTypes = {
       readonly id: CodecTypes['pg/uuid@1']['input'];
       readonly isSample: CodecTypes['pg/bool@1']['input'];
       readonly requestId: CodecTypes['pg/text@1']['input'];
-      readonly targetId: CodecTypes['pg/uuid@1']['input'];
-      readonly targetType: CodecTypes['pg/text@1']['input'];
+      readonly targetId: CodecTypes['pg/uuid@1']['input'] | null;
+      readonly targetType: CodecTypes['pg/text@1']['input'] | null;
     };
     readonly Cart: {
       readonly createdByVisitor: CodecTypes['pg/bool@1']['input'];
@@ -697,8 +697,8 @@ export type StorageColumnTypes = {
       readonly id: CodecTypes['pg/uuid@1']['output'];
       readonly is_sample: CodecTypes['pg/bool@1']['output'];
       readonly request_id: CodecTypes['pg/text@1']['output'];
-      readonly target_id: CodecTypes['pg/uuid@1']['output'];
-      readonly target_type: CodecTypes['pg/text@1']['output'];
+      readonly target_id: CodecTypes['pg/uuid@1']['output'] | null;
+      readonly target_type: CodecTypes['pg/text@1']['output'] | null;
     };
     readonly cart_items: {
       readonly cart_id: CodecTypes['pg/uuid@1']['output'];
@@ -916,8 +916,8 @@ export type StorageColumnInputTypes = {
       readonly id: CodecTypes['pg/uuid@1']['input'];
       readonly is_sample: CodecTypes['pg/bool@1']['input'];
       readonly request_id: CodecTypes['pg/text@1']['input'];
-      readonly target_id: CodecTypes['pg/uuid@1']['input'];
-      readonly target_type: CodecTypes['pg/text@1']['input'];
+      readonly target_id: CodecTypes['pg/uuid@1']['input'] | null;
+      readonly target_type: CodecTypes['pg/text@1']['input'] | null;
     };
     readonly cart_items: {
       readonly cart_id: CodecTypes['pg/uuid@1']['input'];
@@ -1133,8 +1133,8 @@ export namespace Models {
     id: CodecTypes['pg/uuid@1']['output'];
     isSample: CodecTypes['pg/bool@1']['output'];
     requestId: CodecTypes['pg/text@1']['output'];
-    targetId: CodecTypes['pg/uuid@1']['output'];
-    targetType: CodecTypes['pg/text@1']['output'];
+    targetId: CodecTypes['pg/uuid@1']['output'] | null;
+    targetType: CodecTypes['pg/text@1']['output'] | null;
     actor: public_User | null;
     readonly [RelationKeys]?: 'actor';
   };
@@ -1639,13 +1639,13 @@ type ContractBase = Omit<
                 readonly target_id: {
                   readonly dataType: 'pg/uuid';
                   readonly codecId: 'pg/uuid@1';
-                  readonly nullable: false;
+                  readonly nullable: true;
                   readonly many: false;
                 };
                 readonly target_type: {
                   readonly dataType: 'pg/text';
                   readonly codecId: 'pg/text@1';
-                  readonly nullable: false;
+                  readonly nullable: true;
                   readonly many: false;
                 };
               };
@@ -3526,11 +3526,11 @@ type ContractBase = Omit<
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
               readonly targetId: {
-                readonly nullable: false;
+                readonly nullable: true;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/uuid@1' };
               };
               readonly targetType: {
-                readonly nullable: false;
+                readonly nullable: true;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
             };

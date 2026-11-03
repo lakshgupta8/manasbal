@@ -52,10 +52,11 @@ Not personal on their own, but they reveal what a person bought when joined to t
 
 ## Personal data outside the database
 
-| Where                                               | What                                           | Why we need it                                                                       | How long we keep it                    | Removed by the nightly reset?    |
-| --------------------------------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------ | -------------------------------------- | -------------------------------- |
-| Valkey, rate-limit counter (`rate-limit.module.ts`) | IP address, as the counter key                 | Stops one visitor sending too many requests (100 a minute; 10 a minute on `/auth/*`) | One minute (the counting window)       | Not needed; it expires by itself |
-| Server logs on Render and Vercel                    | IP address and request path, kept by the hosts | Debugging and abuse handling                                                         | Set by the host's plan, not by the app | No. The app cannot reset these   |
+| Where                                                  | What                                                                                                        | Why we need it                                                                                                        | How long we keep it                                            | Removed by the nightly reset?    |
+| ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | -------------------------------- |
+| Valkey, sign-in lockout counter (`lockout.service.ts`) | SHA-256 hash of the lower-cased email (or of a user id, for the two-step code), as the key; never the email | Locks an email for 15 minutes after 5 wrong passwords in 15 minutes, and an account's second step after 5 wrong codes | 15 minutes (the key expires by itself; a right try deletes it) | Not needed; it expires by itself |
+| Valkey, rate-limit counter (`rate-limit.module.ts`)    | IP address, as the counter key                                                                              | Stops one visitor sending too many requests (100 a minute; 10 a minute on `/auth/*`)                                  | One minute (the counting window)                               | Not needed; it expires by itself |
+| Server logs on Render and Vercel                       | IP address and request path, kept by the hosts                                                              | Debugging and abuse handling                                                                                          | Set by the host's plan, not by the app                         | No. The app cannot reset these   |
 
 > [!IMPORTANT]
 > The database has **no IP address column**. An IP address is used only as the rate-limit key and in host logs.
@@ -66,7 +67,7 @@ None right now.
 
 `addresses.phone` was a candidate and is gone: the API stored and returned it, but no page used it and nothing is shipped, so it was removed (column, schema field, API docs and tests). Add it back only if a delivery feature needs it.
 
-The audit log never stores field values (`audit.service.ts`), so no address details leak into `audit_logs`.
+The audit log never stores field values (`audit.service.ts`), so no address details leak into `audit_logs`. Auth events (sign-up, sign-in and failed sign-in, lockout, refresh-token reuse, sign-out, email confirmation, password reset requested and completed, and every two-step change) record only the account's id and the request id, never the email or the password. A failed sign-in for an email with no account is recorded with no actor and no target.
 
 `users.name` and `addresses.name` overlap, but the recipient can differ from the account holder, so both stay.
 
@@ -75,5 +76,5 @@ The audit log never stores field values (`audit.service.ts`), so no address deta
 - The retention figures above describe the nightly reset, not a written retention rule. The policy must either confirm "about a day for visitor data" or set another figure.
 - The reset shipped in Phase 4 and truncates every table (`packages/seed/src/reset.ts`). If it ever changes to delete only flagged rows, update the tables above.
 - The roadmap lists other services that may see personal data and are not covered above: Sentry (errors, 30-day history), Grafana Cloud (logs, 14-day retention), Umami (cookieless analytics) and Resend (optional email). Add a row for each once it is wired in. The roadmap also says the logger redacts emails, tokens and passwords, and Phase 11 sets a log retention period.
-- Valkey on Render has no persistence, so the rate-limit counters are lost on restart; that only shortens retention.
+- Valkey on Render has no persistence, so the rate-limit and lockout counters are lost on restart; that only shortens retention.
 - Host logs are outside the app's control. The policy should name the hosts and link to their retention terms.

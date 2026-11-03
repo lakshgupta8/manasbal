@@ -292,14 +292,14 @@
                 }
               },
               "targetId": {
-                "nullable": false,
+                "nullable": true,
                 "type": {
                   "codecId": "pg/uuid@1",
                   "kind": "scalar"
                 }
               },
               "targetType": {
-                "nullable": false,
+                "nullable": true,
                 "type": {
                   "codecId": "pg/text@1",
                   "kind": "scalar"
@@ -3103,12 +3103,12 @@
                 "target_id": {
                   "codecId": "pg/uuid@1",
                   "dataType": "pg/uuid",
-                  "nullable": false
+                  "nullable": true
                 },
                 "target_type": {
                   "codecId": "pg/text@1",
                   "dataType": "pg/text",
-                  "nullable": false
+                  "nullable": true
                 }
               },
               "foreignKeys": [
@@ -5120,7 +5120,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "95b4eb5fefd1121897e8da1274767e768b734ca369649ac6f82a404b0fa6f2b2"
+    "storageHash": "cb40b11c2753b51ead95c48da3d5e5e307626283d04086c216e92cc3a1c0df1d"
   },
   "execution": {
     "executionHash": "423336f569a82d162692569cabd764ba1f05a109bf1bf71838a091e84c54e730",

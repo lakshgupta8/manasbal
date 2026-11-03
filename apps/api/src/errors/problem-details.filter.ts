@@ -8,6 +8,7 @@ import {
   Logger,
 } from "@nestjs/common";
 import type { FastifyReply, FastifyRequest } from "fastify";
+import { TooManyTriesException } from "./too-many-tries.exception.js";
 
 export const PROBLEM_CONTENT_TYPE = "application/problem+json";
 
@@ -51,6 +52,10 @@ export class ProblemDetailsFilter implements ExceptionFilter {
       requestId: String(request.id),
     };
 
+    // A lockout says when to try again, as the rate limiter does.
+    if (exception instanceof TooManyTriesException) {
+      void reply.header("retry-after", String(exception.retryAfterSeconds));
+    }
     void reply.status(status).header("content-type", PROBLEM_CONTENT_TYPE).send(problem);
   }
 }

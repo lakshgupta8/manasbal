@@ -15,6 +15,7 @@ import {
   type ProblemDetails,
   ProblemDetailsFilter,
 } from "./problem-details.filter.js";
+import { TooManyTriesException } from "./too-many-tries.exception.js";
 
 @Controller("boom")
 class BoomController {
@@ -26,6 +27,11 @@ class BoomController {
   @Get("invalid")
   invalid() {
     throw new BadRequestException(["name must not be empty", "price must be a whole number"]);
+  }
+
+  @Get("locked")
+  locked() {
+    throw new TooManyTriesException("Too many wrong tries", 90);
   }
 
   @Get("text")
@@ -108,6 +114,14 @@ describe("ProblemDetailsFilter", () => {
     expect(response.json<ProblemDetails>().detail).toBe(
       "name must not be empty; price must be a whole number",
     );
+  });
+
+  it("sends Retry-After with a lockout's 429", async () => {
+    const response = await app.inject({ method: "GET", url: "/boom/locked" });
+
+    expect(response.statusCode).toBe(429);
+    expect(response.headers["retry-after"]).toBe("90");
+    expect(response.json()).toMatchObject({ status: 429, detail: "Too many wrong tries" });
   });
 
   it("uses a plain string body as the detail", async () => {

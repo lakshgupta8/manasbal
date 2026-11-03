@@ -3,3 +3,6 @@ variables:
   - name: baseUrl
     value: https://manasbal-api.onrender.com
     description: ""
+  - name: webOrigin
+    value: ""
+    description: "Set to one of the production API's WEB_ORIGINS before running Refresh and Sign out"

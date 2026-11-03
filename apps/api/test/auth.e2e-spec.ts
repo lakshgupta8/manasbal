@@ -3,6 +3,7 @@ import { APP_FILTER } from "@nestjs/core";
 import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fastify";
 import { Test } from "@nestjs/testing";
 import { SignJWT } from "jose";
+import type { Redis } from "ioredis";
 import { generate } from "otplib";
 import { AuditModule } from "../src/audit/audit.module.js";
 import { AuthModule } from "../src/auth/auth.module.js";
@@ -16,6 +17,8 @@ import {
 import { hashRecoveryCode } from "../src/auth/recovery-codes.js";
 import { open } from "../src/auth/secret-box.js";
 import { REFRESH_COOKIE } from "../src/auth/cookie.js";
+import { LOCKED_OUT, LOCKOUT_LIMIT } from "../src/auth/lockout.service.js";
+import { ORIGIN_REFUSED } from "../src/auth/origin.guard.js";
 import { CHALLENGE_PURPOSE } from "../src/auth/tokens.service.js";
 import {
   SIGN_IN_AGAIN,
@@ -27,7 +30,12 @@ import { ProblemDetailsFilter } from "../src/errors/problem-details.filter.js";
 import { fastifyOptions } from "../src/logging/logging.config.js";
 import { type Mail, MailerService } from "../src/mail/mailer.service.js";
 import { UsersModule } from "../src/users/users.module.js";
+import { VALKEY } from "../src/valkey/valkey.module.js";
 import { startTestDatabase, type TestDatabase } from "./support/test-database.js";
+import { startTestValkey, type TestValkey } from "./support/test-valkey.js";
+
+// The shop's origin (WEB_ORIGINS in the e2e config): the refresh cookie routes check it.
+const SHOP = { origin: "http://localhost:3000" };
 
 const signUp = {
   email: "test.buyer@example.test",
@@ -40,6 +48,7 @@ const signUp = {
 // so the /auth limit of 10 a minute does not apply here.
 describe("/auth (e2e)", () => {
   let database: TestDatabase;
+  let valkey: TestValkey;
   let app: NestFastifyApplication;
   // Stands in for SMTP. MAIL_MODE is unset here (off), so it only receives mail in the tests
   // that switch mail on.
@@ -60,8 +69,17 @@ describe("/auth (e2e)", () => {
       headers: { "user-agent": "Test Browser" },
     });
 
+  // Every audit row as one text, to show no email or password is ever stored.
+  const auditText = () =>
+    database.sql(
+      "select coalesce(string_agg(row_to_json(audit_logs)::text, ''), '') from audit_logs",
+    );
+  const auditActions = () =>
+    database.sql("select string_agg(action, ',' order by created_at, action) from audit_logs");
+
   beforeAll(async () => {
-    database = await startTestDatabase();
+    // A throwaway Valkey holds the lockout counts, as in production.
+    [database, valkey] = await Promise.all([startTestDatabase(), startTestValkey()]);
 
     const moduleRef = await Test.createTestingModule({
       imports: [AuditModule, AuthModule, UsersModule],
@@ -81,6 +99,7 @@ describe("/auth (e2e)", () => {
   afterAll(async () => {
     await app.close();
     await database.stop();
+    await valkey.stop();
   });
 
   beforeEach(async () => {
@@ -89,6 +108,7 @@ describe("/auth (e2e)", () => {
     await database.sql("delete from recovery_codes");
     await database.sql("delete from audit_logs");
     await database.sql("delete from users");
+    await app.get<Redis>(VALKEY).flushall();
     sent.length = 0;
   });
 
@@ -198,11 +218,17 @@ describe("/auth (e2e)", () => {
       app.inject({
         method: "POST",
         url: "/auth/refresh",
+        headers: SHOP,
         ...(token === undefined ? {} : { cookies: { refresh_token: token } }),
       });
 
     const signOut = (token: string) =>
-      app.inject({ method: "POST", url: "/auth/sign-out", cookies: { refresh_token: token } });
+      app.inject({
+        method: "POST",
+        url: "/auth/sign-out",
+        headers: SHOP,
+        cookies: { refresh_token: token },
+      });
 
     it("swaps a token for a new access token and a new cookie, once", async () => {
       const first = await session();
@@ -245,6 +271,7 @@ describe("/auth (e2e)", () => {
       expect(
         await database.sql("select count(*) from refresh_tokens where revoked_at is null"),
       ).toBe("0");
+      expect(await auditActions()).toBe("auth.sign_up,auth.sign_in,auth.refresh.reuse");
     });
 
     it("refuses an expired token", async () => {
@@ -271,6 +298,113 @@ describe("/auth (e2e)", () => {
       expect(cleared).toContain("Expires=Thu, 01 Jan 1970");
       // A revoked token refuses to refresh.
       expect((await refresh(token)).statusCode).toBe(401);
+      expect(await auditActions()).toBe("auth.sign_up,auth.sign_in,auth.sign_out");
+    });
+
+    it("refuses the cookie routes from another site, or with the cookie and no Origin", async () => {
+      const token = await session();
+      const call = (url: string, headers: Record<string, string>, cookie = true) =>
+        app.inject({
+          method: "POST",
+          url,
+          headers,
+          ...(cookie ? { cookies: { refresh_token: token } } : {}),
+        });
+
+      for (const url of ["/auth/refresh", "/auth/sign-out"]) {
+        for (const refused of [
+          await call(url, { origin: "https://evil.example" }),
+          await call(url, {}),
+        ]) {
+          expect(refused.statusCode).toBe(403);
+          expect(refused.json()).toMatchObject({ detail: ORIGIN_REFUSED });
+          expect(refused.headers["set-cookie"]).toBeUndefined();
+        }
+      }
+      // No cookie and no Origin: nothing to protect, so the usual answers.
+      expect((await call("/auth/refresh", {}, false)).statusCode).toBe(401);
+      expect((await call("/auth/sign-out", {}, false)).statusCode).toBe(204);
+      // The session survived every refused try.
+      expect((await refresh(token)).statusCode).toBe(200);
+    });
+
+    it("leaves the other auth routes open to any origin", async () => {
+      expect((await post(signUp)).statusCode).toBe(201);
+
+      const answer = await app.inject({
+        method: "POST",
+        url: "/auth/sign-in",
+        headers: { origin: "https://evil.example" },
+        payload: { email: signUp.email, password: signUp.password },
+      });
+
+      expect(answer.statusCode).toBe(200);
+    });
+  });
+
+  describe("lockout", () => {
+    const wrong = (email = signUp.email) => signIn({ email, password: "not the password" });
+    const right = () => signIn({ email: signUp.email, password: signUp.password });
+
+    it("locks an email after 5 wrong passwords: the sixth try answers 429, even a right one", async () => {
+      expect((await post(signUp)).statusCode).toBe(201);
+      const userId = await database.sql("select id from users");
+
+      for (let i = 1; i <= LOCKOUT_LIMIT; i++) expect((await wrong()).statusCode).toBe(401);
+      const sixth = await wrong();
+      const rightButLocked = await right();
+
+      for (const locked of [sixth, rightButLocked]) {
+        expect(locked.statusCode).toBe(429);
+        expect(locked.headers["content-type"]).toContain("application/problem+json");
+        expect(locked.json()).toMatchObject({ status: 429, detail: LOCKED_OUT });
+        expect(Number(locked.headers["retry-after"])).toBeGreaterThan(890);
+        expect(locked.headers["set-cookie"]).toBeUndefined();
+      }
+
+      // Valkey holds one key, named by the email's hash, that expires by itself.
+      const valkeyClient = app.get<Redis>(VALKEY);
+      const keys = await valkeyClient.keys("lockout:*");
+      expect(keys).toHaveLength(1);
+      expect(keys[0]).toMatch(/^lockout:email:[0-9a-f]{64}$/);
+      const ttl = await valkeyClient.pttl(keys[0]!);
+      expect(ttl).toBeGreaterThan(890_000);
+      expect(ttl).toBeLessThanOrEqual(15 * 60_000);
+
+      expect(await auditActions()).toBe(
+        `auth.sign_up${",auth.sign_in.failed".repeat(LOCKOUT_LIMIT)},auth.lockout`,
+      );
+      expect(
+        await database.sql(
+          "select count(distinct actor_id) || ',' || min(actor_id::text) from audit_logs",
+        ),
+      ).toBe(`1,${userId}`);
+      expect(await auditText()).not.toContain(signUp.email);
+      expect(await auditText()).not.toContain("not the password");
+    });
+
+    it("counts an unknown email the same way, recorded with no actor and no target", async () => {
+      const nobody = "nobody@example.test";
+
+      for (let i = 1; i <= LOCKOUT_LIMIT; i++) expect((await wrong(nobody)).statusCode).toBe(401);
+
+      expect((await wrong(nobody)).statusCode).toBe(429);
+      expect(
+        await database.sql(
+          "select count(*) from audit_logs where actor_id is null and target_type is null and target_id is null",
+        ),
+      ).toBe(String(LOCKOUT_LIMIT + 1));
+      expect(await auditText()).not.toContain(nobody);
+    });
+
+    it("starts the count again after a right password", async () => {
+      expect((await post(signUp)).statusCode).toBe(201);
+
+      for (let i = 1; i < LOCKOUT_LIMIT; i++) await wrong();
+      expect((await right()).statusCode).toBe(200);
+      for (let i = 1; i < LOCKOUT_LIMIT; i++) expect((await wrong()).statusCode).toBe(401);
+
+      expect((await right()).statusCode).toBe(200);
     });
   });
 
@@ -338,6 +472,7 @@ describe("/auth (e2e)", () => {
       const used = await verify(token);
       const madeUp = await verify("not-a-real-token");
       await database.sql("delete from email_tokens");
+      await database.sql("delete from audit_logs");
       await database.sql("delete from users");
       expect((await post(signUp)).statusCode).toBe(201);
       await database.sql("update email_tokens set expires_at = now() - interval '1 minute'");
@@ -366,7 +501,12 @@ describe("/auth (e2e)", () => {
       const reset = (token: string, password = newPassword) =>
         app.inject({ method: "POST", url: "/auth/reset-password", payload: { token, password } });
       const refreshWith = (token: string) =>
-        app.inject({ method: "POST", url: "/auth/refresh", cookies: { refresh_token: token } });
+        app.inject({
+          method: "POST",
+          url: "/auth/refresh",
+          headers: SHOP,
+          cookies: { refresh_token: token },
+        });
 
       // Signs up, confirms and signs in; answers the refresh token from the cookie.
       async function signedIn(): Promise<string> {
@@ -416,6 +556,16 @@ describe("/auth (e2e)", () => {
         const again = await reset(token, "yet another passphrase");
         expect(again.statusCode).toBe(400);
         expect(again.json()).toMatchObject({ detail: LINK_INVALID });
+
+        expect(await auditActions()).toBe(
+          [
+            "auth.sign_up,auth.email.verify,auth.sign_in",
+            "auth.password_reset.request,auth.password_reset.complete",
+            "auth.sign_in.failed,auth.sign_in",
+          ].join(","),
+        );
+        expect(await auditText()).not.toContain(signUp.email);
+        expect(await auditText()).not.toContain(newPassword);
       });
 
       it("uses up every older reset link when one is used", async () => {
@@ -504,7 +654,7 @@ describe("/auth (e2e)", () => {
       for (const code of recoveryCodes) expect(hashes.join()).not.toContain(code);
       expect(
         await database.sql("select string_agg(action, ',' order by action) from audit_logs"),
-      ).toBe("auth.2fa.enable,auth.2fa.setup");
+      ).toBe("auth.2fa.enable,auth.2fa.setup,auth.sign_in,auth.sign_up");
 
       // Once on, set-up and enable both answer 409.
       for (const again of [
@@ -617,18 +767,51 @@ describe("/auth (e2e)", () => {
         await database.sql("select count(*) from recovery_codes where used_at is not null"),
       ).toBe("1");
 
+      // Every challenge, wrong code and sign-in is recorded, with no email.
+      expect(await actions()).toBe(
+        [
+          "auth.sign_up,auth.sign_in,auth.2fa.setup,auth.2fa.enable",
+          "auth.2fa.challenge,auth.2fa.failed,auth.2fa.challenge,auth.2fa.failed",
+          "auth.2fa.challenge,auth.2fa.verify",
+          "auth.2fa.challenge,auth.2fa.failed",
+          "auth.2fa.challenge,auth.2fa.recovery_used,auth.2fa.verify",
+          "auth.2fa.challenge,auth.2fa.failed",
+        ].join(","),
+      );
+
       // Two verifies racing with one recovery code: only one signs in.
+      await database.sql("delete from audit_logs");
       const [a, b] = await Promise.all([
         verify(await challenge(), recoveryCodes[1]!),
         verify(await challenge(), recoveryCodes[1]!),
       ]);
       expect([a.statusCode, b.statusCode].sort()).toEqual([200, 401]);
-
-      expect(await actions()).toBe(
-        "auth.2fa.setup,auth.2fa.enable,auth.2fa.verify,auth.2fa.recovery_used,auth.2fa.verify,auth.2fa.recovery_used,auth.2fa.verify",
+      expect(
+        await database.sql("select string_agg(action, ',' order by action) from audit_logs"),
+      ).toBe(
+        "auth.2fa.challenge,auth.2fa.challenge,auth.2fa.failed,auth.2fa.recovery_used,auth.2fa.verify",
       );
       // One sign-in before two-step, and three through the second step.
       expect(await database.sql("select count(*) from refresh_tokens")).toBe("4");
+    });
+
+    it("locks the second step after 5 wrong codes, even for a right code", async () => {
+      const { secret } = await withTwoStep();
+
+      for (let i = 1; i <= LOCKOUT_LIMIT; i++) {
+        expect((await verify(await challenge(), "000000")).statusCode).toBe(401);
+      }
+      const locked = await verify(
+        await challenge(),
+        await generate({ secret, epoch: Math.floor(Date.now() / 1000) + 30 }),
+      );
+
+      expect(locked.statusCode).toBe(429);
+      expect(locked.json()).toMatchObject({ detail: LOCKED_OUT });
+      expect(await app.get<Redis>(VALKEY).keys("lockout:user:*")).toHaveLength(1);
+      expect(
+        await database.sql("select count(*) from audit_logs where action = 'auth.lockout'"),
+      ).toBe("1");
     });
 
     it("never takes a challenge as an access token, or an access token as a challenge", async () => {

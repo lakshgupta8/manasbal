@@ -261,8 +261,9 @@ model AuditLog {
   id         Uuid     @id @default(uuid())
   actorId    Uuid?    @map("actor_id")
   action     String
-  targetType String   @map("target_type")
-  targetId   Uuid     @map("target_id")
+  // Empty for an event about no known record, such as a sign-in with an unknown email.
+  targetType String?  @map("target_type")
+  targetId   Uuid?    @map("target_id")
   requestId  String   @map("request_id")
   isSample         Boolean @default(false) @map("is_sample")
   createdByVisitor Boolean @default(false) @map("created_by_visitor")
