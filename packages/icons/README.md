@@ -37,6 +37,7 @@ Check a new icon at 16, 20 and 24 px: if it turns into a blob when small, draw i
 | `arrow-left`    | A shaft with an open head pointing left                                                              |
 | `arrow-right`   | A shaft with an open head pointing right                                                             |
 | `bank`          | A building under a curved, petal-like roof, four columns and a base line; no bank's mark             |
+| `bell`          | A bell with a pointed, lotus-bud body, a rim and a small clapper below                               |
 | `card`          | A rounded card with a band across it and a ripple where the numbers would be; no card network's mark |
 | `cart`          | A soft-cornered basket on a handle, a ripple inside, two round wheels                                |
 | `check`         | A check whose long stroke curves up like a reed                                                      |
@@ -48,13 +49,16 @@ Check a new icon at 16, 20 and 24 px: if it turns into a blob when small, draw i
 | `close`         | Two crossing strokes                                                                                 |
 | `edit`          | A petal-shaped nib with its slit, writing a ripple                                                   |
 | `eye`           | An almond of two curves meeting at pointed corners, and a round pupil                                |
+| `eye-off`       | A closed eyelid: one lower curve with three lashes                                                   |
 | `filter`        | A funnel with a ripple for its rim and curved sides                                                  |
 | `heart`         | Two pointed petals leaning out, meeting at the bottom                                                |
 | `info`          | A lily pad (a circle with a small notch) with an i                                                   |
 | `lock`          | A shackle over a body with a rounded, bud-like bottom and a short keyhole line                       |
+| `logout`        | An arched doorway open on the right, with an arrow leaving through it                                |
 | `map-pin`       | A rounded marker coming to a point, with a small ripple inside, standing on a ripple                 |
 | `menu`          | Three ripples                                                                                        |
 | `minus`         | One stroke                                                                                           |
+| `moon`          | A crescent above a ripple, like the moon over the lake                                               |
 | `package`       | A box with a lid and a V-shaped tape label                                                           |
 | `plus`          | Two crossing strokes                                                                                 |
 | `return`        | An arrow pointing back, curving down and round into a ripple                                         |
@@ -63,6 +67,8 @@ Check a new icon at 16, 20 and 24 px: if it turns into a blob when small, draw i
 | `sort`          | Three ripples getting shorter, beside a down arrow                                                   |
 | `star`          | Five pointed petals                                                                                  |
 | `star-half`     | `star` split down the middle, for half ratings                                                       |
+| `store`         | A shopfront: an awning with a rippled edge, a front wall and a door                                  |
+| `sun`           | A half sun rising over a ripple, with five short rays                                                |
 | `trash`         | An open bin with rounded bottom corners and two slats, a petal falling in                            |
 | `truck`         | A cargo box and a cab with a curved front on two round wheels                                        |
 | `user`          | A head and shoulders standing on a ripple                                                            |
