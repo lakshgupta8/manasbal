@@ -60,7 +60,8 @@ jobs:
           done
           echo "::error::$API_URL/products listed no products after the reset"; exit 1
 
-      # The demo customer's password is public (packages/seed/src/demo-logins.ts and the README),
+      # The demo customer's password is public (packages/seed/src/demo-logins.ts and the README;
+      # the emails are in packages/types/src/demo-logins.ts),
       # so the check can sign in with it. Only the access token is secret: it is masked before
       # anything could print it. The right password never trips the 5-try lockout, and sign-in
       # needs no Origin header (only refresh and sign-out do).
@@ -71,8 +72,12 @@ jobs:
           logins=packages/seed/src/demo-logins.ts
           # A released main from before the demo logins has no such file and no such account.
           if [ ! -f "$logins" ]; then echo "::notice::No demo logins in this code yet; skipped"; exit 0; fi
+          emails=packages/types/src/demo-logins.ts
+          # A released main from before the emails moved to @manasbal/types keeps them beside the password.
+          if [ ! -f "$emails" ]; then emails=$logins; fi
           read -r email password < <(node --input-type=module -e "
-            import { DEMO_EMAILS, DEMO_PASSWORD } from './$logins';
+            import { DEMO_EMAILS } from './$emails';
+            import { DEMO_PASSWORD } from './$logins';
             console.log(DEMO_EMAILS.customer, DEMO_PASSWORD);")
           body=$(jq -n --arg email "$email" --arg password "$password" '{email: $email, password: $password}')
           token=$(curl -fsS --max-time 30 -X POST "$API_URL/auth/sign-in" \

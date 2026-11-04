@@ -1,19 +1,11 @@
 import type { Role } from "@manasbal/types";
 
-// One sign-in per role for people trying the demo. The password is public on purpose: it is in
-// the README and the nightly workflow reads it from here. Nothing real sits behind these
-// accounts, and the nightly reset restores them. This file holds constants only, so the
-// workflow can import it with plain Node.
+// The password of the demo logins, whose emails are DEMO_EMAILS in @manasbal/types. It is public
+// on purpose: it is in the README and the nightly workflow reads it from here. Nothing real sits
+// behind these accounts, and the nightly reset restores them. This file holds constants only, so
+// the workflow can import it with plain Node.
 // NOSONAR below: a deliberately public demo password, not a secret (see the README).
 export const DEMO_PASSWORD = "quiet-mango-river-lamp"; // NOSONAR
-
-export const DEMO_EMAILS: Readonly<Record<Role, string>> = {
-  customer: "customer@example.com",
-  seller: "seller@example.com",
-  seller_staff: "seller-staff@example.com",
-  support: "support@example.com",
-  admin: "admin@example.com",
-};
 
 // The three roles the generated people don't have, with fixed ids and names so they never shift
 // the random stream the rest of the data comes from.

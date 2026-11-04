@@ -1,5 +1,5 @@
 import { verify } from "@node-rs/argon2";
-import { ROLES } from "@manasbal/types";
+import { DEMO_EMAILS, ROLES } from "@manasbal/types";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import {
   startTestDatabase,
@@ -7,7 +7,7 @@ import {
 } from "../../../apps/api/test/support/test-database.ts";
 import { dumpTables, firstDifference } from "../src/compare.ts";
 import { generateDataset, rowsByTable } from "../src/dataset.ts";
-import { DEMO_EMAILS, DEMO_PASSWORD } from "../src/demo-logins.ts";
+import { DEMO_PASSWORD } from "../src/demo-logins.ts";
 import { createDb } from "../src/db.ts";
 import { PROFILES } from "../src/profiles.ts";
 import { contractTables, truncatePlan } from "../src/reset.ts";

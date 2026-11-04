@@ -1,11 +1,12 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Inject,
   Injectable,
   UnauthorizedException,
 } from "@nestjs/common";
-import type { TwoStepEnabled, TwoStepSetup } from "@manasbal/types";
+import { isDemoEmail, type TwoStepEnabled, type TwoStepSetup } from "@manasbal/types";
 import { generateSecret, generateURI, verify } from "otplib";
 import { AuditService } from "../audit/audit.service.js";
 import { getDb } from "../prisma/db.js";
@@ -19,6 +20,8 @@ export const ISSUER = "Manasbal";
 export const TWO_STEP_ALREADY_ON = "Two-step sign-in is already on";
 export const TWO_STEP_NOT_SET_UP = "Start the two-step set-up first";
 export const TWO_STEP_OFF = "Two-step sign-in is not on";
+// A visitor who switched two-step on for a shared demo login would shut everyone else out of it.
+export const DEMO_TWO_STEP_OFF = "Two-step sign-in is off for demo logins";
 export const WRONG_CODE = "That code is not right. Check the time on your phone and try again";
 // The access token is valid but its account is gone (the nightly reset).
 export const ACCOUNT_GONE = "Sign in again";
@@ -57,6 +60,7 @@ export class TwoStepService {
       const users = tx.orm.public.User;
       const user = await users.where({ id: who.userId }).select("email", "totpEnabledAt").first();
       if (user === null) throw new UnauthorizedException(ACCOUNT_GONE);
+      if (isDemoEmail(user.email)) throw new ForbiddenException(DEMO_TWO_STEP_OFF);
       if (user.totpEnabledAt !== null) throw new ConflictException(TWO_STEP_ALREADY_ON);
 
       const secret = generateSecret();

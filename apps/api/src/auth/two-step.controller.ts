@@ -3,6 +3,7 @@ import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiConflictResponse,
+  ApiForbiddenResponse,
   ApiNoContentResponse,
   ApiOkResponse,
   ApiOperation,
@@ -74,6 +75,7 @@ export class TwoStepController {
   })
   @ApiOkResponse({ type: TwoStepSetupResult })
   @ApiConflictResponse({ description: "Two-step sign-in is already on" })
+  @ApiForbiddenResponse({ description: "Two-step sign-in is off for demo logins" })
   setup(@CurrentActor() who: Actor): Promise<TwoStepSetup> {
     return this.twoStep.setup(who);
   }

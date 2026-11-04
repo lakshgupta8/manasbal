@@ -8,6 +8,7 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import {
+  isDemoEmail,
   NEW_ACCOUNT_ROLE,
   type SignInInput,
   type SignUpInput,
@@ -206,8 +207,10 @@ export class AuthService {
 
   async signIn({ email, password }: SignInInput, userAgent: string | undefined, requestId: string) {
     // A locked email answers 429 even with the right password, before the password is checked.
-    const lockKey = emailLockKey(email);
-    await this.lockout.assertOpen(lockKey);
+    // The demo logins are never locked: their password is public, so a lock would protect nothing
+    // and only shut other visitors out. The rate limit still covers them.
+    const lockKey = isDemoEmail(email) ? null : emailLockKey(email);
+    if (lockKey !== null) await this.lockout.assertOpen(lockKey);
     const db = getDb();
     const user = await db.orm.public.User.where({ email })
       .select("id", "role", "passwordHash", "emailVerifiedAt", "totpEnabledAt")
@@ -223,7 +226,7 @@ export class AuthService {
       await this.failed(lockKey, { userId: user?.id ?? null, requestId }, "auth.sign_in.failed");
       throw new UnauthorizedException(SIGN_IN_FAILED);
     }
-    await this.lockout.clear(lockKey);
+    if (lockKey !== null) await this.lockout.clear(lockKey);
     const who = { userId: user.id, requestId };
     // Only after the right password, so a wrong one never tells whether the account is confirmed.
     // With mail off no link could arrive, so an older unconfirmed account is let in.
@@ -365,10 +368,12 @@ export class AuthService {
     throw new UnauthorizedException(REFRESH_FAILED);
   }
 
-  // Records a wrong password or code and counts it; the try that locks the key is recorded too.
-  private async failed(lockKey: string, who: AuditWho, action: string): Promise<void> {
+  // Records a wrong password or code and counts it against the key, if there is one; the try that
+  // locks the key is recorded too.
+  private async failed(lockKey: string | null, who: AuditWho, action: string): Promise<void> {
     const target = who.userId === null ? null : account(who.userId);
     await this.audit.record(who, action, target);
+    if (lockKey === null) return;
     if (await this.lockout.fail(lockKey)) await this.audit.record(who, "auth.lockout", target);
   }
 

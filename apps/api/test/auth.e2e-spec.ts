@@ -3,7 +3,7 @@ import { APP_FILTER } from "@nestjs/core";
 import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fastify";
 import { Test } from "@nestjs/testing";
 import { SignJWT } from "jose";
-import { sessionListSchema } from "@manasbal/types";
+import { DEMO_EMAILS, sessionListSchema } from "@manasbal/types";
 import type { Redis } from "ioredis";
 import { generate } from "otplib";
 import { AuditModule } from "../src/audit/audit.module.js";
@@ -22,6 +22,7 @@ import { LOCKED_OUT, LOCKOUT_LIMIT } from "../src/auth/lockout.service.js";
 import { ORIGIN_REFUSED } from "../src/auth/origin.guard.js";
 import { CHALLENGE_PURPOSE } from "../src/auth/tokens.service.js";
 import {
+  DEMO_TWO_STEP_OFF,
   SIGN_IN_AGAIN,
   TWO_STEP_ALREADY_ON,
   TWO_STEP_OFF,
@@ -399,6 +400,19 @@ describe("/auth (e2e)", () => {
       expect(await auditText()).not.toContain(nobody);
     });
 
+    it("never locks a demo login: wrong passwords stay 401, and the right one still works", async () => {
+      const demo = { ...signUp, email: DEMO_EMAILS.customer };
+      expect((await post(demo)).statusCode).toBe(201);
+
+      for (let i = 1; i <= LOCKOUT_LIMIT + 1; i++) {
+        expect((await wrong(demo.email)).statusCode).toBe(401);
+      }
+
+      expect((await signIn({ email: demo.email, password: demo.password })).statusCode).toBe(200);
+      expect(await app.get<Redis>(VALKEY).keys("lockout:*")).toEqual([]);
+      expect(await auditActions()).not.toContain("auth.lockout");
+    });
+
     it("starts the count again after a right password", async () => {
       expect((await post(signUp)).statusCode).toBe(201);
 
@@ -725,6 +739,26 @@ describe("/auth (e2e)", () => {
       const { recoveryCodes } = enabled.json<{ recoveryCodes: string[] }>();
       return { token, secret, enableCode, recoveryCodes };
     }
+
+    it("refuses two-step set-up for a demo login, so nobody can shut the others out", async () => {
+      const demo = { ...signUp, email: DEMO_EMAILS.customer };
+      expect((await post(demo)).statusCode).toBe(201);
+      const token = (await signIn({ email: demo.email, password: demo.password })).json<{
+        accessToken: string;
+      }>().accessToken;
+
+      const setup = await app.inject({
+        method: "POST",
+        url: "/auth/2fa/setup",
+        headers: bearerHeader(token),
+      });
+
+      expect(setup.statusCode).toBe(403);
+      expect(setup.json()).toMatchObject({ status: 403, detail: DEMO_TWO_STEP_OFF });
+      expect(await database.sql("select count(*) from users where totp_secret is not null")).toBe(
+        "0",
+      );
+    });
 
     it("asks for the code after the password, and lets each code in only once", async () => {
       const { secret, enableCode, recoveryCodes } = await withTwoStep();
