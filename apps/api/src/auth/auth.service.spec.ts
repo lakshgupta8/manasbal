@@ -13,6 +13,7 @@ import {
   SIGN_IN_FAILED,
   SIGN_UP_FAILED,
 } from "./auth.service.js";
+import { DEMO_EMAILS } from "@manasbal/types";
 import { TooManyTriesException } from "../errors/too-many-tries.exception.js";
 import { emailLockKey, userLockKey } from "./lockout.service.js";
 import { hashToken } from "./tokens.service.js";
@@ -339,6 +340,34 @@ describe("AuthService", () => {
         "auth.lockout",
         null,
       );
+    });
+
+    describe("as a demo login", () => {
+      const demo = { email: DEMO_EMAILS.customer, password: input.password };
+
+      it("never counts a wrong password against it, but still records the failure", async () => {
+        User.first.mockResolvedValue(user);
+        passwords.verify.mockResolvedValue(false);
+
+        await expect(service.signIn(demo, undefined, REQ)).rejects.toThrow(
+          new UnauthorizedException(SIGN_IN_FAILED),
+        );
+        expect(lockout.assertOpen).not.toHaveBeenCalled();
+        expect(lockout.fail).not.toHaveBeenCalled();
+        expect(recorded()).toEqual(["auth.sign_in.failed"]);
+      });
+
+      it("signs in with the right password without checking or clearing a lock", async () => {
+        User.first.mockResolvedValue(user);
+        passwords.verify.mockResolvedValue(true);
+        RefreshToken.create.mockResolvedValue({});
+
+        await expect(service.signIn(demo, undefined, REQ)).resolves.toMatchObject({
+          accessToken: "access.jwt",
+        });
+        expect(lockout.assertOpen).not.toHaveBeenCalled();
+        expect(lockout.clear).not.toHaveBeenCalled();
+      });
     });
 
     it("answers only a challenge when two-step is on: no tokens, nothing stored", async () => {

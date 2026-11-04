@@ -369,6 +369,9 @@
           "401": {
             "description": "No valid access token"
           },
+          "403": {
+            "description": "Two-step sign-in is off for demo logins"
+          },
           "409": {
             "description": "Two-step sign-in is already on"
           }

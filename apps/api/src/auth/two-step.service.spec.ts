@@ -1,9 +1,16 @@
-import { BadRequestException, ConflictException, UnauthorizedException } from "@nestjs/common";
+import { DEMO_EMAILS } from "@manasbal/types";
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  UnauthorizedException,
+} from "@nestjs/common";
 import { generate, generateSecret } from "otplib";
 import { hashRecoveryCode } from "./recovery-codes.js";
 import { open, seal } from "./secret-box.js";
 import {
   ACCOUNT_GONE,
+  DEMO_TWO_STEP_OFF,
   SIGN_IN_AGAIN,
   TWO_STEP_ALREADY_ON,
   TWO_STEP_NOT_SET_UP,
@@ -100,6 +107,17 @@ describe("TwoStepService", () => {
 
       await expect(service.setup(WHO)).rejects.toThrow(new UnauthorizedException(ACCOUNT_GONE));
     });
+
+    it.each(Object.values(DEMO_EMAILS))(
+      "answers 403 for the demo login %s, and stores no secret",
+      async (email) => {
+        User.first.mockResolvedValue({ email, totpEnabledAt: null });
+
+        await expect(service.setup(WHO)).rejects.toThrow(new ForbiddenException(DEMO_TWO_STEP_OFF));
+        expect(User.updateAndCount).not.toHaveBeenCalled();
+        expect(audit.record).not.toHaveBeenCalled();
+      },
+    );
   });
 
   describe("enable", () => {

@@ -1192,6 +1192,13 @@ export interface operations {
         };
         content?: never;
       };
+      /** @description Two-step sign-in is off for demo logins */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
       /** @description Two-step sign-in is already on */
       409: {
         headers: {
