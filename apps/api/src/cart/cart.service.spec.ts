@@ -43,6 +43,17 @@ function fakeCollection() {
 let Cart = fakeCollection();
 let CartItem = fakeCollection();
 let Variant = fakeCollection();
+// What the transaction did, in order: the raw statements it ran and the ORM reads.
+let steps: string[] = [];
+
+// The raw lane builds a plan from the SQL text and its values; the plan records both.
+function rawSql(strings: TemplateStringsArray, ...values: unknown[]) {
+  return { affectedCount: () => ({ build: () => ({ sql: strings.join("$"), values }) }) };
+}
+const execute = vi.fn((plan: { sql: string; values: unknown[] }) => {
+  steps.push(`${plan.sql} ${JSON.stringify(plan.values)}`);
+  return Promise.resolve({ affectedRows: 1 });
+});
 
 // The queries against a real database are in test/cart.e2e-spec.ts. These cover the service's
 // own decisions.
@@ -51,7 +62,9 @@ vi.mock("../prisma/db.js", () => ({
     const orm = { public: { Cart, CartItem, Variant } };
     return {
       orm,
-      transaction: (work: (tx: { orm: typeof orm }) => unknown) => work({ orm }),
+      raw: { sql: rawSql },
+      transaction: (work: (tx: { orm: typeof orm; execute: typeof execute }) => unknown) =>
+        work({ orm, execute }),
     };
   },
 }));
@@ -70,6 +83,8 @@ describe("CartService", () => {
     Cart = fakeCollection();
     CartItem = fakeCollection();
     Variant = fakeCollection();
+    steps = [];
+    execute.mockClear();
   });
 
   describe("get", () => {
@@ -129,6 +144,22 @@ describe("CartService", () => {
     // After the write, addItem answers with the whole cart through get.
     beforeEach(() => {
       Cart.first.mockResolvedValue({ id: CART_ID, items: [line("TEE-M", "Tee", 1, 49900)] });
+    });
+
+    it("locks the user first, so two adds by one user run one after the other", async () => {
+      Variant.first.mockImplementation(() => {
+        steps.push("read variant");
+        return Promise.resolve(null);
+      });
+
+      await expect(
+        service.addItem(USER_ID, { variantId: VARIANT_ID, quantity: 1 }),
+      ).rejects.toThrow(NotFoundException);
+
+      expect(steps).toEqual([
+        `SELECT pg_advisory_xact_lock(hashtextextended($, 0)) ["${USER_ID}"]`,
+        "read variant",
+      ]);
     });
 
     it("answers 404 for an unknown variant, before touching the cart", async () => {
