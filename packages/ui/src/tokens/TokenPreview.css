@@ -1,0 +1,89 @@
+/* Labels use the meaning layer, so they keep their contrast in the light and the dark theme. */
+.mb-tokens {
+  padding: var(--mb-space-4);
+  background: var(--mb-color-surface-page);
+  color: var(--mb-color-text-default);
+  font:
+    0.875rem/1.4 system-ui,
+    sans-serif;
+}
+
+.mb-tokens h2 {
+  margin: var(--mb-space-4) 0 var(--mb-space-2);
+  font-size: var(--mb-font-size-heading-4);
+  line-height: var(--mb-font-line-height-heading-4);
+  text-transform: capitalize;
+}
+
+.mb-tokens__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+  gap: var(--mb-space-4);
+}
+
+.mb-tokens__swatch {
+  margin: 0;
+}
+
+.mb-tokens__swatch figcaption {
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--mb-space-1);
+}
+
+.mb-tokens__swatch figcaption span,
+.mb-tokens__list span {
+  color: var(--mb-color-text-muted);
+}
+
+.mb-tokens__chip {
+  height: var(--mb-space-12);
+  border: 1px solid var(--mb-color-border-default);
+  border-radius: var(--mb-radius-sm);
+}
+
+.mb-tokens__radius {
+  width: var(--mb-space-16);
+  height: var(--mb-space-16);
+  border: 2px solid var(--mb-color-border-strong);
+  background: var(--mb-color-surface-card);
+}
+
+.mb-tokens__table {
+  border-collapse: collapse;
+}
+
+.mb-tokens__table caption {
+  margin-bottom: var(--mb-space-2);
+  text-align: left;
+}
+
+.mb-tokens__table th,
+.mb-tokens__table td {
+  padding: var(--mb-space-2) var(--mb-space-4) var(--mb-space-2) 0;
+  text-align: left;
+  vertical-align: top;
+}
+
+.mb-tokens__table td .mb-tokens__swatch {
+  width: 10rem;
+}
+
+.mb-tokens__list {
+  display: grid;
+  gap: var(--mb-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mb-tokens__bar {
+  display: block;
+  height: var(--mb-space-4);
+  margin-bottom: var(--mb-space-1);
+  background: var(--mb-color-brand-primary);
+}
+
+.mb-tokens__sample {
+  margin: 0;
+}

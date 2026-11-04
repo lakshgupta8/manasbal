@@ -1,5 +1,20 @@
 # @manasbal/web
 
+## 0.1.4
+
+### Patch Changes
+
+- 3a02150: Builds the theme from the design tokens: `@manasbal/ui/theme.css` holds every token as a CSS variable, a meaning layer (text, surface, border, brand) for light and dark, and a Tailwind theme. The storefront and the demo banner take their colours from it.
+- Updated dependencies [693a9c3]
+- Updated dependencies [e93f956]
+- Updated dependencies [9e11a89]
+- Updated dependencies [3a02150]
+- Updated dependencies [9f6c0dc]
+- Updated dependencies [fc99e14]
+- Updated dependencies [307a2ba]
+  - @manasbal/ui@0.0.3
+  - @manasbal/sdk@0.2.1
+
 ## 0.1.3
 
 ### Patch Changes

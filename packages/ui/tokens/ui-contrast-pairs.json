@@ -1,0 +1,7 @@
+[
+  ["color.border.strong", "color.surface.page"],
+  ["color.border.strong", "color.surface.card"],
+  ["color.brand.primary", "color.surface.page"],
+  ["color.brand.accent", "color.surface.page"],
+  ["color.brand.accent", "color.surface.card"]
+]

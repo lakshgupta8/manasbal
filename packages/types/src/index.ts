@@ -19,3 +19,8 @@ export * from "./products.js";
 export * from "./reviews.js";
 export * from "./sellers.js";
 export * from "./auth.js";
+export * from "./roles.js";
+export * from "./sessions.js";
+export * from "./slug.js";
+export * from "./stores.js";
+export * from "./two-step.js";

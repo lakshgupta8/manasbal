@@ -35,6 +35,17 @@ describe("AuthGuard", () => {
     await expect(guard.canActivate(context)).resolves.toBe(true);
     expect(request.userId).toBe(USER_ID);
     expect(request.role).toBe("admin");
+    // No session in an older token.
+    expect(request.sessionId).toBeUndefined();
+  });
+
+  it("puts the token's session on the request", async () => {
+    const family = "0f1e2d3c-4b5a-4968-8776-655443322110";
+    const token = await tokens.signAccess({ id: USER_ID, role: "customer" }, family);
+    const { context, request } = contextFor(`Bearer ${token}`);
+
+    await expect(guard.canActivate(context)).resolves.toBe(true);
+    expect(request.sessionId).toBe(family);
   });
 
   it.each([
@@ -47,7 +58,7 @@ describe("AuthGuard", () => {
   });
 
   it("refuses an expired token", async () => {
-    const token = await tokens.signAccess({ id: USER_ID, role: "buyer" });
+    const token = await tokens.signAccess({ id: USER_ID, role: "customer" });
     // Checked 16 minutes from now, past the token's 15-minute life.
     const later = new Date(Date.now() + 16 * 60_000);
     const checking = new AuthGuard({ verifyAccess: (t) => tokens.verifyAccess(t, later) });
@@ -71,7 +82,7 @@ describe("AuthGuard", () => {
 
   it("refuses a token without a role or without a subject", async () => {
     const noRole = await sign({}, USER_ID);
-    const noSub = await sign({ role: "buyer" });
+    const noSub = await sign({ role: "customer" });
 
     for (const token of [noRole, noSub]) {
       const { context, request } = contextFor(`Bearer ${token}`);

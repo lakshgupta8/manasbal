@@ -1,5 +1,26 @@
 # @manasbal/api
 
+## 0.7.0
+
+### Minor Changes
+
+- 94d943c: Sign-in locks an email for 15 minutes after 5 wrong passwords (and the second step after 5 wrong codes); the refresh cookie routes only accept the shop's origins (WEB_ORIGINS); every auth event is audited without emails or passwords, so an audit entry's target can now be null.
+- 9259e7c: Sellers can rename their store (PATCH /me/store); support and admin can view any order (GET /admin/orders/:id), and each view is audited.
+- 312620d: Five roles (customer, seller, seller_staff, support, admin); new accounts are customers; admin endpoints check the role in the access token.
+- e93f956: Users can list where they are signed in (GET /me/sessions) and end any session (DELETE /me/sessions/:id).
+- fc99e14: Signed-in users can switch on two-step sign-in with an authenticator app (POST /auth/2fa/setup, POST /auth/2fa/enable) and get 10 recovery codes once; the secret is stored encrypted.
+- 307a2ba: Sign-in asks for the authenticator-app code (or a recovery code) when two-step sign-in is on; each code works once, and two-step can be switched off with a code.
+
+### Patch Changes
+
+- Updated dependencies [94d943c]
+- Updated dependencies [9259e7c]
+- Updated dependencies [312620d]
+- Updated dependencies [e93f956]
+- Updated dependencies [fc99e14]
+- Updated dependencies [307a2ba]
+  - @manasbal/types@0.5.0
+
 ## 0.6.0
 
 ### Minor Changes

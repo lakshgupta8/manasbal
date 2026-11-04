@@ -1,12 +1,23 @@
+import { verify } from "@node-rs/argon2";
+import { ROLES } from "@manasbal/types";
 import { describe, expect, it, vi } from "vitest";
 import places from "../data/places.json" with { type: "json" };
 import { assertAllowed } from "./guardrails.ts";
-import { generatePeople, insertPeople, sellerShares, type People } from "./people.ts";
+import { DEMO_EMAILS, DEMO_PASSWORD } from "./demo-logins.ts";
+import {
+  allUsers,
+  generatePeople,
+  insertPeople,
+  sellerShares,
+  withDemoPasswords,
+  type People,
+} from "./people.ts";
 import { PROFILES } from "./profiles.ts";
 import { createRandom } from "./random.ts";
 
 const demo = generatePeople(createRandom(), PROFILES.demo);
-const users = [...demo.customers, ...demo.sellerUsers];
+const users = allUsers(demo);
+const demoEmails = new Set(Object.values(DEMO_EMAILS));
 const rows = [...users, ...demo.sellers, ...demo.addresses];
 
 describe("generatePeople", () => {
@@ -27,8 +38,31 @@ describe("generatePeople", () => {
     expect(rows.every((row) => row.isSample)).toBe(true);
   });
 
-  it("leaves every password hash empty", () => {
+  it("leaves every password hash empty until the users are written", () => {
     expect(users.every((user) => user.passwordHash === "")).toBe(true);
+  });
+
+  it("makes one confirmed demo login per role, with the role's public email", () => {
+    const logins = users.filter((user) => demoEmails.has(user.email));
+
+    expect(logins.map((user) => user.role).sort((a, b) => a.localeCompare(b))).toEqual(
+      [...ROLES].sort((a, b) => a.localeCompare(b)),
+    );
+    for (const login of logins) {
+      expect(login.email).toBe(DEMO_EMAILS[login.role]);
+      expect(login.emailVerifiedAt).not.toBeNull();
+      expect(login.isSample).toBe(true);
+    }
+    // Everyone else stays unconfirmed, with no password.
+    expect(users.filter((user) => user.emailVerifiedAt !== null)).toHaveLength(5);
+  });
+
+  it("makes the first customer and the biggest seller the demo customer and seller", () => {
+    expect(demo.customers[0]?.email).toBe("customer@example.com");
+    expect(demo.sellerUsers[0]?.email).toBe("seller@example.com");
+    expect(demo.sellers[0]?.userId).toBe(demo.sellerUsers[0]?.id);
+    expect(demo.addresses.some((address) => address.userId === demo.customers[0]?.id)).toBe(true);
+    expect(demo.staff.map((user) => user.role)).toEqual(["seller_staff", "support", "admin"]);
   });
 
   it("makes the same first customer from the same seed", () => {
@@ -63,7 +97,7 @@ describe("generatePeople", () => {
     const sellerUserIds = new Set(demo.sellerUsers.map((user) => user.id));
 
     expect(demo.sellerUsers.every((user) => user.role === "seller")).toBe(true);
-    expect(demo.customers.every((user) => user.role === "buyer")).toBe(true);
+    expect(demo.customers.every((user) => user.role === "customer")).toBe(true);
     expect(new Set(demo.sellers.map((seller) => seller.userId))).toEqual(sellerUserIds);
     expect(new Set(demo.sellers.map((seller) => seller.storeName)).size).toBe(30);
     for (const seller of demo.sellers) {
@@ -89,6 +123,29 @@ describe("sellerShares", () => {
   });
 });
 
+describe("withDemoPasswords", () => {
+  it("gives each demo login its own argon2id hash of the public password, and no one else", async () => {
+    const minimal = allUsers(generatePeople(createRandom(), PROFILES.minimal));
+
+    const hashed = await withDemoPasswords(minimal);
+
+    const logins = hashed.filter((user) => demoEmails.has(user.email));
+    expect(logins).toHaveLength(5);
+    for (const login of logins) {
+      expect(login.passwordHash).toMatch(/^\$argon2id\$v=19\$m=19456,t=2,p=1\$/);
+      await expect(verify(login.passwordHash, DEMO_PASSWORD)).resolves.toBe(true);
+      await expect(verify(login.passwordHash, "wrong-password-here")).resolves.toBe(false);
+    }
+    // A random salt each: no two demo logins share a hash.
+    expect(new Set(logins.map((user) => user.passwordHash)).size).toBe(5);
+    expect(
+      hashed
+        .filter((user) => !demoEmails.has(user.email))
+        .every((user) => user.passwordHash === ""),
+    ).toBe(true);
+  });
+});
+
 describe("insertPeople", () => {
   it("inserts users first, then sellers and addresses, in batches of 500", async () => {
     const calls: [string, number][] = [];
@@ -105,7 +162,7 @@ describe("insertPeople", () => {
 
     await insertPeople(orm as unknown as Parameters<typeof insertPeople>[0], load as People);
 
-    const users = load.customers.length + load.sellerUsers.length;
+    const users = allUsers(load).length;
     expect(calls.filter(([name]) => name === "User")).toHaveLength(Math.ceil(users / 500));
     expect(calls.every(([, size]) => size <= 500)).toBe(true);
     expect(calls.map(([name]) => name).indexOf("Seller")).toBeGreaterThan(

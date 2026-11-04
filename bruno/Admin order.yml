@@ -1,0 +1,37 @@
+info:
+  name: Admin order
+  type: http
+  seq: 20
+
+http:
+  method: GET
+  url: "{{baseUrl}}/admin/orders/{{orderId}}"
+  auth:
+    type: bearer
+    token: "{{supportAccessToken}}"
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Needs a support (or admin) access token and another user's order id; see
+        // bruno/README.md. Skipped until both are set. Each view adds an order.view audit row.
+        if (!bru.getEnvVar("supportAccessToken") || !bru.getEnvVar("orderId")) {
+          bru.runner.skipRequest();
+        }
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.id
+      operator: eq
+      value: "{{orderId}}"
+    - expression: res.body.totalPaise
+      operator: isNumber
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

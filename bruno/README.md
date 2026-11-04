@@ -34,18 +34,41 @@ The `Auth` folder runs first and in this order:
 8. **Forgot password** asks for a reset link for the same account and must answer 202 (it answers 202 for any email).
 9. **Reset password** reads the link from the newest reset mail to that account in Mailpit (it waits up to 3 seconds, since the API sends it just after answering) and sets the password to `made-up-new-password-456`. The reset ends every session of the account.
 10. **Sign in with new password** signs in with it and saves the new access token for the requests after the folder.
+11. **Two-step set up** starts two-step sign-in and saves the authenticator secret.
+12. **Two-step enable** works out the app's code from the secret, as an authenticator app would (no phone needed), and switches two-step on. It also works out the next 30-second step's code for **Two-step verify**, since a code works only once, and saves a recovery code.
+13. **Two-step sign in** signs in again with the password and must answer only a challenge: no access token and no cookie.
+14. **Two-step verify** sends the challenge with the next step's code and saves the new access token for the requests after the folder.
+15. **Two-step disable** switches two-step off with the recovery code and must answer 204.
+16. **Sessions** lists where the account is signed in; the newest, the session of the token in use, comes first and is flagged `current`. It saves another session's id, if there is one.
+17. **End session** ends that other session and must answer 204. It skips itself when there is no other session (with mail off).
+
+The two-step requests need `TOTP_KEY` on the API (see `.env.example`).
 
 With `MAIL_MODE=off` no mail exists, so **Verify email**, **Reset password** and **Sign in with new password** skip themselves.
 
+**Refresh**, **Refresh reuse** and **Sign out** send `Origin: {{webOrigin}}`: the API takes the refresh cookie only from the shop's origins (`WEB_ORIGINS`) and answers 403 to any other. The **local** environment sets it to `http://localhost:3000`; on **prod**, set it to one of the production `WEB_ORIGINS` first.
+
+After 5 wrong passwords for one email within 15 minutes, sign-in answers 429 for that email for 15 minutes, so a run with many wrong tries can lock the test account; it unlocks by itself.
+
 They pass values to each other through runtime variables, so running one on its own may fail. Every other request with `auth: inherit` sends `Authorization: Bearer {{accessToken}}`, set once in [`opencollection.yml`](opencollection.yml). **Address add** saves the new address's id, which **Address edit** and **Address delete** then change.
 
-### Admin requests
+### Staff and seller requests
 
-**Admin audit log forbidden** uses the signed-in buyer's token and must answer 403. **Admin audit log** needs an admin, and the seed gives no account a known password, so the run skips it until you set `adminAccessToken`:
+**Admin audit log forbidden** uses the signed-in customer's token and must answer 403. Three requests need another role, and the seed gives no account a known password, so the run skips each until you set its token in the **local** environment:
+
+| Request             | Role                 | Variables                          |
+| ------------------- | -------------------- | ---------------------------------- |
+| **Admin audit log** | `admin`              | `adminAccessToken`                 |
+| **Store update**    | `seller`             | `sellerAccessToken`                |
+| **Admin order**     | `support` or `admin` | `supportAccessToken` and `orderId` |
+
+To get a token for a role:
 
 1. Run **Auth → Sign up** and **Sign in** (or use any account you signed up locally).
-2. Open the local database in Prisma Studio, `pnpm dlx prisma@7.10.1 studio --url "postgresql://manasbal:manasbal@localhost:5432/manasbal"`, then http://localhost:5555, and set that user's `role` in `users` to `admin`.
-3. Run **Sign in** again and copy `accessToken` from the answer into `adminAccessToken` in the **local** environment. Don't commit it; it expires in 15 minutes.
+2. Open the local database in Prisma Studio, `pnpm dlx prisma@7.10.1 studio --url "postgresql://manasbal:manasbal@localhost:5432/manasbal"`, then http://localhost:5555, and set that user's `role` in `users`. A `seller` also needs a row in `sellers` with their `user_id` (a store name, a unique slug and status `approved`).
+3. Run **Sign in** again and copy `accessToken` from the answer into the variable. Don't commit it; it expires in 15 minutes.
+
+For **Admin order**, set `orderId` to any order in the database, for example one from the seed (Prisma Studio, `orders`). Each view adds an `order.view` row to the audit log, with the support user as the actor: **Admin audit log** shows it.
 
 ## Run every request
 

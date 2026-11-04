@@ -1,18 +1,20 @@
 {
   "name": "@manasbal/seed",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "license": "Apache-2.0",
   "type": "module",
   "scripts": {
-    "seed": "node --env-file-if-exists=../../apps/api/.env src/cli.ts",
-    "seed:reset": "node --env-file-if-exists=../../apps/api/.env src/reset-cli.ts",
+    "seed": "pnpm --filter @manasbal/types build && node --env-file-if-exists=../../apps/api/.env src/cli.ts",
+    "seed:reset": "pnpm --filter @manasbal/types build && node --env-file-if-exists=../../apps/api/.env src/reset-cli.ts",
     "typecheck": "tsc",
     "test": "vitest run --coverage",
     "test:db": "vitest run --config ./vitest.config.db.ts"
   },
   "dependencies": {
     "@faker-js/faker": "^10.6.0",
+    "@manasbal/types": "workspace:*",
+    "@node-rs/argon2": "^2.2.2",
     "@prisma/orm-postgres": "8.0.0-rc.18",
     "temporal-polyfill": "^1.0.6"
   },

@@ -90,9 +90,26 @@ The API listens on http://localhost:3001 (set `PORT` to change it). Start the da
 
 Production runs with mail off, so new accounts are confirmed at once and nobody receives mail. Password reset therefore can't be used there until real mail arrives (Phase 13). More detail is in [apps/api/README.md](apps/api/README.md#signing-in).
 
+## Demo logins
+
+One account per role, so you can try the demo without signing up. They all use the same password.
+
+| Role         | Email                      | Password                 |
+| ------------ | -------------------------- | ------------------------ |
+| Customer     | `customer@example.com`     | `quiet-mango-river-lamp` |
+| Seller       | `seller@example.com`       | `quiet-mango-river-lamp` |
+| Seller staff | `seller-staff@example.com` | `quiet-mango-river-lamp` |
+| Support      | `support@example.com`      | `quiet-mango-river-lamp` |
+| Admin        | `admin@example.com`        | `quiet-mango-river-lamp` |
+
+These are public on purpose; the nightly reset restores them. Anything you change while signed in to one of them is undone that night.
+
+The seed writes them ([`packages/seed/src/demo-logins.ts`](packages/seed/src/demo-logins.ts) holds the emails and the password). The demo customer has orders and addresses, and the demo seller owns the biggest store. After a local `seed` or `seed:reset`, they sign in locally too.
+
 ## Documentation
 
 - [Architecture decisions](docs/adr)
+- [Sign-in threat model](docs/security/auth-threat-model.md)
 - [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
 
 ## Contributors

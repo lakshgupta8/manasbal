@@ -1,0 +1,32 @@
+info:
+  name: Two-step set up
+  type: http
+  seq: 11
+
+http:
+  method: POST
+  url: "{{baseUrl}}/auth/2fa/setup"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        // The secret an authenticator app would read from the QR code. Two-step enable works out
+        // the app's codes from it, so no phone is needed.
+        bru.setVar("totpSecret", res.body.secret);
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.secret
+      operator: isString
+    - expression: res.body.otpauthUrl
+      operator: isString
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

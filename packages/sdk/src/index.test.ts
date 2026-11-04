@@ -112,6 +112,100 @@ describe("createApiClient", () => {
     expect(fetch.mock.calls[0]![0].url).toBe("http://api.test/admin/audit-log");
   });
 
+  it("starts two-step set-up with the access token and reads the typed answer", async () => {
+    const started = { otpauthUrl: "otpauth://totp/Manasbal:x?secret=JBSWY3DP", secret: "JBSWY3DP" };
+    const { api, fetch } = fakeApi(started, 200, "application/json", "a.b.c");
+
+    const { data } = await api.POST("/auth/2fa/setup");
+
+    const request = fetch.mock.calls[0]![0];
+    expect(request.method).toBe("POST");
+    expect(request.url).toBe("http://api.test/auth/2fa/setup");
+    expect(request.headers.get("authorization")).toBe("Bearer a.b.c");
+    expect(data?.otpauthUrl).toBe(started.otpauthUrl);
+  });
+
+  it("sends the app's code to enable two-step and gets the recovery codes", async () => {
+    const codes = Array.from({ length: 10 }, (_, i) => `abcde-fghj${i}`);
+    const { api, fetch } = fakeApi({ recoveryCodes: codes }, 200, "application/json", "a.b.c");
+
+    const { data } = await api.POST("/auth/2fa/enable", { body: { code: "123456" } });
+
+    const request = fetch.mock.calls[0]![0];
+    expect(request.url).toBe("http://api.test/auth/2fa/enable");
+    expect(await request.json()).toEqual({ code: "123456" });
+    expect(data?.recoveryCodes).toHaveLength(10);
+  });
+
+  it("tells a two-step challenge from a session after sign-in", async () => {
+    const { api } = fakeApi({ twoFactorRequired: true, challengeToken: "c.h.t" });
+
+    const { data } = await api.POST("/auth/sign-in", {
+      body: { email: "a@example.test", password: "made-up-password" },
+    });
+
+    expect(data && "challengeToken" in data ? data.challengeToken : undefined).toBe("c.h.t");
+  });
+
+  it("sends the challenge and a code for the second step and gets the access token", async () => {
+    const { api, fetch } = fakeApi({ accessToken: "a.b.c", expiresIn: 900 });
+
+    const { data } = await api.POST("/auth/2fa/verify", {
+      body: { challengeToken: "c.h.t", code: "abcde-fghjk" },
+    });
+
+    const request = fetch.mock.calls[0]![0];
+    expect(request.url).toBe("http://api.test/auth/2fa/verify");
+    expect(await request.json()).toEqual({ challengeToken: "c.h.t", code: "abcde-fghjk" });
+    expect(data?.accessToken).toBe("a.b.c");
+  });
+
+  it("sends a code to switch two-step off", async () => {
+    // A 204 has no body, so this answer is made by hand.
+    const fetch = vi.fn<(request: Request) => Promise<Response>>(
+      async () => new Response(null, { status: 204 }),
+    );
+    const api = createApiClient({ baseUrl: "http://api.test", fetch, accessToken: "a.b.c" });
+
+    const { error } = await api.POST("/auth/2fa/disable", { body: { code: "123456" } });
+
+    const request = fetch.mock.calls[0]![0];
+    expect(error).toBeUndefined();
+    expect(request.url).toBe("http://api.test/auth/2fa/disable");
+    expect(request.headers.get("authorization")).toBe("Bearer a.b.c");
+  });
+
+  it("lists the signed-in user's sessions", async () => {
+    const session = {
+      id: ID,
+      browser: "Firefox on Windows",
+      startedAt: "2026-11-03T09:00:00Z",
+      lastUsedAt: "2026-11-03T11:00:00Z",
+      current: true,
+    };
+    const { api, fetch } = fakeApi([session], 200, "application/json", "a.b.c");
+
+    const { data } = await api.GET("/me/sessions");
+
+    expect(fetch.mock.calls[0]![0].url).toBe("http://api.test/me/sessions");
+    expect(data?.[0]?.current).toBe(true);
+  });
+
+  it("ends a session by its id", async () => {
+    // A 204 has no body, so this answer is made by hand.
+    const fetch = vi.fn<(request: Request) => Promise<Response>>(
+      async () => new Response(null, { status: 204 }),
+    );
+    const api = createApiClient({ baseUrl: "http://api.test", fetch, accessToken: "a.b.c" });
+
+    const { error } = await api.DELETE("/me/sessions/{id}", { params: { path: { id: ID } } });
+
+    const request = fetch.mock.calls[0]![0];
+    expect(error).toBeUndefined();
+    expect(request.method).toBe("DELETE");
+    expect(request.url).toBe(`http://api.test/me/sessions/${ID}`);
+  });
+
   it("sends the access token as a bearer token only when given one", async () => {
     const signedIn = fakeApi({ items: [], subtotalPaise: 0 }, 200, "application/json", "a.b.c");
     const without = fakeApi({ items: [], subtotalPaise: 0 });

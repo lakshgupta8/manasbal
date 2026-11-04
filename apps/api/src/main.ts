@@ -5,11 +5,16 @@ import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fa
 import { Logger } from "nestjs-pino";
 import { AppModule } from "./app.module.js";
 import { requireJwtSecret } from "./auth/jwt-secret.js";
+import { requireTotpKey } from "./auth/totp-key.js";
+import { webOrigins } from "./auth/web-origins.js";
 import { setupDocs } from "./docs/docs.js";
 import { echoRequestId, fastifyOptions } from "./logging/logging.config.js";
 
 async function bootstrap() {
   requireJwtSecret();
+  requireTotpKey();
+  // Read first, so a missing or malformed WEB_ORIGINS stops the start-up.
+  const origins = webOrigins();
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter(fastifyOptions),
@@ -20,6 +25,9 @@ async function bootstrap() {
   app.useLogger(app.get(Logger));
   // Reads and sets the refresh_token cookie on /auth routes.
   await app.register(fastifyCookie);
+  // Only the shop may call from a browser with credentials (the refresh cookie); the refresh and
+  // sign-out routes also check Origin themselves (OriginGuard).
+  app.enableCors({ origin: origins, credentials: true });
   echoRequestId(app);
   setupDocs(app);
   // Listen on all interfaces so the API is reachable inside Docker and on Render. Locally it

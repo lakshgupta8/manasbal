@@ -1,12 +1,12 @@
-/* White on lake teal: 4.8:1 contrast (WCAG AA). */
+/* On-brand white on the brand teal: 4.8:1 contrast (WCAG AA). Colours come from theme.css. */
 .mb-demo-banner {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
-  background: #167e86;
-  color: #fff;
+  background: var(--mb-color-brand-primary);
+  color: var(--mb-color-text-on-brand);
   font:
     0.875rem/1.4 system-ui,
     sans-serif;

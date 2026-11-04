@@ -1,7 +1,7 @@
 name: Reset demo data
 
 # Wipes the live demo database every night and seeds the demo profile again, so visitors' rows
-# last at most a day. The reset refuses unless SEED_ALLOW_RESET=true and the database has a
+# last at most a day, and the demo logins (one per role) come back with their public password. The reset refuses unless SEED_ALLOW_RESET=true and the database has a
 # _demo_marker row (see packages/seed/README.md for the one-time setup).
 #
 # Scheduled runs use this file from the default branch (dev) but check out main, the released
@@ -59,3 +59,26 @@ jobs:
             sleep 10
           done
           echo "::error::$API_URL/products listed no products after the reset"; exit 1
+
+      # The demo customer's password is public (packages/seed/src/demo-logins.ts and the README),
+      # so the check can sign in with it. Only the access token is secret: it is masked before
+      # anything could print it. The right password never trips the 5-try lockout, and sign-in
+      # needs no Origin header (only refresh and sign-out do).
+      - name: Smoke check (the demo customer can sign in and GET /me answers role customer)
+        env:
+          API_URL: ${{ vars.API_URL }}
+        run: |
+          logins=packages/seed/src/demo-logins.ts
+          # A released main from before the demo logins has no such file and no such account.
+          if [ ! -f "$logins" ]; then echo "::notice::No demo logins in this code yet; skipped"; exit 0; fi
+          read -r email password < <(node --input-type=module -e "
+            import { DEMO_EMAILS, DEMO_PASSWORD } from './$logins';
+            console.log(DEMO_EMAILS.customer, DEMO_PASSWORD);")
+          body=$(jq -n --arg email "$email" --arg password "$password" '{email: $email, password: $password}')
+          token=$(curl -fsS --max-time 30 -X POST "$API_URL/auth/sign-in" \
+            -H "content-type: application/json" -d "$body" | jq -r '.accessToken // empty' || true)
+          if [ -z "$token" ]; then echo "::error::$email could not sign in to $API_URL"; exit 1; fi
+          echo "::add-mask::$token"
+          role=$(curl -fsS --max-time 30 "$API_URL/me" -H "authorization: Bearer $token" | jq -r '.role' || true)
+          if [ "$role" != "customer" ]; then echo "::error::GET /me as $email answered role '$role'"; exit 1; fi
+          echo "$email signed in and GET /me answered role customer"

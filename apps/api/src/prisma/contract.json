@@ -56,6 +56,10 @@
       "model": "Product",
       "namespace": "public"
     },
+    "recovery_codes": {
+      "model": "RecoveryCode",
+      "namespace": "public"
+    },
     "refresh_tokens": {
       "model": "RefreshToken",
       "namespace": "public"
@@ -288,14 +292,14 @@
                 }
               },
               "targetId": {
-                "nullable": false,
+                "nullable": true,
                 "type": {
                   "codecId": "pg/uuid@1",
                   "kind": "scalar"
                 }
               },
               "targetType": {
-                "nullable": false,
+                "nullable": true,
                 "type": {
                   "codecId": "pg/text@1",
                   "kind": "scalar"
@@ -1586,6 +1590,104 @@
               "table": "products"
             }
           },
+          "RecoveryCode": {
+            "fields": {
+              "codeHash": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
+              },
+              "createdByVisitor": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/uuid@1",
+                  "kind": "scalar"
+                }
+              },
+              "isSample": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
+              "usedAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
+              },
+              "userId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/uuid@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "user": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "userId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "User",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "codeHash": {
+                  "column": "code_hash"
+                },
+                "createdAt": {
+                  "column": "created_at"
+                },
+                "createdByVisitor": {
+                  "column": "created_by_visitor"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "isSample": {
+                  "column": "is_sample"
+                },
+                "usedAt": {
+                  "column": "used_at"
+                },
+                "userId": {
+                  "column": "user_id"
+                }
+              },
+              "namespaceId": "public",
+              "table": "recovery_codes"
+            }
+          },
           "RefreshToken": {
             "fields": {
               "createdAt": {
@@ -2452,6 +2554,27 @@
                   "codecId": "pg/text@1",
                   "kind": "scalar"
                 }
+              },
+              "totpEnabledAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
+              },
+              "totpLastStep": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "totpSecret": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
               }
             },
             "relations": {
@@ -2531,6 +2654,21 @@
                   "namespace": "public"
                 }
               },
+              "recoveryCodes": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "userId"
+                  ]
+                },
+                "to": {
+                  "model": "RecoveryCode",
+                  "namespace": "public"
+                }
+              },
               "refreshTokens": {
                 "cardinality": "1:N",
                 "on": {
@@ -2606,6 +2744,15 @@
                 },
                 "role": {
                   "column": "role"
+                },
+                "totpEnabledAt": {
+                  "column": "totp_enabled_at"
+                },
+                "totpLastStep": {
+                  "column": "totp_last_step"
+                },
+                "totpSecret": {
+                  "column": "totp_secret"
                 }
               },
               "namespaceId": "public",
@@ -2956,12 +3103,12 @@
                 "target_id": {
                   "codecId": "pg/uuid@1",
                   "dataType": "pg/uuid",
-                  "nullable": false
+                  "nullable": true
                 },
                 "target_type": {
                   "codecId": "pg/text@1",
                   "dataType": "pg/text",
-                  "nullable": false
+                  "nullable": true
                 }
               },
               "foreignKeys": [
@@ -4001,6 +4148,94 @@
                 }
               ]
             },
+            "recovery_codes": {
+              "columns": {
+                "code_hash": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                },
+                "created_at": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "dataType": "pg/timestamptz",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nullable": false
+                },
+                "created_by_visitor": {
+                  "codecId": "pg/bool@1",
+                  "dataType": "pg/bool",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/uuid@1",
+                  "dataType": "pg/uuid",
+                  "nullable": false
+                },
+                "is_sample": {
+                  "codecId": "pg/bool@1",
+                  "dataType": "pg/bool",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
+                  "nullable": false
+                },
+                "used_at": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "dataType": "pg/timestamptz",
+                  "nullable": true
+                },
+                "user_id": {
+                  "codecId": "pg/uuid@1",
+                  "dataType": "pg/uuid",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [
+                {
+                  "index": {
+                    "name": "recovery_codes_user_id_idx_6c952402"
+                  },
+                  "source": {
+                    "columns": [
+                      "user_id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "recovery_codes"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "users"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "user_id"
+                  ],
+                  "name": "recovery_codes_user_id_idx_6c952402",
+                  "prefix": "recovery_codes_user_id_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": []
+            },
             "refresh_tokens": {
               "columns": {
                 "created_at": {
@@ -4749,9 +4984,24 @@
                   "dataType": "pg/text",
                   "default": {
                     "kind": "literal",
-                    "value": "buyer"
+                    "value": "customer"
                   },
                   "nullable": false
+                },
+                "totp_enabled_at": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "dataType": "pg/timestamptz",
+                  "nullable": true
+                },
+                "totp_last_step": {
+                  "codecId": "pg/int4@1",
+                  "dataType": "pg/int4",
+                  "nullable": true
+                },
+                "totp_secret": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": true
                 }
               },
               "foreignKeys": [],
@@ -4870,10 +5120,10 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "4bdfe0358c09c5608154925d70b91d7659066abd228903ff69eb74d453be2128"
+    "storageHash": "cb40b11c2753b51ead95c48da3d5e5e307626283d04086c216e92cc3a1c0df1d"
   },
   "execution": {
-    "executionHash": "da5247b2def99b27f05442865168a9a909d7a23701d40e06a7e7bad1d8d5f998",
+    "executionHash": "423336f569a82d162692569cabd764ba1f05a109bf1bf71838a091e84c54e730",
     "mutations": {
       "defaults": [
         {
@@ -5015,6 +5265,17 @@
           },
           "ref": {
             "entry": "products",
+            "field": "id",
+            "namespace": "public"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "uuidv4",
+            "kind": "generator"
+          },
+          "ref": {
+            "entry": "recovery_codes",
             "field": "id",
             "namespace": "public"
           }

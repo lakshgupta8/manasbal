@@ -5,11 +5,11 @@ export default defineConfig({
   plugins: [react()],
   test: {
     environment: "jsdom",
-    include: ["src/**/*.test.tsx"],
+    include: ["src/**/*.test.{ts,tsx}"],
     setupFiles: ["./vitest.setup.ts"],
     coverage: {
       provider: "v8",
-      include: ["src/**/*.tsx"],
+      include: ["src/**/*.tsx", "style-dictionary.config.ts"],
       exclude: ["src/**/*.stories.tsx", "src/**/*.test.tsx"],
       reporter: ["text-summary", "lcov", "json-summary"],
       // CI gate: coverage never drops below 60%.

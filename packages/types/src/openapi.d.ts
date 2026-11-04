@@ -55,9 +55,29 @@ export interface paths {
     put?: never;
     /**
      * Sign in
-     * @description Answers an access token and sets the refresh_token cookie.
+     * @description Answers an access token and sets the refresh_token cookie. With two-step sign-in on, answers only a challenge for POST /auth/2fa/verify instead.
      */
     post: operations["AuthController_signIn"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/auth/2fa/verify": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Second step of sign-in
+     * @description Takes the challenge sign-in answered and the 6-digit code from the authenticator app, or a recovery code. Each code works once. Answers an access token and sets the refresh_token cookie, as sign-in does.
+     */
+    post: operations["AuthController_verifyTwoStep"];
     delete?: never;
     options?: never;
     head?: never;
@@ -164,6 +184,66 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/auth/2fa/setup": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Start two-step sign-in
+     * @description Makes a new authenticator-app secret for the signed-in user. It is not on until POST /auth/2fa/enable gets a code from the app.
+     */
+    post: operations["TwoStepController_setup"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/auth/2fa/enable": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Switch on two-step sign-in
+     * @description Takes the 6-digit code from the authenticator app. Answers the recovery codes, which are shown only this once.
+     */
+    post: operations["TwoStepController_enable"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/auth/2fa/disable": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Switch off two-step sign-in
+     * @description Takes a current 6-digit code from the authenticator app, or a recovery code. Removes the secret and every recovery code.
+     */
+    post: operations["TwoStepController_disable"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/me": {
     parameters: {
       query?: never;
@@ -230,6 +310,66 @@ export interface paths {
      * @description Updates only the fields sent. The change is written to the audit log.
      */
     patch: operations["AddressesController_update"];
+    trace?: never;
+  };
+  "/me/store": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Rename your store
+     * @description Changes the signed-in seller's store name; the slug (the store page's address) follows it. The change is recorded in the audit log.
+     */
+    patch: operations["StoreController_rename"];
+    trace?: never;
+  };
+  "/me/sessions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Where I am signed in
+     * @description One entry per signed-in device or browser, most recently used first.
+     */
+    get: operations["SessionsController_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/me/sessions/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * End a session
+     * @description Signs that browser out: its refresh token stops working. Its access token works until it expires (15 minutes). Ending the current session is allowed.
+     */
+    delete: operations["SessionsController_end"];
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   "/categories": {
@@ -412,6 +552,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/admin/orders/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Read any order
+     * @description One order by its id, whoever placed it. Support and admins only; every view is recorded in the audit log as order.view.
+     */
+    get: operations["AdminController_order"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/admin/audit-log": {
     parameters: {
       query?: never;
@@ -444,12 +604,6 @@ export interface components {
       /** @example dev */
       version: string;
     };
-    SignUpResult: {
-      /** Format: uuid */
-      id: string;
-      email: string;
-      name: string;
-    };
     SignInResult: {
       accessToken: string;
       /**
@@ -458,13 +612,49 @@ export interface components {
        */
       expiresIn: number;
     };
+    TwoStepChallengeResult: {
+      /** @enum {boolean} */
+      twoFactorRequired: true;
+      /** @description Send it with the code to POST /auth/2fa/verify. It works for 5 minutes. */
+      challengeToken: string;
+    };
+    SignUpResult: {
+      /** Format: uuid */
+      id: string;
+      email: string;
+      name: string;
+    };
+    TwoStepSetupResult: {
+      /**
+       * @description Show as a QR code for the authenticator app
+       * @example otpauth://totp/Manasbal:asha%40example.test?secret=JBSWY3DPEHPK3PXP&issuer=Manasbal
+       */
+      otpauthUrl: string;
+      /**
+       * @description The same secret, to type in by hand
+       * @example JBSWY3DPEHPK3PXP
+       */
+      secret: string;
+    };
+    TwoStepEnabledResult: {
+      /**
+       * @description 10 one-time codes for when the app is lost. Shown only this once.
+       * @example [
+       *       "abcde-fghjk"
+       *     ]
+       */
+      recoveryCodes: string[];
+    };
     Me: {
       /** Format: uuid */
       id: string;
       name: string;
       email: string;
-      /** @example buyer */
-      role: string;
+      /**
+       * @example customer
+       * @enum {string}
+       */
+      role: "customer" | "seller" | "seller_staff" | "support" | "admin";
     };
     Address: {
       /** Format: uuid */
@@ -476,6 +666,32 @@ export interface components {
       /** @example 190006 */
       pincode: string;
       isDefault: boolean;
+    };
+    OwnStore: {
+      /** @example Quill Threads */
+      storeName: string;
+      /**
+       * @description The store page's address
+       * @example quill-threads
+       */
+      slug: string;
+      /** @example approved */
+      status: string;
+    };
+    Session: {
+      /**
+       * Format: uuid
+       * @description Pass it to DELETE /me/sessions/{id}
+       */
+      id: string;
+      /** @example Firefox on Windows */
+      browser: string;
+      /** Format: date-time */
+      startedAt: string;
+      /** Format: date-time */
+      lastUsedAt: string;
+      /** @description The session this access token belongs to */
+      current: boolean;
     };
     Category: {
       /** Format: uuid */
@@ -618,6 +834,16 @@ export interface components {
       /** @description Pass as cursor to get the next page; null on the last page */
       nextCursor: string | null;
     };
+    AdminOrder: {
+      /** Format: uuid */
+      id: string;
+      /** @example placed */
+      status: string;
+      /** @description Whole paise */
+      totalPaise: number;
+      /** Format: date-time */
+      createdAt: string;
+    };
     AuditEntry: {
       /** Format: uuid */
       id: string;
@@ -626,9 +852,9 @@ export interface components {
       /** @example address.create */
       action: string;
       /** @example address */
-      targetType: string;
+      targetType: string | null;
       /** Format: uuid */
-      targetId: string;
+      targetId: string | null;
       /** @description The x-request-id of the request that made the change */
       requestId: string;
       /** Format: date-time */
@@ -724,7 +950,8 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["SignInResult"];
+          "application/json":
+            components["schemas"]["SignInResult"] | components["schemas"]["TwoStepChallengeResult"];
         };
       };
       /** @description Email or password is wrong */
@@ -736,6 +963,53 @@ export interface operations {
       };
       /** @description Check your email to confirm your account */
       403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description 5 wrong tries for this email in 15 minutes: wait 15 minutes */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AuthController_verifyTwoStep: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          challengeToken: string;
+          code: string;
+        };
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SignInResult"];
+        };
+      };
+      /** @description The code is not right, or sign in again */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description 5 wrong codes for this account in 15 minutes: wait 15 minutes */
+      429: {
         headers: {
           [name: string]: unknown;
         };
@@ -861,6 +1135,13 @@ export interface operations {
         };
         content?: never;
       };
+      /** @description This request must come from the Manasbal shop: the Origin header is not in WEB_ORIGINS, or is missing while the refresh_token cookie is sent */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
   AuthController_signOut: {
@@ -873,6 +1154,137 @@ export interface operations {
     requestBody?: never;
     responses: {
       204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description This request must come from the Manasbal shop: the Origin header is not in WEB_ORIGINS, or is missing while the refresh_token cookie is sent */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  TwoStepController_setup: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TwoStepSetupResult"];
+        };
+      };
+      /** @description No valid access token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Two-step sign-in is already on */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  TwoStepController_enable: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          code: string;
+        };
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TwoStepEnabledResult"];
+        };
+      };
+      /** @description The code is not right, or set-up was not started */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No valid access token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Two-step sign-in is already on */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  TwoStepController_disable: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          code: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Two-step sign-in is off */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The code is not right */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No valid access token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Two-step sign-in is not on */
+      409: {
         headers: {
           [name: string]: unknown;
         };
@@ -1047,6 +1459,133 @@ export interface operations {
         content?: never;
       };
       /** @description The user has no address with this id */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  StoreController_rename: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          storeName: string;
+        };
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OwnStore"];
+        };
+      };
+      /** @description The name is too short, too long or has no letters */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No valid access token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description You can't do this with your role */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description This account has no store */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Another store already uses this name */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SessionsController_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Session"][];
+        };
+      };
+      /** @description No valid access token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SessionsController_end: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The session is ended */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The id is not a UUID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No valid access token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No session with this id */
       404: {
         headers: {
           [name: string]: unknown;
@@ -1353,6 +1892,55 @@ export interface operations {
       };
     };
   };
+  AdminController_order: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AdminOrder"];
+        };
+      };
+      /** @description The id is not a UUID */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No valid access token */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description You can't do this with your role */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No order with this id */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   AdminController_list: {
     parameters: {
       query?: {
@@ -1389,7 +1977,7 @@ export interface operations {
         };
         content?: never;
       };
-      /** @description The user is not an admin */
+      /** @description You can't do this with your role */
       403: {
         headers: {
           [name: string]: unknown;

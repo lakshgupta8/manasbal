@@ -1,11 +1,12 @@
 {
   "name": "@manasbal/ui",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "private": true,
   "license": "Apache-2.0",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./theme.css": "./src/theme.css"
   },
   "scripts": {
     "dev": "storybook dev --port 6006 --ci",
@@ -13,7 +14,8 @@
     "lint": "eslint .",
     "typecheck": "tsc",
     "test": "vitest run --coverage",
-    "test:visual": "node scripts/visual.mjs"
+    "test:visual": "node scripts/visual.mjs",
+    "tokens": "style-dictionary build --config style-dictionary.config.ts"
   },
   "peerDependencies": {
     "react": "^19.2.8",
@@ -22,6 +24,7 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
     "@eslint/js": "^10.0.1",
+    "@manasbal/icons": "workspace:*",
     "@manasbal/tsconfig": "workspace:*",
     "@playwright/test": "1.63.0",
     "@storybook/addon-a11y": "10.6.1",
@@ -42,6 +45,7 @@
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "storybook": "10.6.1",
+    "style-dictionary": "5.7.0",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.71.1",
     "vite": "^8.3.4",

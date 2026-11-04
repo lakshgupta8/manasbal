@@ -18,9 +18,9 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'4bdfe0358c09c5608154925d70b91d7659066abd228903ff69eb74d453be2128'>;
+  StorageHashBase<'cb40b11c2753b51ead95c48da3d5e5e307626283d04086c216e92cc3a1c0df1d'>;
 export type ExecutionHash =
-  ExecutionHashBase<'da5247b2def99b27f05442865168a9a909d7a23701d40e06a7e7bad1d8d5f998'>;
+  ExecutionHashBase<'423336f569a82d162692569cabd764ba1f05a109bf1bf71838a091e84c54e730'>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
 
@@ -254,8 +254,8 @@ export type FieldOutputTypes = {
       readonly id: CodecTypes['pg/uuid@1']['output'];
       readonly isSample: CodecTypes['pg/bool@1']['output'];
       readonly requestId: CodecTypes['pg/text@1']['output'];
-      readonly targetId: CodecTypes['pg/uuid@1']['output'];
-      readonly targetType: CodecTypes['pg/text@1']['output'];
+      readonly targetId: CodecTypes['pg/uuid@1']['output'] | null;
+      readonly targetType: CodecTypes['pg/text@1']['output'] | null;
     };
     readonly Cart: {
       readonly createdByVisitor: CodecTypes['pg/bool@1']['output'];
@@ -353,6 +353,15 @@ export type FieldOutputTypes = {
       readonly sellerId: CodecTypes['pg/uuid@1']['output'];
       readonly slug: CodecTypes['pg/text@1']['output'];
     };
+    readonly RecoveryCode: {
+      readonly codeHash: CodecTypes['pg/text@1']['output'];
+      readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
+      readonly createdByVisitor: CodecTypes['pg/bool@1']['output'];
+      readonly id: CodecTypes['pg/uuid@1']['output'];
+      readonly isSample: CodecTypes['pg/bool@1']['output'];
+      readonly usedAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
+      readonly userId: CodecTypes['pg/uuid@1']['output'];
+    };
     readonly RefreshToken: {
       readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
       readonly createdByVisitor: CodecTypes['pg/bool@1']['output'];
@@ -426,6 +435,9 @@ export type FieldOutputTypes = {
       readonly name: CodecTypes['pg/text@1']['output'];
       readonly passwordHash: CodecTypes['pg/text@1']['output'];
       readonly role: CodecTypes['pg/text@1']['output'];
+      readonly totpEnabledAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
+      readonly totpLastStep: CodecTypes['pg/int4@1']['output'] | null;
+      readonly totpSecret: CodecTypes['pg/text@1']['output'] | null;
     };
     readonly Variant: {
       readonly colour: CodecTypes['pg/text@1']['output'] | null;
@@ -461,8 +473,8 @@ export type FieldInputTypes = {
       readonly id: CodecTypes['pg/uuid@1']['input'];
       readonly isSample: CodecTypes['pg/bool@1']['input'];
       readonly requestId: CodecTypes['pg/text@1']['input'];
-      readonly targetId: CodecTypes['pg/uuid@1']['input'];
-      readonly targetType: CodecTypes['pg/text@1']['input'];
+      readonly targetId: CodecTypes['pg/uuid@1']['input'] | null;
+      readonly targetType: CodecTypes['pg/text@1']['input'] | null;
     };
     readonly Cart: {
       readonly createdByVisitor: CodecTypes['pg/bool@1']['input'];
@@ -560,6 +572,15 @@ export type FieldInputTypes = {
       readonly sellerId: CodecTypes['pg/uuid@1']['input'];
       readonly slug: CodecTypes['pg/text@1']['input'];
     };
+    readonly RecoveryCode: {
+      readonly codeHash: CodecTypes['pg/text@1']['input'];
+      readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
+      readonly createdByVisitor: CodecTypes['pg/bool@1']['input'];
+      readonly id: CodecTypes['pg/uuid@1']['input'];
+      readonly isSample: CodecTypes['pg/bool@1']['input'];
+      readonly usedAt: CodecTypes['pg/timestamptz-temporal@1']['input'] | null;
+      readonly userId: CodecTypes['pg/uuid@1']['input'];
+    };
     readonly RefreshToken: {
       readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
       readonly createdByVisitor: CodecTypes['pg/bool@1']['input'];
@@ -633,6 +654,9 @@ export type FieldInputTypes = {
       readonly name: CodecTypes['pg/text@1']['input'];
       readonly passwordHash: CodecTypes['pg/text@1']['input'];
       readonly role: CodecTypes['pg/text@1']['input'];
+      readonly totpEnabledAt: CodecTypes['pg/timestamptz-temporal@1']['input'] | null;
+      readonly totpLastStep: CodecTypes['pg/int4@1']['input'] | null;
+      readonly totpSecret: CodecTypes['pg/text@1']['input'] | null;
     };
     readonly Variant: {
       readonly colour: CodecTypes['pg/text@1']['input'] | null;
@@ -673,8 +697,8 @@ export type StorageColumnTypes = {
       readonly id: CodecTypes['pg/uuid@1']['output'];
       readonly is_sample: CodecTypes['pg/bool@1']['output'];
       readonly request_id: CodecTypes['pg/text@1']['output'];
-      readonly target_id: CodecTypes['pg/uuid@1']['output'];
-      readonly target_type: CodecTypes['pg/text@1']['output'];
+      readonly target_id: CodecTypes['pg/uuid@1']['output'] | null;
+      readonly target_type: CodecTypes['pg/text@1']['output'] | null;
     };
     readonly cart_items: {
       readonly cart_id: CodecTypes['pg/uuid@1']['output'];
@@ -767,6 +791,15 @@ export type StorageColumnTypes = {
       readonly seller_id: CodecTypes['pg/uuid@1']['output'];
       readonly slug: CodecTypes['pg/text@1']['output'];
     };
+    readonly recovery_codes: {
+      readonly code_hash: CodecTypes['pg/text@1']['output'];
+      readonly created_at: CodecTypes['pg/timestamptz-temporal@1']['output'];
+      readonly created_by_visitor: CodecTypes['pg/bool@1']['output'];
+      readonly id: CodecTypes['pg/uuid@1']['output'];
+      readonly is_sample: CodecTypes['pg/bool@1']['output'];
+      readonly used_at: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
+      readonly user_id: CodecTypes['pg/uuid@1']['output'];
+    };
     readonly refresh_tokens: {
       readonly created_at: CodecTypes['pg/timestamptz-temporal@1']['output'];
       readonly created_by_visitor: CodecTypes['pg/bool@1']['output'];
@@ -840,6 +873,9 @@ export type StorageColumnTypes = {
       readonly name: CodecTypes['pg/text@1']['output'];
       readonly password_hash: CodecTypes['pg/text@1']['output'];
       readonly role: CodecTypes['pg/text@1']['output'];
+      readonly totp_enabled_at: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
+      readonly totp_last_step: CodecTypes['pg/int4@1']['output'] | null;
+      readonly totp_secret: CodecTypes['pg/text@1']['output'] | null;
     };
     readonly variants: {
       readonly colour: CodecTypes['pg/text@1']['output'] | null;
@@ -880,8 +916,8 @@ export type StorageColumnInputTypes = {
       readonly id: CodecTypes['pg/uuid@1']['input'];
       readonly is_sample: CodecTypes['pg/bool@1']['input'];
       readonly request_id: CodecTypes['pg/text@1']['input'];
-      readonly target_id: CodecTypes['pg/uuid@1']['input'];
-      readonly target_type: CodecTypes['pg/text@1']['input'];
+      readonly target_id: CodecTypes['pg/uuid@1']['input'] | null;
+      readonly target_type: CodecTypes['pg/text@1']['input'] | null;
     };
     readonly cart_items: {
       readonly cart_id: CodecTypes['pg/uuid@1']['input'];
@@ -974,6 +1010,15 @@ export type StorageColumnInputTypes = {
       readonly seller_id: CodecTypes['pg/uuid@1']['input'];
       readonly slug: CodecTypes['pg/text@1']['input'];
     };
+    readonly recovery_codes: {
+      readonly code_hash: CodecTypes['pg/text@1']['input'];
+      readonly created_at: CodecTypes['pg/timestamptz-temporal@1']['input'];
+      readonly created_by_visitor: CodecTypes['pg/bool@1']['input'];
+      readonly id: CodecTypes['pg/uuid@1']['input'];
+      readonly is_sample: CodecTypes['pg/bool@1']['input'];
+      readonly used_at: CodecTypes['pg/timestamptz-temporal@1']['input'] | null;
+      readonly user_id: CodecTypes['pg/uuid@1']['input'];
+    };
     readonly refresh_tokens: {
       readonly created_at: CodecTypes['pg/timestamptz-temporal@1']['input'];
       readonly created_by_visitor: CodecTypes['pg/bool@1']['input'];
@@ -1047,6 +1092,9 @@ export type StorageColumnInputTypes = {
       readonly name: CodecTypes['pg/text@1']['input'];
       readonly password_hash: CodecTypes['pg/text@1']['input'];
       readonly role: CodecTypes['pg/text@1']['input'];
+      readonly totp_enabled_at: CodecTypes['pg/timestamptz-temporal@1']['input'] | null;
+      readonly totp_last_step: CodecTypes['pg/int4@1']['input'] | null;
+      readonly totp_secret: CodecTypes['pg/text@1']['input'] | null;
     };
     readonly variants: {
       readonly colour: CodecTypes['pg/text@1']['input'] | null;
@@ -1085,8 +1133,8 @@ export namespace Models {
     id: CodecTypes['pg/uuid@1']['output'];
     isSample: CodecTypes['pg/bool@1']['output'];
     requestId: CodecTypes['pg/text@1']['output'];
-    targetId: CodecTypes['pg/uuid@1']['output'];
-    targetType: CodecTypes['pg/text@1']['output'];
+    targetId: CodecTypes['pg/uuid@1']['output'] | null;
+    targetType: CodecTypes['pg/text@1']['output'] | null;
     actor: public_User | null;
     readonly [RelationKeys]?: 'actor';
   };
@@ -1220,6 +1268,17 @@ export namespace Models {
     variants: public_Variant[];
     readonly [RelationKeys]?: 'category' | 'reviews' | 'seller' | 'variants';
   };
+  export type public_RecoveryCode = {
+    codeHash: CodecTypes['pg/text@1']['output'];
+    createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
+    createdByVisitor: CodecTypes['pg/bool@1']['output'];
+    id: CodecTypes['pg/uuid@1']['output'];
+    isSample: CodecTypes['pg/bool@1']['output'];
+    usedAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
+    userId: CodecTypes['pg/uuid@1']['output'];
+    user: public_User;
+    readonly [RelationKeys]?: 'user';
+  };
   export type public_RefreshToken = {
     createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
     createdByVisitor: CodecTypes['pg/bool@1']['output'];
@@ -1313,11 +1372,15 @@ export namespace Models {
     name: CodecTypes['pg/text@1']['output'];
     passwordHash: CodecTypes['pg/text@1']['output'];
     role: CodecTypes['pg/text@1']['output'];
+    totpEnabledAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
+    totpLastStep: CodecTypes['pg/int4@1']['output'] | null;
+    totpSecret: CodecTypes['pg/text@1']['output'] | null;
     addresses: public_Address[];
     auditLogs: public_AuditLog[];
     cart: public_Cart | null;
     emailTokens: public_EmailToken[];
     orders: public_Order[];
+    recoveryCodes: public_RecoveryCode[];
     refreshTokens: public_RefreshToken[];
     reviews: public_Review[];
     seller: public_Seller | null;
@@ -1327,6 +1390,7 @@ export namespace Models {
       | 'cart'
       | 'emailTokens'
       | 'orders'
+      | 'recoveryCodes'
       | 'refreshTokens'
       | 'reviews'
       | 'seller';
@@ -1363,6 +1427,7 @@ export declare const models: {
     OrderItem: Models.public_OrderItem;
     Payment: Models.public_Payment;
     Product: Models.public_Product;
+    RecoveryCode: Models.public_RecoveryCode;
     RefreshToken: Models.public_RefreshToken;
     Review: Models.public_Review;
     Seller: Models.public_Seller;
@@ -1574,13 +1639,13 @@ type ContractBase = Omit<
                 readonly target_id: {
                   readonly dataType: 'pg/uuid';
                   readonly codecId: 'pg/uuid@1';
-                  readonly nullable: false;
+                  readonly nullable: true;
                   readonly many: false;
                 };
                 readonly target_type: {
                   readonly dataType: 'pg/text';
                   readonly codecId: 'pg/text@1';
-                  readonly nullable: false;
+                  readonly nullable: true;
                   readonly many: false;
                 };
               };
@@ -2451,6 +2516,85 @@ type ContractBase = Omit<
                 },
               ];
             };
+            readonly recovery_codes: {
+              columns: {
+                readonly code_hash: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly created_at: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                  readonly many: false;
+                };
+                readonly created_by_visitor: {
+                  readonly dataType: 'pg/bool';
+                  readonly codecId: 'pg/bool@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/bool@1', false>;
+                  };
+                  readonly many: false;
+                };
+                readonly id: {
+                  readonly dataType: 'pg/uuid';
+                  readonly codecId: 'pg/uuid@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly is_sample: {
+                  readonly dataType: 'pg/bool';
+                  readonly codecId: 'pg/bool@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/bool@1', false>;
+                  };
+                  readonly many: false;
+                };
+                readonly used_at: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly user_id: {
+                  readonly dataType: 'pg/uuid';
+                  readonly codecId: 'pg/uuid@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [];
+              indexes: readonly [
+                {
+                  readonly name: 'recovery_codes_user_id_idx_6c952402';
+                  readonly prefix: 'recovery_codes_user_id_idx';
+                  readonly columns: readonly ['user_id'];
+                  readonly unique: false;
+                },
+              ];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'recovery_codes';
+                    readonly columns: readonly ['user_id'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'users';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+              ];
+            };
             readonly refresh_tokens: {
               columns: {
                 readonly created_at: {
@@ -3098,8 +3242,26 @@ type ContractBase = Omit<
                   readonly nullable: false;
                   readonly default: {
                     readonly kind: 'literal';
-                    readonly value: DefaultLiteralValue<'pg/text@1', 'buyer'>;
+                    readonly value: DefaultLiteralValue<'pg/text@1', 'customer'>;
                   };
+                  readonly many: false;
+                };
+                readonly totp_enabled_at: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly totp_last_step: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly totp_secret: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
                   readonly many: false;
                 };
               };
@@ -3225,6 +3387,10 @@ type ContractBase = Omit<
     readonly orders: { readonly namespace: 'public' & NamespaceId; readonly model: 'Order' };
     readonly payments: { readonly namespace: 'public' & NamespaceId; readonly model: 'Payment' };
     readonly products: { readonly namespace: 'public' & NamespaceId; readonly model: 'Product' };
+    readonly recovery_codes: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'RecoveryCode';
+    };
     readonly refresh_tokens: {
       readonly namespace: 'public' & NamespaceId;
       readonly model: 'RefreshToken';
@@ -3360,11 +3526,11 @@ type ContractBase = Omit<
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
               readonly targetId: {
-                readonly nullable: false;
+                readonly nullable: true;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/uuid@1' };
               };
               readonly targetType: {
-                readonly nullable: false;
+                readonly nullable: true;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
             };
@@ -4177,6 +4343,68 @@ type ContractBase = Omit<
               };
             };
           };
+          readonly RecoveryCode: {
+            readonly fields: {
+              readonly codeHash: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly createdAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                };
+              };
+              readonly createdByVisitor: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
+              };
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/uuid@1' };
+              };
+              readonly isSample: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
+              };
+              readonly usedAt: {
+                readonly nullable: true;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                };
+              };
+              readonly userId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/uuid@1' };
+              };
+            };
+            readonly relations: {
+              readonly user: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['userId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'recovery_codes';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly codeHash: { readonly column: 'code_hash' };
+                readonly createdAt: { readonly column: 'created_at' };
+                readonly createdByVisitor: { readonly column: 'created_by_visitor' };
+                readonly id: { readonly column: 'id' };
+                readonly isSample: { readonly column: 'is_sample' };
+                readonly usedAt: { readonly column: 'used_at' };
+                readonly userId: { readonly column: 'user_id' };
+              };
+            };
+          };
           readonly RefreshToken: {
             readonly fields: {
               readonly createdAt: {
@@ -4727,6 +4955,21 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
+              readonly totpEnabledAt: {
+                readonly nullable: true;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                };
+              };
+              readonly totpLastStep: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly totpSecret: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
             };
             readonly relations: {
               readonly addresses: {
@@ -4782,6 +5025,17 @@ type ContractBase = Omit<
                   readonly targetFields: readonly ['userId'];
                 };
               };
+              readonly recoveryCodes: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'RecoveryCode';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['userId'];
+                };
+              };
               readonly refreshTokens: {
                 readonly to: {
                   readonly namespace: 'public' & NamespaceId;
@@ -4830,6 +5084,9 @@ type ContractBase = Omit<
                 readonly name: { readonly column: 'name' };
                 readonly passwordHash: { readonly column: 'password_hash' };
                 readonly role: { readonly column: 'role' };
+                readonly totpEnabledAt: { readonly column: 'totp_enabled_at' };
+                readonly totpLastStep: { readonly column: 'totp_last_step' };
+                readonly totpSecret: { readonly column: 'totp_secret' };
               };
             };
           };
@@ -5066,6 +5323,14 @@ type ContractBase = Omit<
           readonly onCreate: { readonly id: 'uuidv4'; readonly kind: 'generator' };
           readonly ref: {
             readonly entry: 'products';
+            readonly field: 'id';
+            readonly namespace: 'public';
+          };
+        },
+        {
+          readonly onCreate: { readonly id: 'uuidv4'; readonly kind: 'generator' };
+          readonly ref: {
+            readonly entry: 'recovery_codes';
             readonly field: 'id';
             readonly namespace: 'public';
           };

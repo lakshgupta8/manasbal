@@ -1,0 +1,62 @@
+info:
+  name: Two-step enable
+  type: http
+  seq: 12
+
+http:
+  method: POST
+  url: "{{baseUrl}}/auth/2fa/enable"
+  body:
+    type: json
+    data: |-
+      {
+        "code": "{{totpCode}}"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Does what an authenticator app does (RFC 6238: HMAC-SHA1, 6 digits, 30-second steps).
+        // It makes this step's code, to switch two-step on, and the next step's, for Two-step
+        // verify: this step's code is used up once it switches two-step on.
+        const CryptoJS = require("crypto-js");
+        const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+        function totp(secret, epochSeconds) {
+          let bits = "";
+          for (const char of secret.replace(/=+$/, "")) {
+            bits += ALPHABET.indexOf(char).toString(2).padStart(5, "0");
+          }
+          const key = (bits.match(/.{8}/g) ?? [])
+            .map((byte) => parseInt(byte, 2).toString(16).padStart(2, "0"))
+            .join("");
+          const counter = Math.floor(epochSeconds / 30).toString(16).padStart(16, "0");
+          const mac = CryptoJS.HmacSHA1(
+            CryptoJS.enc.Hex.parse(counter),
+            CryptoJS.enc.Hex.parse(key),
+          ).toString();
+          const offset = parseInt(mac.slice(-1), 16) * 2;
+          const value = parseInt(mac.slice(offset, offset + 8), 16) & 0x7fffffff;
+          return String(value % 1000000).padStart(6, "0");
+        }
+        const now = Math.floor(Date.now() / 1000);
+        bru.setVar("totpCode", totp(bru.getVar("totpSecret"), now));
+        bru.setVar("nextTotpCode", totp(bru.getVar("totpSecret"), now + 30));
+    - type: after-response
+      code: |-
+        // Two-step disable uses one of these at the end of the folder.
+        bru.setVar("recoveryCode", res.body.recoveryCodes?.[0]);
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.recoveryCodes
+      operator: isArray
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
