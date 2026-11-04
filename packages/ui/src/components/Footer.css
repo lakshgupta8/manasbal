@@ -1,0 +1,42 @@
+/* Colours, spacing and type come from theme.css. Muted text on the card surface: 6.1:1 (WCAG AA). */
+.mb-footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mb-space-3);
+  padding: var(--mb-space-6) var(--mb-space-4);
+  border-top: 1px solid var(--mb-color-border-default);
+  background: var(--mb-color-surface-card);
+  color: var(--mb-color-text-default);
+  font-family: var(--mb-font-family-sans);
+  font-size: var(--mb-font-size-body);
+}
+
+.mb-footer ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mb-space-1) var(--mb-space-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mb-footer a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--mb-space-6);
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.mb-footer a:focus-visible {
+  outline: 2px solid var(--mb-color-brand-primary);
+  outline-offset: 2px;
+  border-radius: var(--mb-radius-sm);
+}
+
+.mb-footer__small-print {
+  margin: 0;
+  color: var(--mb-color-text-muted);
+  font-size: var(--mb-font-size-small);
+}

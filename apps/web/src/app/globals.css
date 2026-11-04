@@ -9,6 +9,7 @@
   --color-ink: var(--mb-color-brand-ink);
   --color-lake: var(--mb-color-brand-primary);
   --color-lotus: var(--mb-color-brand-accent);
+  --color-on-brand: var(--mb-color-text-on-brand);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
