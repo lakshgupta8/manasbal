@@ -20,7 +20,10 @@ packageExtensions:
 # pnpm 10 skipped all of them and everything worked: the native ones ship prebuilt binaries, and
 # @scarf/scarf only sends install analytics.
 allowBuilds:
+  # next-intl's message extractor brings these two; both ship prebuilt binaries.
+  "@parcel/watcher": false
   "@scarf/scarf": false
+  "@swc/core": false
   cpu-features: false
   esbuild: false
   protobufjs: false

@@ -1,6 +1,7 @@
 import { composeStories } from "@storybook/react-vite";
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+import { Footer } from "./Footer";
 import * as stories from "./Footer.stories";
 
 const { Default, SmallPrintOnly } = composeStories(stories);
@@ -38,5 +39,13 @@ describe("Footer", () => {
 
     expect(screen.queryByRole("navigation")).toBeNull();
     expect(screen.getByRole("contentinfo").textContent).toContain("Nothing here is for sale");
+  });
+
+  it("names the navigation in the page's language", () => {
+    render(
+      <Footer links={[{ href: "/hi", label: "होम" }]} smallPrint="छोटी बात" navLabel="फ़ुटर" />,
+    );
+
+    expect(screen.getByRole("navigation", { name: "फ़ुटर" })).toBeDefined();
   });
 });

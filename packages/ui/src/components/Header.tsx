@@ -18,10 +18,19 @@ export interface HeaderProps {
   readonly account?: ReactNode;
   /** Slot for the cart link. */
   readonly cart?: ReactNode;
+  /** The main navigation's name, in the page's language. */
+  readonly navLabel?: string;
 }
 
 /** The top of every page: the logo, the main links and the language, account and cart slots. */
-export function Header({ links, homeHref = "/", languageSwitch, account, cart }: HeaderProps) {
+export function Header({
+  links,
+  homeHref = "/",
+  languageSwitch,
+  account,
+  cart,
+  navLabel = "Main",
+}: HeaderProps) {
   return (
     <header className="mb-header">
       <a className="mb-header__brand" href={homeHref}>
@@ -29,7 +38,7 @@ export function Header({ links, homeHref = "/", languageSwitch, account, cart }:
         <span>Manasbal</span>
       </a>
       {links.length > 0 && (
-        <nav aria-label="Main" className="mb-header__nav">
+        <nav aria-label={navLabel} className="mb-header__nav">
           <ul>
             {links.map((link) => (
               <li key={link.href}>
