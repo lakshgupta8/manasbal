@@ -19,7 +19,7 @@ Check a new icon at 16, 20 and 24 px: if it turns into a blob when small, draw i
 
 ## Icons
 
-`cart`, `close`, `filter`, `heart`, `menu`, `plus`, `search`, `shopping-bag`, `sort`, `star`, `star-half` (the left half of `star`, for half ratings), `user`.
+`cart`, `close`, `filter`, `heart`, `menu`, `plus`, `search`, `shopping-bag`, `sort`, `star`, `star-half` (`star` split down the middle, for half ratings), `user`.
 
 ```bash
 pnpm --filter @manasbal/icons test   # checks every file against the rules
