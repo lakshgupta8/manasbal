@@ -1,0 +1,48 @@
+/* Uses the theme variables from @manasbal/ui's theme.css, which the Storybook preview loads. */
+.mb-icon-gallery {
+  padding: var(--mb-space-4);
+  background: var(--mb-color-surface-page);
+  color: var(--mb-color-text-default);
+  font:
+    0.875rem/1.4 system-ui,
+    sans-serif;
+}
+
+.mb-icon-gallery label {
+  display: block;
+  margin-bottom: var(--mb-space-1);
+}
+
+.mb-icon-gallery input {
+  width: min(100%, 20rem);
+  padding: var(--mb-space-2) var(--mb-space-3);
+  border: 1px solid var(--mb-color-border-strong);
+  border-radius: var(--mb-radius-sm);
+  background: var(--mb-color-surface-page);
+  color: inherit;
+  font: inherit;
+}
+
+.mb-icon-gallery__count {
+  color: var(--mb-color-text-muted);
+}
+
+.mb-icon-gallery__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr));
+  gap: var(--mb-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mb-icon-gallery__grid li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--mb-space-2);
+  padding: var(--mb-space-3) var(--mb-space-2);
+  border: 1px solid var(--mb-color-border-default);
+  border-radius: var(--mb-radius-md);
+  background: var(--mb-color-surface-card);
+}

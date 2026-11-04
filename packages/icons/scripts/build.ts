@@ -56,6 +56,21 @@ export async function iconSource(svg: string, name: string, file: string): Promi
   return formatTs(HEADER + code, file);
 }
 
+// Every icon with the name of its drawing, so a gallery or a picker lists new icons by itself.
+function iconListSource(icons: readonly { file: string; name: string }[]): string {
+  const imports = icons.map(({ name }) => `import { ${name} } from "./${name}";\n`);
+  const entries = icons.map(
+    ({ file, name }) => `  { name: "${path.basename(file, ".svg")}", Icon: ${name} },\n`,
+  );
+  return `${HEADER}import type { ComponentType } from "react";
+import type { IconProps } from "../Icon";
+${imports.join("")}
+/** Every icon, by the name of its drawing (\`shopping-bag\`), in file name order. */
+export const iconList: readonly { readonly name: string; readonly Icon: ComponentType<IconProps> }[] = [
+${entries.join("")}];
+`;
+}
+
 /** Builds every icon from svgDir into srcDir/generated and writes srcDir/index.ts. */
 export async function buildIcons(svgDir: string, srcDir: string): Promise<void> {
   const files = readdirSync(svgDir)
@@ -65,17 +80,19 @@ export async function buildIcons(svgDir: string, srcDir: string): Promise<void> 
   rmSync(generatedDir, { recursive: true, force: true });
   mkdirSync(generatedDir, { recursive: true });
 
-  const names: string[] = [];
-  for (const file of files) {
-    const name = componentName(file);
-    names.push(name);
+  const icons = files.map((file) => ({ file, name: componentName(file) }));
+  for (const { file, name } of icons) {
     const svg = readFileSync(path.join(svgDir, file), "utf8");
     const target = path.join(generatedDir, `${name}.tsx`);
     writeFileSync(target, await iconSource(svg, name, target));
   }
+  const list = path.join(generatedDir, "icon-list.ts");
+  writeFileSync(list, await formatTs(iconListSource(icons), list));
 
-  const exports = names.map((name) => `export { ${name} } from "./generated/${name}";\n`);
+  const exports = icons.map(({ name }) => `export { ${name} } from "./generated/${name}";\n`);
   const index = path.join(srcDir, "index.ts");
-  const code = `${HEADER}export { Icon, type IconProps, type IconSize } from "./Icon";\n${exports.join("")}`;
+  const code = `${HEADER}export { Icon, type IconProps, type IconSize } from "./Icon";
+export { iconList } from "./generated/icon-list";
+${exports.join("")}`;
   writeFileSync(index, await formatTs(code, index));
 }

@@ -6,7 +6,7 @@ import type { ComponentType } from "react";
 import { describe, expect, it } from "vitest";
 import { buildIcons, componentName } from "../scripts/build";
 import * as icons from "./index";
-import { type IconProps, ShoppingBagIcon } from "./index";
+import { type IconProps, iconList, ShoppingBagIcon } from "./index";
 
 const packageDir = path.resolve(import.meta.dirname, "..");
 const svgDir = path.join(packageDir, "svg");
@@ -95,10 +95,22 @@ describe("Icon", () => {
     expect(container.querySelector("svg")?.getAttribute("class")).toBe("nav-icon");
   });
 
-  it("exports a component for every drawing, and nothing else but Icon", () => {
+  it("exports a component for every drawing, and nothing else but Icon and iconList", () => {
     expect(Object.keys(icons).sort((a, b) => a.localeCompare(b))).toEqual(
-      ["Icon", ...drawings.map(componentName)].sort((a, b) => a.localeCompare(b)),
+      ["Icon", "iconList", ...drawings.map(componentName)].sort((a, b) => a.localeCompare(b)),
     );
+  });
+});
+
+describe("iconList", () => {
+  it("lists every drawing once, by name, with its component", () => {
+    expect(iconList.map(({ name }) => name)).toEqual(
+      // The build sorts the file names, so star-half.svg comes before star.svg.
+      [...drawings].sort((a, b) => a.localeCompare(b)).map((file) => file.replace(/\.svg$/, "")),
+    );
+    for (const { name, Icon } of iconList) {
+      expect(Icon).toBe(components[componentName(`${name}.svg`)]);
+    }
   });
 });
 
@@ -115,6 +127,7 @@ describe("build:icons", () => {
       for (const file of fresh) {
         expect(read(outDir, `generated/${file}`)).toBe(read(committed, `generated/${file}`));
       }
+      expect(fresh).toContain("icon-list.ts");
       expect(read(outDir, "index.ts")).toBe(read(committed, "index.ts"));
     } finally {
       rmSync(outDir, { recursive: true, force: true });

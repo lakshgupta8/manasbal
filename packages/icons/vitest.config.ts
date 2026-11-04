@@ -10,7 +10,7 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       include: ["src/**/*.{ts,tsx}", "scripts/**/*.ts"],
-      exclude: ["src/**/*.test.{ts,tsx}"],
+      exclude: ["src/**/*.test.{ts,tsx}", "src/**/*.stories.tsx"],
       reporter: ["text-summary", "lcov"],
       thresholds: { lines: 60, functions: 60, branches: 60, statements: 60 },
     },
