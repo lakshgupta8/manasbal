@@ -1,17 +1,21 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import { MESSAGES, type TestLocale, withIntl } from "@/test/intl";
 import { MAIN_ID, REPO_URL, SiteFrame } from "./site-frame";
+
+vi.mock("next-intl/server", () => import("@/test/intl"));
+vi.mock("next/navigation", () => ({ usePathname: () => "/en" }));
 
 // What Tab reaches, in order: nothing in the frame sets a positive tabindex.
 const FOCUSABLE = 'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
+async function frame(locale: TestLocale) {
+  return render(withIntl(await SiteFrame({ locale, children: <h1>The page</h1> }), locale));
+}
+
 describe("SiteFrame", () => {
-  it("puts the skip link first, then the banner, header, page and footer", () => {
-    const { container } = render(
-      <SiteFrame>
-        <h1>The page</h1>
-      </SiteFrame>,
-    );
+  it("puts the skip link first, then the banner, header, page and footer", async () => {
+    const { container } = await frame("en");
 
     expect([...container.children].map((element) => element.tagName)).toEqual([
       "A",
@@ -26,8 +30,8 @@ describe("SiteFrame", () => {
     expect(screen.getByRole("contentinfo")).toBeDefined();
   });
 
-  it("reaches the skip link first with Tab, and it leads to the page", () => {
-    const { container } = render(<SiteFrame>page</SiteFrame>);
+  it("reaches the skip link first with Tab, and it leads to the page", async () => {
+    const { container } = await frame("en");
 
     const skip = screen.getByRole("link", { name: "Skip to main content" });
     expect(container.querySelector(FOCUSABLE)).toBe(skip);
@@ -38,11 +42,41 @@ describe("SiteFrame", () => {
     expect(screen.getByRole("main").id).toBe(MAIN_ID);
   });
 
-  it("links the source code from the footer", () => {
-    render(<SiteFrame>page</SiteFrame>);
+  it("links the home page in the page's language, and the switch to the other one", async () => {
+    await frame("en");
+
+    const nav = screen.getByRole("navigation", { name: "Main" });
+    expect(
+      [...nav.querySelectorAll("a")].map((link) => [link.textContent, link.getAttribute("href")]),
+    ).toEqual([
+      ["Home", "/en"],
+      ["Categories", "/en#categories"],
+    ]);
+    expect(screen.getByRole("link", { name: "Read in हिन्दी" })).toBeDefined();
+  });
+
+  it("links the source code from the footer, with no draft note in English", async () => {
+    await frame("en");
 
     expect(screen.getByRole("link", { name: "Source code on GitHub" }).getAttribute("href")).toBe(
       REPO_URL,
+    );
+    expect(screen.getByRole("contentinfo").textContent).not.toContain("Draft");
+  });
+
+  it("shows everything in Hindi on a Hindi page, and says the Hindi is a draft", async () => {
+    await frame("hi");
+
+    const { Frame } = MESSAGES.hi;
+    expect(screen.getByRole("link", { name: Frame.skipLink })).toBeDefined();
+    expect(screen.getByRole("complementary", { name: Frame.demoLabel }).textContent).toContain(
+      Frame.demoHeading,
+    );
+    expect(screen.getByRole("navigation", { name: Frame.mainNav })).toBeDefined();
+    expect(screen.getByRole("link", { name: Frame.home }).getAttribute("href")).toBe("/hi");
+    expect(screen.getByRole("navigation", { name: Frame.footerNav })).toBeDefined();
+    expect(screen.getByRole("contentinfo").textContent).toContain(
+      `${Frame.smallPrint} ${Frame.draftNote}`,
     );
   });
 });

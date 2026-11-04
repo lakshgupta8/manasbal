@@ -1,0 +1,42 @@
+{
+  "Metadata": {
+    "title": "Manasbal — a demo marketplace",
+    "description": "A portfolio demo of a multi-vendor marketplace. Nothing here is for sale; payments and delivery are simulated."
+  },
+  "Frame": {
+    "skipLink": "Skip to main content",
+    "demoLabel": "Demo notice",
+    "demoHeading": "Demo store: nothing here is for sale.",
+    "demoDetail": "Orders, payments and deliveries are simulated, so please don't enter real details.",
+    "mainNav": "Main",
+    "home": "Home",
+    "categories": "Categories",
+    "languageSwitch": "Read in <lang></lang>",
+    "footerNav": "Footer",
+    "sourceCode": "Source code on GitHub",
+    "smallPrint": "Manasbal is a portfolio demo: nothing here is for sale, and payments and delivery are simulated.",
+    "draftNote": ""
+  },
+  "Home": {
+    "title": "Manasbal",
+    "tagline": "A demo multi-vendor marketplace, under construction.",
+    "categoriesHeading": "Categories",
+    "loadingCategories": "Loading categories…",
+    "noCategories": "There are no categories yet",
+    "noteLead": "Note:"
+  },
+  "Loading": {
+    "message": "Loading…"
+  },
+  "Error": {
+    "heading": "This page couldn't load",
+    "body": "Something went wrong on our side, or the shop lost touch with its data for a moment. Try again in a little while.",
+    "retry": "Try again",
+    "home": "Go to the home page"
+  },
+  "NotFound": {
+    "heading": "Page not found",
+    "body": "There's nothing at this address. The link may be mistyped, or the page may have moved.",
+    "home": "Go to the home page"
+  }
+}

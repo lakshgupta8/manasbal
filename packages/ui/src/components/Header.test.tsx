@@ -62,4 +62,10 @@ describe("Header", () => {
 
     expect(screen.getByRole("link", { name: "Manasbal" }).getAttribute("href")).toBe("/en");
   });
+
+  it("names the navigation in the page's language", () => {
+    render(<Header links={[{ href: "/hi", label: "होम" }]} navLabel="मुख्य" />);
+
+    expect(screen.getByRole("navigation", { name: "मुख्य" })).toBeDefined();
+  });
 });
