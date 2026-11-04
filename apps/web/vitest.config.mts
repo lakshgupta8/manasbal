@@ -11,7 +11,12 @@ export default defineConfig({
     setupFiles: ["./vitest.setup.ts"],
     coverage: {
       provider: "v8",
-      include: ["src/lib/**/*.ts", "src/components/**/*.tsx", "src/app/page.tsx"],
+      include: [
+        "src/lib/**/*.ts",
+        "src/components/**/*.tsx",
+        "src/app/page.tsx",
+        "src/app/{loading,error,not-found}.tsx",
+      ],
       exclude: ["src/**/*.test.{ts,tsx}"],
       reporter: ["text-summary", "lcov"],
       // CI gate: coverage never drops below 60%.

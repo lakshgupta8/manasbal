@@ -10,6 +10,7 @@
   --color-lake: var(--mb-color-brand-primary);
   --color-lotus: var(--mb-color-brand-accent);
   --color-on-brand: var(--mb-color-text-on-brand);
+  --color-muted: var(--mb-color-text-muted);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

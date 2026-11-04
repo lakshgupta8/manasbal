@@ -25,14 +25,18 @@ describe("Categories", () => {
     ]);
   });
 
-  it("says the categories are unavailable when there are none to show", async () => {
-    vi.mocked(getCategories).mockResolvedValue(null);
+  it("says so when there are no categories yet", async () => {
+    vi.mocked(getCategories).mockResolvedValue([]);
 
     render(await Categories());
 
-    expect(screen.getByRole("status").textContent).toBe(
-      "Note: Categories are unavailable right now",
-    );
-    expect(screen.queryByRole("alert")).toBeNull();
+    expect(screen.getByRole("status").textContent).toBe("Note: There are no categories yet");
+    expect(screen.queryByRole("list")).toBeNull();
+  });
+
+  it("lets a failed load through to the page's error boundary", async () => {
+    vi.mocked(getCategories).mockRejectedValue(new Error("down"));
+
+    await expect(Categories()).rejects.toThrow("down");
   });
 });
