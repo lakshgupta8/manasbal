@@ -5,6 +5,7 @@ import { AlertIcon } from "./AlertIcon";
 import { ArrowLeftIcon } from "./ArrowLeftIcon";
 import { ArrowRightIcon } from "./ArrowRightIcon";
 import { BankIcon } from "./BankIcon";
+import { BellIcon } from "./BellIcon";
 import { CardIcon } from "./CardIcon";
 import { CartIcon } from "./CartIcon";
 import { CheckIcon } from "./CheckIcon";
@@ -15,14 +16,17 @@ import { ChevronUpIcon } from "./ChevronUpIcon";
 import { ClockIcon } from "./ClockIcon";
 import { CloseIcon } from "./CloseIcon";
 import { EditIcon } from "./EditIcon";
+import { EyeOffIcon } from "./EyeOffIcon";
 import { EyeIcon } from "./EyeIcon";
 import { FilterIcon } from "./FilterIcon";
 import { HeartIcon } from "./HeartIcon";
 import { InfoIcon } from "./InfoIcon";
 import { LockIcon } from "./LockIcon";
+import { LogoutIcon } from "./LogoutIcon";
 import { MapPinIcon } from "./MapPinIcon";
 import { MenuIcon } from "./MenuIcon";
 import { MinusIcon } from "./MinusIcon";
+import { MoonIcon } from "./MoonIcon";
 import { PackageIcon } from "./PackageIcon";
 import { PlusIcon } from "./PlusIcon";
 import { ReturnIcon } from "./ReturnIcon";
@@ -31,6 +35,8 @@ import { ShoppingBagIcon } from "./ShoppingBagIcon";
 import { SortIcon } from "./SortIcon";
 import { StarHalfIcon } from "./StarHalfIcon";
 import { StarIcon } from "./StarIcon";
+import { StoreIcon } from "./StoreIcon";
+import { SunIcon } from "./SunIcon";
 import { TrashIcon } from "./TrashIcon";
 import { TruckIcon } from "./TruckIcon";
 import { UserIcon } from "./UserIcon";
@@ -45,6 +51,7 @@ export const iconList: readonly {
   { name: "arrow-left", Icon: ArrowLeftIcon },
   { name: "arrow-right", Icon: ArrowRightIcon },
   { name: "bank", Icon: BankIcon },
+  { name: "bell", Icon: BellIcon },
   { name: "card", Icon: CardIcon },
   { name: "cart", Icon: CartIcon },
   { name: "check", Icon: CheckIcon },
@@ -55,14 +62,17 @@ export const iconList: readonly {
   { name: "clock", Icon: ClockIcon },
   { name: "close", Icon: CloseIcon },
   { name: "edit", Icon: EditIcon },
+  { name: "eye-off", Icon: EyeOffIcon },
   { name: "eye", Icon: EyeIcon },
   { name: "filter", Icon: FilterIcon },
   { name: "heart", Icon: HeartIcon },
   { name: "info", Icon: InfoIcon },
   { name: "lock", Icon: LockIcon },
+  { name: "logout", Icon: LogoutIcon },
   { name: "map-pin", Icon: MapPinIcon },
   { name: "menu", Icon: MenuIcon },
   { name: "minus", Icon: MinusIcon },
+  { name: "moon", Icon: MoonIcon },
   { name: "package", Icon: PackageIcon },
   { name: "plus", Icon: PlusIcon },
   { name: "return", Icon: ReturnIcon },
@@ -71,6 +81,8 @@ export const iconList: readonly {
   { name: "sort", Icon: SortIcon },
   { name: "star-half", Icon: StarHalfIcon },
   { name: "star", Icon: StarIcon },
+  { name: "store", Icon: StoreIcon },
+  { name: "sun", Icon: SunIcon },
   { name: "trash", Icon: TrashIcon },
   { name: "truck", Icon: TruckIcon },
   { name: "user", Icon: UserIcon },
