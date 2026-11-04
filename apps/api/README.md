@@ -23,6 +23,10 @@ pnpm --filter @manasbal/api exec prisma db migrate --advance-ref db     # apply 
 
 Commit the contract, the generated files and `migrations/`. Don't edit the generated files by hand.
 
+## Visitor address
+
+The rate limits (100 requests a minute per visitor, 10 a minute on `/auth/*`) count each visitor by `request.ip`. Behind a proxy every request comes from the proxy, so `TRUSTED_PROXY_HOPS` (see `.env.example`) says how many proxies sit in front of the API: `request.ip` is then the address the outermost trusted proxy reported in `X-Forwarded-For`. It is `0` when unset, which ignores the header, so a visitor who talks to the API directly can't fake their address; a value that isn't a whole number stops the start-up. Render's proxy makes `1`; the shop's rewrite in front of it makes `2`. The lockout is not affected: it counts by email or account, whatever the address.
+
 ## Signing in
 
 Protected endpoints (`/me`, `/me/addresses`, `/cart`, `/orders`, `/admin`) take an access token in `Authorization: Bearer <token>`. Get one from `POST /auth/sign-in` (sign up first with `POST /auth/sign-up`); it lasts 15 minutes, and `POST /auth/refresh` swaps the `refresh_token` cookie for a new one. Without a valid token they answer 401. The API signs tokens with `JWT_SECRET` (see `.env.example`) and refuses to start in production without it.
