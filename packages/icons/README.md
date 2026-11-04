@@ -31,42 +31,42 @@ Check a new icon at 16, 20 and 24 px: if it turns into a blob when small, draw i
 
 ## Icons
 
-| Icon            | Drawing                                                                                      |
-| --------------- | -------------------------------------------------------------------------------------------- |
-| `alert`         | A lotus bud with an exclamation mark                                                         |
-| `arrow-left`    | A shaft with an open head pointing left                                                      |
-| `arrow-right`   | A shaft with an open head pointing right                                                     |
-| `bank`          | A building under a curved, petal-like roof, four columns and a base line; no bank's mark     |
-| `card`          | A rounded card with a stripe and a ripple where the numbers would be; no card network's mark |
-| `cart`          | A soft-cornered basket on a handle, a ripple inside, two round wheels                        |
-| `check`         | A check whose long stroke curves up like a reed                                              |
-| `chevron-down`  | An open angle pointing down                                                                  |
-| `chevron-left`  | An open angle pointing left                                                                  |
-| `chevron-right` | An open angle pointing right                                                                 |
-| `chevron-up`    | An open angle pointing up                                                                    |
-| `clock`         | A round face with a single petal-shaped hand and four short hour ticks                       |
-| `close`         | Two crossing strokes                                                                         |
-| `edit`          | A petal-shaped nib with its slit, writing a ripple                                           |
-| `eye`           | An almond of two curves meeting at pointed corners, and a round pupil                        |
-| `filter`        | A funnel with a ripple for its rim and curved sides                                          |
-| `heart`         | Two pointed petals leaning out, meeting at the bottom                                        |
-| `info`          | A lily pad (a circle with a small notch) with an i                                           |
-| `lock`          | A shackle over a body with a rounded, bud-like bottom and a short keyhole line               |
-| `map-pin`       | A rounded marker coming to a point, with a small ripple inside, standing on a ripple         |
-| `menu`          | Three ripples                                                                                |
-| `minus`         | One stroke                                                                                   |
-| `package`       | A box with a lid and a V-shaped tape label                                                   |
-| `plus`          | Two crossing strokes                                                                         |
-| `return`        | An arrow pointing back, curving down and round into a ripple                                 |
-| `search`        | A lens and handle                                                                            |
-| `shopping-bag`  | A bag with rounded bottom corners, a handle and a ripple inside                              |
-| `sort`          | Three ripples getting shorter, beside a down arrow                                           |
-| `star`          | Five pointed petals                                                                          |
-| `star-half`     | `star` split down the middle, for half ratings                                               |
-| `trash`         | An open bin with rounded bottom corners and two slats, a petal falling in                    |
-| `truck`         | A cargo box and a cab with a curved front on two round wheels                                |
-| `user`          | A head and shoulders standing on a ripple                                                    |
-| `wallet`        | A wallet with a curved flap and a rounded clasp on its side                                  |
+| Icon            | Drawing                                                                                              |
+| --------------- | ---------------------------------------------------------------------------------------------------- |
+| `alert`         | A lotus bud with an exclamation mark                                                                 |
+| `arrow-left`    | A shaft with an open head pointing left                                                              |
+| `arrow-right`   | A shaft with an open head pointing right                                                             |
+| `bank`          | A building under a curved, petal-like roof, four columns and a base line; no bank's mark             |
+| `card`          | A rounded card with a band across it and a ripple where the numbers would be; no card network's mark |
+| `cart`          | A soft-cornered basket on a handle, a ripple inside, two round wheels                                |
+| `check`         | A check whose long stroke curves up like a reed                                                      |
+| `chevron-down`  | An open angle pointing down                                                                          |
+| `chevron-left`  | An open angle pointing left                                                                          |
+| `chevron-right` | An open angle pointing right                                                                         |
+| `chevron-up`    | An open angle pointing up                                                                            |
+| `clock`         | A round face with a single petal-shaped hand and four short hour ticks                               |
+| `close`         | Two crossing strokes                                                                                 |
+| `edit`          | A petal-shaped nib with its slit, writing a ripple                                                   |
+| `eye`           | An almond of two curves meeting at pointed corners, and a round pupil                                |
+| `filter`        | A funnel with a ripple for its rim and curved sides                                                  |
+| `heart`         | Two pointed petals leaning out, meeting at the bottom                                                |
+| `info`          | A lily pad (a circle with a small notch) with an i                                                   |
+| `lock`          | A shackle over a body with a rounded, bud-like bottom and a short keyhole line                       |
+| `map-pin`       | A rounded marker coming to a point, with a small ripple inside, standing on a ripple                 |
+| `menu`          | Three ripples                                                                                        |
+| `minus`         | One stroke                                                                                           |
+| `package`       | A box with a lid and a V-shaped tape label                                                           |
+| `plus`          | Two crossing strokes                                                                                 |
+| `return`        | An arrow pointing back, curving down and round into a ripple                                         |
+| `search`        | A lens and handle                                                                                    |
+| `shopping-bag`  | A bag with rounded bottom corners, a handle and a ripple inside                                      |
+| `sort`          | Three ripples getting shorter, beside a down arrow                                                   |
+| `star`          | Five pointed petals                                                                                  |
+| `star-half`     | `star` split down the middle, for half ratings                                                       |
+| `trash`         | An open bin with rounded bottom corners and two slats, a petal falling in                            |
+| `truck`         | A cargo box and a cab with a curved front on two round wheels                                        |
+| `user`          | A head and shoulders standing on a ripple                                                            |
+| `wallet`        | A wallet with a curved flap and a rounded clasp on its side                                          |
 
 ## Adding or changing an icon
 
