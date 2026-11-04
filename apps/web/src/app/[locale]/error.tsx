@@ -1,7 +1,13 @@
 "use client"; // Error boundaries must be client components.
 
 import Link from "next/link";
-import { useLocale, useTranslations } from "next-intl";
+import { useParams } from "next/navigation";
+import en from "../../../messages/en.json";
+import hi from "../../../messages/hi.json";
+
+// An error page is a client component, so it reads its words straight from the message files
+// rather than shipping a translation library to the browser.
+const WORDS = { en: en.Error, hi: hi.Error } as const;
 
 export interface ErrorPageProps {
   readonly error: Error & { digest?: string };
@@ -11,22 +17,23 @@ export interface ErrorPageProps {
 // Shown when a page fails to load, such as when the API is down. The message stays general: in
 // production the error's own message is hidden from the browser anyway.
 export default function ErrorPage({ retry }: ErrorPageProps) {
-  const t = useTranslations("Error");
-  const locale = useLocale();
+  const { locale } = useParams<{ locale: string }>();
+  const lang = locale === "hi" ? "hi" : "en";
+  const words = WORDS[lang];
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 py-24 text-center">
-      <h1 className="text-2xl font-semibold">{t("heading")}</h1>
-      <p className="max-w-md text-muted">{t("body")}</p>
+      <h1 className="text-2xl font-semibold">{words.heading}</h1>
+      <p className="max-w-md text-muted">{words.body}</p>
       <div className="flex flex-wrap items-center justify-center gap-4">
         <button
           type="button"
           onClick={() => retry()}
           className="rounded-md bg-lake px-4 py-2 font-medium text-on-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lake"
         >
-          {t("retry")}
+          {words.retry}
         </button>
-        <Link href={`/${locale}`} className="underline underline-offset-4">
-          {t("home")}
+        <Link href={`/${lang}`} className="underline underline-offset-4">
+          {words.home}
         </Link>
       </div>
     </div>

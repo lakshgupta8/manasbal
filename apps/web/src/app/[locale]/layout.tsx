@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Noto_Sans_Devanagari } from "next/font/google";
 import { notFound } from "next/navigation";
-import { hasLocale, NextIntlClientProvider } from "next-intl";
+import { hasLocale } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { SiteFrame } from "@/components/site-frame";
 import { routing } from "@/i18n/routing";
@@ -47,9 +47,8 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
       className={`${geistSans.variable} ${geistMono.variable} ${devanagari.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
-        <NextIntlClientProvider>
-          <SiteFrame locale={locale}>{children}</SiteFrame>
-        </NextIntlClientProvider>
+        {/* Pages are translated on the server; no translation code is sent to the browser. */}
+        <SiteFrame locale={locale}>{children}</SiteFrame>
       </body>
     </html>
   );

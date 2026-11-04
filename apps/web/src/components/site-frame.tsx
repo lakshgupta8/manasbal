@@ -1,13 +1,14 @@
 import { DemoBanner, Footer, Header } from "@manasbal/ui";
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
+import { LANGUAGE_NAMES, otherLocale, type Locale } from "@/i18n/routing";
 import { LanguageSwitch } from "./language-switch";
 
 export const MAIN_ID = "main-content";
 export const REPO_URL = "https://github.com/lakshgupta8/manasbal";
 
 export interface SiteFrameProps {
-  readonly locale: string;
+  readonly locale: Locale;
   readonly children: ReactNode;
 }
 
@@ -17,6 +18,7 @@ export interface SiteFrameProps {
 export async function SiteFrame({ locale, children }: SiteFrameProps) {
   const t = await getTranslations({ locale, namespace: "Frame" });
   const home = `/${locale}`;
+  const target = otherLocale(locale);
   // Only a draft translation has a note, and the footer shows it.
   const draftNote = t("draftNote");
 
@@ -36,7 +38,14 @@ export async function SiteFrame({ locale, children }: SiteFrameProps) {
           { href: home, label: t("home") },
           { href: `${home}#categories`, label: t("categories") },
         ]}
-        languageSwitch={<LanguageSwitch />}
+        languageSwitch={
+          // The other language's own name carries its lang.
+          <LanguageSwitch target={target}>
+            {t.rich("languageSwitch", {
+              lang: () => <span lang={target}>{LANGUAGE_NAMES[target]}</span>,
+            })}
+          </LanguageSwitch>
+        }
       />
       <main id={MAIN_ID} tabIndex={-1} className="flex flex-1 flex-col focus:outline-none">
         {children}
