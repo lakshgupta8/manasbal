@@ -668,9 +668,10 @@ describe("/auth (e2e)", () => {
         .sort();
       expect(hashes).toEqual(recoveryCodes.map(hashRecoveryCode).sort());
       for (const code of recoveryCodes) expect(hashes.join()).not.toContain(code);
+      // The wrong code above is audited too.
       expect(
         await database.sql("select string_agg(action, ',' order by action) from audit_logs"),
-      ).toBe("auth.2fa.enable,auth.2fa.setup,auth.sign_in,auth.sign_up");
+      ).toBe("auth.2fa.enable,auth.2fa.failed,auth.2fa.setup,auth.sign_in,auth.sign_up");
 
       // Once on, set-up and enable both answer 409.
       for (const again of [
@@ -845,6 +846,80 @@ describe("/auth (e2e)", () => {
       expect(locked.statusCode).toBe(429);
       expect(locked.json()).toMatchObject({ detail: LOCKED_OUT });
       expect(await app.get<Redis>(VALKEY).keys("lockout:user:*")).toHaveLength(1);
+      expect(
+        await database.sql("select count(*) from audit_logs where action = 'auth.lockout'"),
+      ).toBe("1");
+    });
+
+    // A 6-digit code that is not the one the app shows now.
+    const wrongCode = async (secret: string) =>
+      (await generate({ secret })) === "000000" ? "111111" : "000000";
+    const nextCode = (secret: string) =>
+      generate({ secret, epoch: Math.floor(Date.now() / 1000) + 30 });
+    const twoStepCall = (url: string, token: string, code: string) =>
+      app.inject({ method: "POST", url, headers: bearerHeader(token), payload: { code } });
+
+    it("allows 5 wrong codes on one challenge, then refuses even a right code: sign in again", async () => {
+      const { secret } = await withTwoStep();
+      const challengeToken = await challenge();
+
+      for (let i = 1; i <= LOCKOUT_LIMIT; i++) {
+        const wrong = await verify(challengeToken, await wrongCode(secret));
+        expect(wrong.statusCode).toBe(401);
+        expect(wrong.json()).toMatchObject({ detail: WRONG_CODE });
+      }
+      const sixth = await verify(challengeToken, await nextCode(secret));
+
+      expect(sixth.statusCode).toBe(401);
+      expect(sixth.json()).toMatchObject({ detail: SIGN_IN_AGAIN });
+      expect(sixth.headers["set-cookie"]).toBeUndefined();
+      expect(await app.get<Redis>(VALKEY).keys("lockout:challenge:*")).toHaveLength(1);
+      // The account's own count also reached 5, so a new challenge is locked out too.
+      expect((await verify(await challenge(), await nextCode(secret))).statusCode).toBe(429);
+    });
+
+    it("counts wrong codes on enable against the account: 5 lock it for 15 minutes", async () => {
+      expect((await post(signUp)).statusCode).toBe(201);
+      const token = (await signIn(credentials)).json<{ accessToken: string }>().accessToken;
+      const setup = await app.inject({
+        method: "POST",
+        url: "/auth/2fa/setup",
+        headers: bearerHeader(token),
+      });
+      const { secret } = setup.json<{ secret: string }>();
+
+      for (let i = 1; i <= LOCKOUT_LIMIT; i++) {
+        const wrong = await twoStepCall("/auth/2fa/enable", token, await wrongCode(secret));
+        expect(wrong.statusCode).toBe(400);
+        expect(wrong.json()).toMatchObject({ detail: WRONG_CODE });
+      }
+      const locked = await twoStepCall("/auth/2fa/enable", token, await generate({ secret }));
+
+      expect(locked.statusCode).toBe(429);
+      expect(locked.json()).toMatchObject({ detail: LOCKED_OUT });
+      expect(Number(locked.headers["retry-after"])).toBeGreaterThan(890);
+      expect(await database.sql("select totp_enabled_at is null from users")).toBe("t");
+      expect(await actions()).toBe(
+        `auth.sign_up,auth.sign_in,auth.2fa.setup${",auth.2fa.failed".repeat(LOCKOUT_LIMIT)},auth.lockout`,
+      );
+    });
+
+    it("counts wrong codes on disable the same way, and leaves two-step on", async () => {
+      const { token, secret } = await withTwoStep();
+
+      for (let i = 1; i <= LOCKOUT_LIMIT; i++) {
+        const wrong = await twoStepCall("/auth/2fa/disable", token, await wrongCode(secret));
+        expect(wrong.statusCode).toBe(400);
+        expect(wrong.json()).toMatchObject({ detail: WRONG_CODE });
+      }
+      const locked = await twoStepCall("/auth/2fa/disable", token, await nextCode(secret));
+
+      expect(locked.statusCode).toBe(429);
+      expect(locked.json()).toMatchObject({ detail: LOCKED_OUT });
+      expect(await database.sql("select totp_enabled_at is not null from users")).toBe("t");
+      expect(
+        await database.sql("select count(*) from audit_logs where action = 'auth.2fa.failed'"),
+      ).toBe(String(LOCKOUT_LIMIT));
       expect(
         await database.sql("select count(*) from audit_logs where action = 'auth.lockout'"),
       ).toBe("1");

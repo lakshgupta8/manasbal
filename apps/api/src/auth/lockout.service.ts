@@ -29,9 +29,15 @@ export function emailLockKey(email: string): string {
   return `lockout:email:${sha256(email.trim().toLowerCase())}`;
 }
 
-// The Valkey key for an account's second sign-in step.
+// The Valkey key for an account's second sign-in step, and for codes that switch two-step on or
+// off: every wrong code counts against the account.
 export function userLockKey(userId: string): string {
   return `lockout:user:${sha256(userId)}`;
+}
+
+// The Valkey key for one sign-in challenge, which allows at most LOCKOUT_LIMIT wrong codes.
+export function challengeLockKey(challengeId: string): string {
+  return `lockout:challenge:${sha256(challengeId)}`;
 }
 
 // Stops password and code guessing, counted in Valkey so every API instance shares the counts.
@@ -48,6 +54,12 @@ export class LockoutService {
     if (failures >= LOCKOUT_LIMIT) {
       throw new TooManyTriesException(LOCKED_OUT, Math.max(1, Math.ceil(ms / 1000)));
     }
+  }
+
+  // Whether the key has had LOCKOUT_LIMIT failures, for a caller that answers its own way.
+  async isLocked(key: string): Promise<boolean> {
+    const [failures] = ((await this.run(READ_SCRIPT, key)) ?? [0]) as [number];
+    return failures >= LOCKOUT_LIMIT;
   }
 
   // Counts a wrong try. Answers true when this one locked the key.
