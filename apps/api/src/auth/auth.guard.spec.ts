@@ -1,5 +1,5 @@
 import type { ExecutionContext } from "@nestjs/common";
-import { SignJWT } from "jose";
+import { SignJWT, UnsecuredJWT } from "jose";
 import { AuthGuard, SIGN_IN_REQUIRED } from "./auth.guard.js";
 import type { AuthedRequest } from "./current-user.js";
 import { TokensService } from "./tokens.service.js";
@@ -78,6 +78,24 @@ describe("AuthGuard", () => {
     await expect(guard.canActivate(contextFor(`Bearer ${forged}`).context)).rejects.toThrow(
       SIGN_IN_REQUIRED,
     );
+  });
+
+  it("refuses a token with another algorithm: unsigned (alg: none) or HS512 with our secret", async () => {
+    const unsigned = new UnsecuredJWT({ role: "admin" })
+      .setSubject(USER_ID)
+      .setExpirationTime("15m")
+      .encode();
+    const otherAlgorithm = await new SignJWT({ role: "admin" })
+      .setProtectedHeader({ alg: "HS512" })
+      .setSubject(USER_ID)
+      .setExpirationTime("15m")
+      .sign(SECRET);
+
+    for (const token of [unsigned, otherAlgorithm]) {
+      const { context, request } = contextFor(`Bearer ${token}`);
+      await expect(guard.canActivate(context)).rejects.toThrow(SIGN_IN_REQUIRED);
+      expect(request.userId).toBeUndefined();
+    }
   });
 
   it("refuses a token without a role or without a subject", async () => {

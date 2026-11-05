@@ -1,4 +1,4 @@
-import { SignJWT } from "jose";
+import { SignJWT, UnsecuredJWT } from "jose";
 import {
   ACCESS_TOKEN_SECONDS,
   CHALLENGE_PURPOSE,
@@ -49,6 +49,25 @@ describe("TokensService", () => {
       .sign(new TextEncoder().encode("some-other-secret-0123456789abcdef"));
 
     await expect(tokens.verifyAccess(forged)).rejects.toThrow(/signature/);
+  });
+
+  it("rejects an unsigned token (alg: none), whatever it claims", async () => {
+    const unsigned = new UnsecuredJWT({ role: "admin" })
+      .setSubject(USER.id)
+      .setExpirationTime("15m")
+      .encode();
+
+    await expect(tokens.verifyAccess(unsigned)).rejects.toThrow();
+  });
+
+  it("rejects a token signed with the right secret but another algorithm (HS512)", async () => {
+    const otherAlgorithm = await new SignJWT({ role: "admin" })
+      .setProtectedHeader({ alg: "HS512" })
+      .setSubject(USER.id)
+      .setExpirationTime("15m")
+      .sign(new TextEncoder().encode(process.env["JWT_SECRET"]));
+
+    await expect(tokens.verifyAccess(otherAlgorithm)).rejects.toThrow(/alg/);
   });
 
   it("refuses to sign without JWT_SECRET", async () => {
