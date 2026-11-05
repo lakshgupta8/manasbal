@@ -6,7 +6,7 @@ import { Logger } from "nestjs-pino";
 import { AppModule } from "./app.module.js";
 import { requireJwtSecret } from "./auth/jwt-secret.js";
 import { requireTotpKey } from "./auth/totp-key.js";
-import { webOrigins } from "./auth/web-origins.js";
+import { corsOptions, webOrigins } from "./auth/web-origins.js";
 import { setupDocs } from "./docs/docs.js";
 import { echoRequestId, fastifyOptions } from "./logging/logging.config.js";
 import { trustedProxyHops, trustProxy } from "./proxy/trusted-proxy.js";
@@ -31,7 +31,7 @@ async function bootstrap() {
   await app.register(fastifyCookie);
   // Only the shop may call from a browser with credentials (the refresh cookie); the refresh and
   // sign-out routes also check Origin themselves (OriginGuard).
-  app.enableCors({ origin: origins, credentials: true });
+  app.enableCors(corsOptions(origins));
   echoRequestId(app);
   setupDocs(app);
   // Listen on all interfaces so the API is reachable inside Docker and on Render. Locally it

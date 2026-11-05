@@ -28,3 +28,10 @@ export function webOrigins(env: NodeJS.ProcessEnv = process.env): string[] {
   }
   return origins;
 }
+
+// CORS for the API: only the shop's origins may call it from a browser, with credentials (the
+// refresh cookie). Any other origin gets no Access-Control-Allow-Origin, so its pages can't read
+// the answers.
+export function corsOptions(origins: readonly string[]) {
+  return { origin: [...origins], credentials: true };
+}
