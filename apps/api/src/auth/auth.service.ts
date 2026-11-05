@@ -18,7 +18,7 @@ import { AuditService, type AuditWho } from "../audit/audit.service.js";
 import { readMailSettings } from "../mail/mail-settings.js";
 import { MailerService } from "../mail/mailer.service.js";
 import { getDb } from "../prisma/db.js";
-import { emailLockKey, LockoutService, userLockKey } from "./lockout.service.js";
+import { challengeLockKey, emailLockKey, LockoutService, userLockKey } from "./lockout.service.js";
 import { PasswordService } from "./password.service.js";
 import { revokeFamily } from "./revoke-family.js";
 import {
@@ -78,7 +78,7 @@ export class AuthService {
     @Inject(MailerService) private readonly mailer: Pick<MailerService, "send">,
     @Inject(TwoStepService) private readonly twoStep: Pick<TwoStepService, "verifySignIn">,
     @Inject(LockoutService)
-    private readonly lockout: Pick<LockoutService, "assertOpen" | "fail" | "clear">,
+    private readonly lockout: Pick<LockoutService, "assertOpen" | "isLocked" | "fail" | "clear">,
     @Inject(AuditService) private readonly audit: Pick<AuditService, "record">,
   ) {}
 
@@ -255,15 +255,20 @@ export class AuthService {
     userAgent: string | undefined,
     requestId: string,
   ) {
-    const userId = await this.tokens.verifyChallenge(challengeToken).catch(() => null);
-    if (userId === null) throw new UnauthorizedException(SIGN_IN_AGAIN);
-    // Wrong codes count against the account, so a challenge can't be used to guess the code.
+    const challenge = await this.tokens.verifyChallenge(challengeToken).catch(() => null);
+    if (challenge === null) throw new UnauthorizedException(SIGN_IN_AGAIN);
+    // One challenge allows at most 5 wrong codes; after that it is dead, even for a right code.
+    const challengeKey = challengeLockKey(challenge.challengeId);
+    if (await this.lockout.isLocked(challengeKey)) throw new UnauthorizedException(SIGN_IN_AGAIN);
+    // Wrong codes also count against the account, so new challenges can't be used to guess on.
+    const { userId } = challenge;
     const lockKey = userLockKey(userId);
     await this.lockout.assertOpen(lockKey);
     const who = { userId, requestId };
     const user = await this.twoStep.verifySignIn(who, code).catch(async (error: unknown) => {
       if (error instanceof UnauthorizedException && error.message === WRONG_CODE) {
         await this.failed(lockKey, who, "auth.2fa.failed");
+        await this.lockout.fail(challengeKey);
       }
       throw error;
     });

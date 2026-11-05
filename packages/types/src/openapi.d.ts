@@ -75,7 +75,7 @@ export interface paths {
     put?: never;
     /**
      * Second step of sign-in
-     * @description Takes the challenge sign-in answered and the 6-digit code from the authenticator app, or a recovery code. Each code works once. Answers an access token and sets the refresh_token cookie, as sign-in does.
+     * @description Takes the challenge sign-in answered and the 6-digit code from the authenticator app, or a recovery code. Each code works once, and a challenge allows at most 5 wrong codes. Answers an access token and sets the refresh_token cookie, as sign-in does.
      */
     post: operations["AuthController_verifyTwoStep"];
     delete?: never;
@@ -1001,7 +1001,7 @@ export interface operations {
           "application/json": components["schemas"]["SignInResult"];
         };
       };
-      /** @description The code is not right, or sign in again */
+      /** @description The code is not right, or sign in again (also after 5 wrong codes on one challenge) */
       401: {
         headers: {
           [name: string]: unknown;
@@ -1252,6 +1252,13 @@ export interface operations {
         };
         content?: never;
       };
+      /** @description 5 wrong codes for this account in 15 minutes: wait 15 minutes */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
   TwoStepController_disable: {
@@ -1292,6 +1299,13 @@ export interface operations {
       };
       /** @description Two-step sign-in is not on */
       409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description 5 wrong codes for this account in 15 minutes: wait 15 minutes */
+      429: {
         headers: {
           [name: string]: unknown;
         };

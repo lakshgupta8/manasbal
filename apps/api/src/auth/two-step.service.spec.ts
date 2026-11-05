@@ -6,6 +6,8 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { generate, generateSecret } from "otplib";
+import { TooManyTriesException } from "../errors/too-many-tries.exception.js";
+import { userLockKey } from "./lockout.service.js";
 import { hashRecoveryCode } from "./recovery-codes.js";
 import { open, seal } from "./secret-box.js";
 import {
@@ -61,12 +63,21 @@ vi.mock("../prisma/db.js", () => ({
 
 describe("TwoStepService", () => {
   const audit = { record: vi.fn<() => Promise<void>>() };
-  const service = new TwoStepService(audit);
+  const lockout = {
+    assertOpen: vi.fn<(key: string) => Promise<void>>(),
+    fail: vi.fn<(key: string) => Promise<boolean>>(),
+    clear: vi.fn<(key: string) => Promise<void>>(),
+  };
+  const service = new TwoStepService(audit, lockout);
+  const lockKey = userLockKey(USER_ID);
 
   beforeEach(() => {
     User = fakeCollection();
     RecoveryCode = fakeCollection();
     audit.record.mockReset().mockResolvedValue(undefined);
+    lockout.assertOpen.mockReset().mockResolvedValue(undefined);
+    lockout.fail.mockReset().mockResolvedValue(false);
+    lockout.clear.mockReset().mockResolvedValue(undefined);
   });
 
   describe("setup", () => {
@@ -154,7 +165,7 @@ describe("TwoStepService", () => {
       );
     });
 
-    it("refuses a wrong code and switches nothing on", async () => {
+    it("refuses a wrong code, switches nothing on, and counts and audits it against the account", async () => {
       User.first.mockResolvedValue(pending());
       const right = await generate({ secret });
       const wrong = right === "000000" ? "111111" : "000000";
@@ -162,6 +173,53 @@ describe("TwoStepService", () => {
       await expect(service.enable(WHO, wrong)).rejects.toThrow(new BadRequestException(WRONG_CODE));
       expect(User.updateAndCount).not.toHaveBeenCalled();
       expect(RecoveryCode.createAndCount).not.toHaveBeenCalled();
+      expect(lockout.assertOpen).toHaveBeenCalledWith(lockKey);
+      expect(lockout.fail).toHaveBeenCalledWith(lockKey);
+      expect(lockout.clear).not.toHaveBeenCalled();
+      // Outside the transaction, which the wrong code rolled back.
+      expect(audit.record).toHaveBeenCalledExactlyOnceWith(WHO, "auth.2fa.failed", {
+        type: "user",
+        id: USER_ID,
+      });
+    });
+
+    it("records the lockout when the fifth wrong code locks the account", async () => {
+      User.first.mockResolvedValue(pending());
+      lockout.fail.mockResolvedValue(true);
+      const right = await generate({ secret });
+
+      await expect(service.enable(WHO, right === "000000" ? "111111" : "000000")).rejects.toThrow(
+        WRONG_CODE,
+      );
+      expect(audit.record).toHaveBeenLastCalledWith(WHO, "auth.lockout", {
+        type: "user",
+        id: USER_ID,
+      });
+    });
+
+    it("answers 429 while the account's codes are locked, before reading anything", async () => {
+      lockout.assertOpen.mockRejectedValue(new TooManyTriesException("locked", 900));
+
+      await expect(service.enable(WHO, "123456")).rejects.toThrow(TooManyTriesException);
+      expect(User.first).not.toHaveBeenCalled();
+    });
+
+    it("starts the account's count again after a right code", async () => {
+      User.first.mockResolvedValue(pending());
+      User.updateAndCount.mockResolvedValue(1);
+
+      await service.enable(WHO, await generate({ secret }));
+
+      expect(lockout.clear).toHaveBeenCalledWith(lockKey);
+      expect(lockout.fail).not.toHaveBeenCalled();
+    });
+
+    it("counts nothing when the code was not the problem", async () => {
+      // Set-up never started: what a demo login would get, since set-up is refused for them.
+      User.first.mockResolvedValue({ totpSecret: null, totpEnabledAt: null });
+
+      await expect(service.enable(WHO, "123456")).rejects.toThrow(TWO_STEP_NOT_SET_UP);
+      expect(lockout.fail).not.toHaveBeenCalled();
       expect(audit.record).not.toHaveBeenCalled();
     });
 
@@ -342,7 +400,7 @@ describe("TwoStepService", () => {
       expect(audit.record).toHaveBeenCalledWith(WHO, "auth.2fa.disable", TARGET, auditTx());
     });
 
-    it("refuses a wrong code with 400 and changes nothing", async () => {
+    it("refuses a wrong code with 400, changes nothing, and counts and audits it", async () => {
       User.first.mockResolvedValue(enabled());
       RecoveryCode.updateAndCount.mockResolvedValue(0);
 
@@ -351,7 +409,16 @@ describe("TwoStepService", () => {
       );
       expect(User.updateAndCount).not.toHaveBeenCalled();
       expect(RecoveryCode.deleteAndCount).not.toHaveBeenCalled();
-      expect(audit.record).not.toHaveBeenCalled();
+      expect(lockout.fail).toHaveBeenCalledWith(lockKey);
+      expect(audit.record).toHaveBeenCalledExactlyOnceWith(WHO, "auth.2fa.failed", TARGET);
+    });
+
+    it("answers 429 while the account's codes are locked, and switches nothing off", async () => {
+      lockout.assertOpen.mockRejectedValue(new TooManyTriesException("locked", 900));
+
+      await expect(service.disable(WHO, "123456")).rejects.toThrow(TooManyTriesException);
+      expect(User.first).not.toHaveBeenCalled();
+      expect(User.updateAndCount).not.toHaveBeenCalled();
     });
 
     it.each([

@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from "node:crypto";
+import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { Injectable } from "@nestjs/common";
 import { jwtVerify, SignJWT, type JWTPayload } from "jose";
 
@@ -15,6 +15,13 @@ function secret(): Uint8Array {
   const value = process.env["JWT_SECRET"];
   if (!value) throw new Error("JWT_SECRET is not set");
   return new TextEncoder().encode(value);
+}
+
+// A verified challenge: whose second step it is, and which challenge it is, so its wrong codes
+// can be counted on their own.
+export interface Challenge {
+  readonly userId: string;
+  readonly challengeId: string;
 }
 
 // Access tokens (a JWT, HS256, 15 minutes) and refresh tokens (random, stored only as a hash).
@@ -43,23 +50,25 @@ export class TokensService {
   }
 
   // The token sign-in answers when the password is right and two-step is on. It can do nothing
-  // but the second step, for 5 minutes.
+  // but the second step, for 5 minutes. Its jti names it, so its wrong codes are counted alone.
   async signChallenge(userId: string): Promise<string> {
     return new SignJWT({ purpose: CHALLENGE_PURPOSE })
       .setProtectedHeader({ alg: "HS256" })
       .setSubject(userId)
+      .setJti(randomUUID())
       .setIssuedAt()
       .setExpirationTime(`${CHALLENGE_SECONDS}s`)
       .sign(secret());
   }
 
-  // The user id of a valid challenge. Anything else throws, an access token included.
-  async verifyChallenge(token: string, now?: Date): Promise<string> {
+  // The user and id of a valid challenge. Anything else throws, an access token included. A
+  // challenge from before challenges had a jti is named by the token itself.
+  async verifyChallenge(token: string, now?: Date): Promise<Challenge> {
     const payload = await verifyToken(token, now);
     if (payload["purpose"] !== CHALLENGE_PURPOSE || typeof payload.sub !== "string") {
       throw new Error("Not a two-step challenge");
     }
-    return payload.sub;
+    return { userId: payload.sub, challengeId: payload.jti ?? token };
   }
 
   // 32 random bytes for the cookie; only the SHA-256 hash is stored.

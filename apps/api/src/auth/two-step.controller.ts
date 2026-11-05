@@ -9,6 +9,7 @@ import {
   ApiOperation,
   ApiProperty,
   ApiTags,
+  ApiTooManyRequestsResponse,
   ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
 import { Throttle } from "@nestjs/throttler";
@@ -91,6 +92,9 @@ export class TwoStepController {
   @ApiOkResponse({ type: TwoStepEnabledResult })
   @ApiBadRequestResponse({ description: "The code is not right, or set-up was not started" })
   @ApiConflictResponse({ description: "Two-step sign-in is already on" })
+  @ApiTooManyRequestsResponse({
+    description: "5 wrong codes for this account in 15 minutes: wait 15 minutes",
+  })
   enable(
     @CurrentActor() who: Actor,
     @Body(new ZodValidationPipe(twoStepEnableInputSchema)) input: TwoStepEnableInput,
@@ -109,6 +113,9 @@ export class TwoStepController {
   @ApiNoContentResponse({ description: "Two-step sign-in is off" })
   @ApiBadRequestResponse({ description: "The code is not right" })
   @ApiConflictResponse({ description: "Two-step sign-in is not on" })
+  @ApiTooManyRequestsResponse({
+    description: "5 wrong codes for this account in 15 minutes: wait 15 minutes",
+  })
   disable(
     @CurrentActor() who: Actor,
     @Body(new ZodValidationPipe(twoStepDisableInputSchema)) input: TwoStepDisableInput,
