@@ -647,6 +647,10 @@ importers:
         version: 4.1.11(@types/node@26.1.2)(@vitest/coverage-v8@4.1.11)(jsdom@30.1.2(@noble/hashes@2.4.0))(vite@8.3.4(@types/node@26.1.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
 
   packages/ui:
+    dependencies:
+      '@manasbal/icons':
+        specifier: workspace:*
+        version: link:../icons
     devDependencies:
       '@axe-core/playwright':
         specifier: ^4.13.0
@@ -654,9 +658,6 @@ importers:
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.12.0(jiti@2.7.0)(supports-color@10.2.2))
-      '@manasbal/icons':
-        specifier: workspace:*
-        version: link:../icons
       '@manasbal/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig

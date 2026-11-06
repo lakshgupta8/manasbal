@@ -17,6 +17,24 @@
         "$value": "{color.base.white}",
         "$description": "Text on the brand colour.",
         "$extensions": { "manasbal": { "dark": "{color.base.white}" } }
+      },
+      "on-brand-hover": {
+        "$type": "color",
+        "$value": "{color.base.white}",
+        "$description": "Text on the brand colour while it is hovered.",
+        "$extensions": { "manasbal": { "dark": "{color.lake.900}" } }
+      },
+      "action": {
+        "$type": "color",
+        "$value": "{color.lake.700}",
+        "$description": "Words that do something without a box around them, such as a ghost button.",
+        "$extensions": { "manasbal": { "dark": "{color.lake.200}" } }
+      },
+      "disabled": {
+        "$type": "color",
+        "$value": "{color.grey.500}",
+        "$description": "Words on a control that cannot be used yet. Exempt from contrast rules, kept readable.",
+        "$extensions": { "manasbal": { "dark": "{color.lake.400}" } }
       }
     },
     "surface": {
@@ -28,6 +46,18 @@
       "card": {
         "$type": "color",
         "$value": "{color.grey.50}",
+        "$extensions": { "manasbal": { "dark": "{color.lake.800}" } }
+      },
+      "hover": {
+        "$type": "color",
+        "$value": "{color.grey.100}",
+        "$description": "Behind a quiet control under the pointer.",
+        "$extensions": { "manasbal": { "dark": "{color.lake.800}" } }
+      },
+      "disabled": {
+        "$type": "color",
+        "$value": "{color.grey.100}",
+        "$description": "Fill of a control that cannot be used yet.",
         "$extensions": { "manasbal": { "dark": "{color.lake.800}" } }
       }
     },
@@ -43,6 +73,12 @@
         "$value": "{color.grey.500}",
         "$description": "Edge of a control, such as an input; at least 3:1 on the page and on a card.",
         "$extensions": { "manasbal": { "dark": "{color.lake.400}" } }
+      },
+      "disabled": {
+        "$type": "color",
+        "$value": "{color.grey.300}",
+        "$description": "Edge of a control that cannot be used yet; also the fill of a ticked disabled box.",
+        "$extensions": { "manasbal": { "dark": "{color.lake.700}" } }
       }
     },
     "brand": {
@@ -61,6 +97,34 @@
       "accent": {
         "$type": "color",
         "$value": "{color.lotus.500}",
+        "$extensions": { "manasbal": { "dark": "{color.lotus.400}" } }
+      },
+      "primary-hover": {
+        "$type": "color",
+        "$value": "{color.lake.600}",
+        "$description": "Brand fill under the pointer, behind on-brand-hover text.",
+        "$extensions": { "manasbal": { "dark": "{color.lake.400}" } }
+      }
+    },
+    "focus": {
+      "ring": {
+        "$type": "color",
+        "$value": "{color.lake.500}",
+        "$description": "The keyboard focus ring: 2px, 2px away from the control.",
+        "$extensions": { "manasbal": { "dark": "{color.lake.300}" } }
+      }
+    },
+    "feedback": {
+      "error": {
+        "$type": "color",
+        "$value": "{color.lotus.700}",
+        "$description": "Error words and their alert icon. Never the only sign: an icon and words go with it.",
+        "$extensions": { "manasbal": { "dark": "{color.lotus.300}" } }
+      },
+      "error-border": {
+        "$type": "color",
+        "$value": "{color.lotus.600}",
+        "$description": "Edge of a control with an error.",
         "$extensions": { "manasbal": { "dark": "{color.lotus.400}" } }
       }
     }

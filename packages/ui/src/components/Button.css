@@ -1,0 +1,90 @@
+/* Colours, spacing and type come from theme.css. data-preview="hover" or "focus" shows that state
+   without a pointer or keyboard, so Storybook can draw every state side by side. */
+.mb-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--mb-space-2);
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  border-radius: var(--mb-radius-md);
+  font-family: var(--mb-font-family-sans);
+  font-weight: var(--mb-font-weight-medium);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.mb-button--md {
+  min-height: 44px;
+  padding: 0 calc(var(--mb-space-4) - 1px);
+  font-size: var(--mb-font-size-body);
+  line-height: var(--mb-font-line-height-body);
+}
+
+.mb-button--sm {
+  min-height: 32px;
+  padding: 0 calc(var(--mb-space-3) - 1px);
+  font-size: var(--mb-font-size-small);
+  line-height: var(--mb-font-line-height-small);
+}
+
+.mb-button__icon {
+  display: inline-flex;
+  flex: none;
+}
+
+.mb-button--md .mb-button__icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.mb-button--sm .mb-button__icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.mb-button:is(:focus-visible, [data-preview="focus"]) {
+  outline: 2px solid var(--mb-color-focus-ring);
+  outline-offset: 2px;
+}
+
+.mb-button--primary {
+  background: var(--mb-color-brand-primary);
+  color: var(--mb-color-text-on-brand);
+}
+
+.mb-button--primary:is(:hover, [data-preview="hover"]):not(:disabled) {
+  background: var(--mb-color-brand-primary-hover);
+  color: var(--mb-color-text-on-brand-hover);
+}
+
+.mb-button--secondary {
+  border-color: var(--mb-color-border-strong);
+  background: var(--mb-color-surface-page);
+  color: var(--mb-color-text-default);
+}
+
+.mb-button--ghost {
+  background: transparent;
+  color: var(--mb-color-text-action);
+}
+
+.mb-button--secondary:is(:hover, [data-preview="hover"]):not(:disabled),
+.mb-button--ghost:is(:hover, [data-preview="hover"]):not(:disabled) {
+  background: var(--mb-color-surface-hover);
+}
+
+/* Disabled controls are exempt from the contrast rules; these stay readable. */
+.mb-button:disabled {
+  background: var(--mb-color-surface-disabled);
+  color: var(--mb-color-text-disabled);
+  cursor: not-allowed;
+}
+
+.mb-button--secondary:disabled {
+  border-color: var(--mb-color-border-disabled);
+}
+
+.mb-button--ghost:disabled {
+  background: transparent;
+}

@@ -29,6 +29,7 @@ test("the Storybook build has stories", () => {
 for (const story of stories) {
   test(`${story.title} › ${story.name}`, async ({ page }) => {
     if (story.tags?.includes("mobile")) await page.setViewportSize({ width: 375, height: 667 });
+    if (story.tags?.includes("wide")) await page.setViewportSize({ width: 1600, height: 900 });
     await page.goto(`/iframe.html?id=${story.id}&viewMode=story`);
     const root = page.locator("#storybook-root");
     await expect(root.locator(":scope > *").first()).toBeAttached();

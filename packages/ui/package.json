@@ -17,6 +17,9 @@
     "test:visual": "node scripts/visual.mjs",
     "tokens": "style-dictionary build --config style-dictionary.config.ts"
   },
+  "dependencies": {
+    "@manasbal/icons": "workspace:*"
+  },
   "peerDependencies": {
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
@@ -24,7 +27,6 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
     "@eslint/js": "^10.0.1",
-    "@manasbal/icons": "workspace:*",
     "@manasbal/tsconfig": "workspace:*",
     "@playwright/test": "1.63.0",
     "@storybook/addon-a11y": "10.6.1",
