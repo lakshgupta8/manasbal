@@ -3,5 +3,8 @@
   ["color.border.strong", "color.surface.card"],
   ["color.brand.primary", "color.surface.page"],
   ["color.brand.accent", "color.surface.page"],
-  ["color.brand.accent", "color.surface.card"]
+  ["color.brand.accent", "color.surface.card"],
+  ["color.border.strong", "color.surface.hover"],
+  ["color.focus.ring", "color.surface.page"],
+  ["color.feedback.error-border", "color.surface.page"]
 ]

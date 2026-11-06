@@ -13,5 +13,10 @@
   ["color.text.muted", "color.surface.page"],
   ["color.text.muted", "color.surface.card"],
   ["color.text.on-brand", "color.brand.primary"],
-  ["color.text.on-brand", "color.brand.ink"]
+  ["color.text.on-brand", "color.brand.ink"],
+  ["color.text.on-brand-hover", "color.brand.primary-hover"],
+  ["color.text.default", "color.surface.hover"],
+  ["color.text.action", "color.surface.page"],
+  ["color.text.action", "color.surface.hover"],
+  ["color.feedback.error", "color.surface.page"]
 ]

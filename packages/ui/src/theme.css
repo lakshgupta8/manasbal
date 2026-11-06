@@ -35,13 +35,23 @@
   --mb-color-text-default: var(--mb-color-lake-900);
   --mb-color-text-muted: var(--mb-color-grey-600);
   --mb-color-text-on-brand: var(--mb-color-base-white);
+  --mb-color-text-on-brand-hover: var(--mb-color-base-white);
+  --mb-color-text-action: var(--mb-color-lake-700);
+  --mb-color-text-disabled: var(--mb-color-grey-500);
   --mb-color-surface-page: var(--mb-color-base-white);
   --mb-color-surface-card: var(--mb-color-grey-50);
+  --mb-color-surface-hover: var(--mb-color-grey-100);
+  --mb-color-surface-disabled: var(--mb-color-grey-100);
   --mb-color-border-default: var(--mb-color-grey-200);
   --mb-color-border-strong: var(--mb-color-grey-500);
+  --mb-color-border-disabled: var(--mb-color-grey-300);
   --mb-color-brand-primary: var(--mb-color-lake-500);
   --mb-color-brand-ink: var(--mb-color-lake-900);
   --mb-color-brand-accent: var(--mb-color-lotus-500);
+  --mb-color-brand-primary-hover: var(--mb-color-lake-600);
+  --mb-color-focus-ring: var(--mb-color-lake-500);
+  --mb-color-feedback-error: var(--mb-color-lotus-700);
+  --mb-color-feedback-error-border: var(--mb-color-lotus-600);
   --mb-space-1: 4px;
   --mb-space-2: 8px;
   --mb-space-3: 12px;
@@ -78,14 +88,71 @@
     --mb-color-text-default: var(--mb-color-lake-50);
     --mb-color-text-muted: var(--mb-color-lake-200);
     --mb-color-text-on-brand: var(--mb-color-base-white);
+    --mb-color-text-on-brand-hover: var(--mb-color-lake-900);
+    --mb-color-text-action: var(--mb-color-lake-200);
+    --mb-color-text-disabled: var(--mb-color-lake-400);
     --mb-color-surface-page: var(--mb-color-lake-900);
     --mb-color-surface-card: var(--mb-color-lake-800);
+    --mb-color-surface-hover: var(--mb-color-lake-800);
+    --mb-color-surface-disabled: var(--mb-color-lake-800);
     --mb-color-border-default: var(--mb-color-lake-700);
     --mb-color-border-strong: var(--mb-color-lake-400);
+    --mb-color-border-disabled: var(--mb-color-lake-700);
     --mb-color-brand-primary: var(--mb-color-lake-500);
     --mb-color-brand-ink: var(--mb-color-lake-900);
     --mb-color-brand-accent: var(--mb-color-lotus-400);
+    --mb-color-brand-primary-hover: var(--mb-color-lake-400);
+    --mb-color-focus-ring: var(--mb-color-lake-300);
+    --mb-color-feedback-error: var(--mb-color-lotus-300);
+    --mb-color-feedback-error-border: var(--mb-color-lotus-400);
   }
+}
+
+/* Part of a page, such as a Storybook story, can ask for one theme whatever the system says. */
+[data-theme="dark"] {
+  --mb-color-text-default: var(--mb-color-lake-50);
+  --mb-color-text-muted: var(--mb-color-lake-200);
+  --mb-color-text-on-brand: var(--mb-color-base-white);
+  --mb-color-text-on-brand-hover: var(--mb-color-lake-900);
+  --mb-color-text-action: var(--mb-color-lake-200);
+  --mb-color-text-disabled: var(--mb-color-lake-400);
+  --mb-color-surface-page: var(--mb-color-lake-900);
+  --mb-color-surface-card: var(--mb-color-lake-800);
+  --mb-color-surface-hover: var(--mb-color-lake-800);
+  --mb-color-surface-disabled: var(--mb-color-lake-800);
+  --mb-color-border-default: var(--mb-color-lake-700);
+  --mb-color-border-strong: var(--mb-color-lake-400);
+  --mb-color-border-disabled: var(--mb-color-lake-700);
+  --mb-color-brand-primary: var(--mb-color-lake-500);
+  --mb-color-brand-ink: var(--mb-color-lake-900);
+  --mb-color-brand-accent: var(--mb-color-lotus-400);
+  --mb-color-brand-primary-hover: var(--mb-color-lake-400);
+  --mb-color-focus-ring: var(--mb-color-lake-300);
+  --mb-color-feedback-error: var(--mb-color-lotus-300);
+  --mb-color-feedback-error-border: var(--mb-color-lotus-400);
+}
+
+[data-theme="light"] {
+  --mb-color-text-default: var(--mb-color-lake-900);
+  --mb-color-text-muted: var(--mb-color-grey-600);
+  --mb-color-text-on-brand: var(--mb-color-base-white);
+  --mb-color-text-on-brand-hover: var(--mb-color-base-white);
+  --mb-color-text-action: var(--mb-color-lake-700);
+  --mb-color-text-disabled: var(--mb-color-grey-500);
+  --mb-color-surface-page: var(--mb-color-base-white);
+  --mb-color-surface-card: var(--mb-color-grey-50);
+  --mb-color-surface-hover: var(--mb-color-grey-100);
+  --mb-color-surface-disabled: var(--mb-color-grey-100);
+  --mb-color-border-default: var(--mb-color-grey-200);
+  --mb-color-border-strong: var(--mb-color-grey-500);
+  --mb-color-border-disabled: var(--mb-color-grey-300);
+  --mb-color-brand-primary: var(--mb-color-lake-500);
+  --mb-color-brand-ink: var(--mb-color-lake-900);
+  --mb-color-brand-accent: var(--mb-color-lotus-500);
+  --mb-color-brand-primary-hover: var(--mb-color-lake-600);
+  --mb-color-focus-ring: var(--mb-color-lake-500);
+  --mb-color-feedback-error: var(--mb-color-lotus-700);
+  --mb-color-feedback-error-border: var(--mb-color-lotus-600);
 }
 
 /* Tailwind CSS v4 reads this block; browsers ignore it. */
@@ -124,13 +191,23 @@
   --color-text-default: var(--mb-color-text-default);
   --color-text-muted: var(--mb-color-text-muted);
   --color-text-on-brand: var(--mb-color-text-on-brand);
+  --color-text-on-brand-hover: var(--mb-color-text-on-brand-hover);
+  --color-text-action: var(--mb-color-text-action);
+  --color-text-disabled: var(--mb-color-text-disabled);
   --color-surface-page: var(--mb-color-surface-page);
   --color-surface-card: var(--mb-color-surface-card);
+  --color-surface-hover: var(--mb-color-surface-hover);
+  --color-surface-disabled: var(--mb-color-surface-disabled);
   --color-border-default: var(--mb-color-border-default);
   --color-border-strong: var(--mb-color-border-strong);
+  --color-border-disabled: var(--mb-color-border-disabled);
   --color-brand-primary: var(--mb-color-brand-primary);
   --color-brand-ink: var(--mb-color-brand-ink);
   --color-brand-accent: var(--mb-color-brand-accent);
+  --color-brand-primary-hover: var(--mb-color-brand-primary-hover);
+  --color-focus-ring: var(--mb-color-focus-ring);
+  --color-feedback-error: var(--mb-color-feedback-error);
+  --color-feedback-error-border: var(--mb-color-feedback-error-border);
   --spacing-1: var(--mb-space-1);
   --spacing-2: var(--mb-space-2);
   --spacing-3: var(--mb-space-3);
