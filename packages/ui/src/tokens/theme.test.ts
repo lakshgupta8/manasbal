@@ -22,6 +22,23 @@ describe("theme.css", () => {
     }
   });
 
+  it("lets part of a page ask for either theme, whatever the system setting", () => {
+    const css = readFileSync(path.join(packageDir, "src/theme.css"), "utf8").replaceAll(
+      "\r\n",
+      "\n",
+    );
+
+    expect(css).toContain(
+      '[data-theme="dark"] {\n  --mb-color-text-default: var(--mb-color-lake-50);',
+    );
+    expect(css).toContain(
+      '[data-theme="light"] {\n  --mb-color-text-default: var(--mb-color-lake-900);',
+    );
+    // Only the names that change with the theme are set again, not the plain colours.
+    const light = /\[data-theme="light"\] \{([^}]*)\}/.exec(css)?.[1] ?? "";
+    expect(light).not.toContain("--mb-color-lake-500:");
+  });
+
   it("is what the CLI config writes into src", () => {
     expect(config.platforms?.css?.buildPath).toBe(path.join(packageDir, "src") + path.sep);
   });

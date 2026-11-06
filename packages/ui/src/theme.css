@@ -108,7 +108,7 @@
   }
 }
 
-/* Part of a page, such as a Storybook story, can ask for the dark theme. */
+/* Part of a page, such as a Storybook story, can ask for one theme whatever the system says. */
 [data-theme="dark"] {
   --mb-color-text-default: var(--mb-color-lake-50);
   --mb-color-text-muted: var(--mb-color-lake-200);
@@ -130,6 +130,29 @@
   --mb-color-focus-ring: var(--mb-color-lake-300);
   --mb-color-feedback-error: var(--mb-color-lotus-300);
   --mb-color-feedback-error-border: var(--mb-color-lotus-400);
+}
+
+[data-theme="light"] {
+  --mb-color-text-default: var(--mb-color-lake-900);
+  --mb-color-text-muted: var(--mb-color-grey-600);
+  --mb-color-text-on-brand: var(--mb-color-base-white);
+  --mb-color-text-on-brand-hover: var(--mb-color-base-white);
+  --mb-color-text-action: var(--mb-color-lake-700);
+  --mb-color-text-disabled: var(--mb-color-grey-500);
+  --mb-color-surface-page: var(--mb-color-base-white);
+  --mb-color-surface-card: var(--mb-color-grey-50);
+  --mb-color-surface-hover: var(--mb-color-grey-100);
+  --mb-color-surface-disabled: var(--mb-color-grey-100);
+  --mb-color-border-default: var(--mb-color-grey-200);
+  --mb-color-border-strong: var(--mb-color-grey-500);
+  --mb-color-border-disabled: var(--mb-color-grey-300);
+  --mb-color-brand-primary: var(--mb-color-lake-500);
+  --mb-color-brand-ink: var(--mb-color-lake-900);
+  --mb-color-brand-accent: var(--mb-color-lotus-500);
+  --mb-color-brand-primary-hover: var(--mb-color-lake-600);
+  --mb-color-focus-ring: var(--mb-color-lake-500);
+  --mb-color-feedback-error: var(--mb-color-lotus-700);
+  --mb-color-feedback-error-border: var(--mb-color-lotus-600);
 }
 
 /* Tailwind CSS v4 reads this block; browsers ignore it. */

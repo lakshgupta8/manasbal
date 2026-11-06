@@ -23,7 +23,8 @@ export function tailwindName(tokenPath: string[]): string {
 }
 
 // :root with every token (meaning-layer names point at plain ones), the dark meaning layer (for a
-// dark system setting, and for anything inside data-theme="dark"), and the Tailwind theme block.
+// dark system setting, and for anything inside data-theme="dark"), the light meaning layer again
+// for anything inside data-theme="light", and the Tailwind theme block.
 export function themeCss(tokens: TransformedToken[]): string {
   const byPath = new Map(tokens.map((token) => [token.path.join("."), token]));
   // "{color.lake.900}" -> "var(--mb-color-lake-900)"; an alias to a missing token fails the build.
@@ -47,6 +48,10 @@ export function themeCss(tokens: TransformedToken[]): string {
     const value = darkOf(token);
     return value ? [`    --${token.name}: ${toVar(value)};`] : [];
   });
+  // The light values of the names that change with the theme, to undo a dark system setting.
+  const lightAgain = tokens.flatMap((token) =>
+    darkOf(token) ? [`  --${token.name}: ${valueOf(token)};`] : [],
+  );
   const tailwind = tokens.map((token) => `  ${tailwindName(token.path)}: var(--${token.name});`);
 
   return [
@@ -62,9 +67,13 @@ export function themeCss(tokens: TransformedToken[]): string {
     "  }",
     "}",
     "",
-    "/* Part of a page, such as a Storybook story, can ask for the dark theme. */",
+    "/* Part of a page, such as a Storybook story, can ask for one theme whatever the system says. */",
     '[data-theme="dark"] {',
     ...dark.map((line) => line.slice(2)),
+    "}",
+    "",
+    '[data-theme="light"] {',
+    ...lightAgain,
     "}",
     "",
     "/* Tailwind CSS v4 reads this block; browsers ignore it. */",

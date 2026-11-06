@@ -26,21 +26,39 @@ test("the Storybook build has stories", () => {
   expect(stories.length).toBeGreaterThan(0);
 });
 
+// Each story is drawn with the system set to light and to dark: it must look the same both times,
+// because a story picks its theme itself (see .storybook/preview.ts). The dark run's test name
+// says so; the light run keeps the plain name.
+const systemSettings = ["light", "dark"] as const;
+
 for (const story of stories) {
-  test(`${story.title} › ${story.name}`, async ({ page }) => {
-    if (story.tags?.includes("mobile")) await page.setViewportSize({ width: 375, height: 667 });
-    if (story.tags?.includes("wide")) await page.setViewportSize({ width: 1600, height: 900 });
-    await page.goto(`/iframe.html?id=${story.id}&viewMode=story`);
-    const root = page.locator("#storybook-root");
-    await expect(root.locator(":scope > *").first()).toBeAttached();
-    await page.evaluate(() => document.fonts.ready);
+  for (const colorScheme of systemSettings) {
+    const suffix = colorScheme === "dark" ? " (system set to dark)" : "";
+    test(`${story.title} › ${story.name}${suffix}`, async ({ page }) => {
+      await page.emulateMedia({ colorScheme });
+      if (story.tags?.includes("mobile")) await page.setViewportSize({ width: 375, height: 667 });
+      if (story.tags?.includes("wide")) await page.setViewportSize({ width: 1600, height: 900 });
+      await page.goto(`/iframe.html?id=${story.id}&viewMode=story`);
+      const root = page.locator("#storybook-root");
+      await expect(root.locator(":scope > *").first()).toBeAttached();
+      await page.evaluate(() => document.fonts.ready);
 
-    await expect(root).toHaveScreenshot(`${story.id}.png`);
+      await expect(root).toHaveScreenshot(`${story.id}.png`);
 
-    const { violations } = await new AxeBuilder({ page })
-      .include("#storybook-root")
-      .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
-      .analyze();
-    expect(violations.map((v) => `${v.id}: ${v.help}`)).toEqual([]);
-  });
+      const { violations } = await new AxeBuilder({ page })
+        .include("#storybook-root")
+        .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+        .analyze();
+      expect(violations.map((v) => `${v.id}: ${v.help}`)).toEqual([]);
+
+      // What Storybook's Accessibility panel runs: every default axe rule on the body (so not the
+      // whole-page rules), except "region", which it turns off because a lone component has no
+      // landmarks.
+      const panel = await new AxeBuilder({ page })
+        .include("body")
+        .disableRules(["region"])
+        .analyze();
+      expect(panel.violations.map((v) => `${v.id}: ${v.help}`)).toEqual([]);
+    });
+  }
 }
