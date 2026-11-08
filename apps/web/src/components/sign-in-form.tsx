@@ -51,7 +51,6 @@ type FieldErrors = Partial<Record<Field, string>>;
 const DEMO_ROLES = Object.keys(DEMO_EMAILS) as Role[];
 // With no Retry-After, the button waits this long before it can be pressed again.
 export const DEFAULT_WAIT_SECONDS = 60;
-const SIMPLE_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function tooManyTriesText(words: SignInWords, seconds: number | undefined): string {
   if (seconds === undefined) return words.tooManyTries;
@@ -61,11 +60,20 @@ export function tooManyTriesText(words: SignInWords, seconds: number | undefined
     : words.tooManyTriesMinutes.replace("{minutes}", String(minutes));
 }
 
+// Something@something.something, with no spaces: the API checks the rest. No regular expression,
+// so a long input can't make it slow.
+export function looksLikeEmail(email: string): boolean {
+  const at = email.indexOf("@");
+  const domain = email.slice(at + 1);
+  const dot = domain.lastIndexOf(".");
+  return at > 0 && !domain.includes("@") && dot > 0 && dot < domain.length - 1 && !/\s/.test(email);
+}
+
 // The empty fields and a malformed email, before anything is sent.
 function check(words: SignInWords, email: string, password: string): FieldErrors {
   const errors: FieldErrors = {};
   if (email === "") errors.email = words.emailMissing;
-  else if (!SIMPLE_EMAIL.test(email)) errors.email = words.emailInvalid;
+  else if (!looksLikeEmail(email)) errors.email = words.emailInvalid;
   if (password === "") errors.password = words.passwordMissing;
   return errors;
 }
@@ -144,8 +152,9 @@ export function SignInForm({
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    const email = String(data.get("email")).trim();
-    const password = String(data.get("password"));
+    // Both fields are text inputs, so their values are strings.
+    const email = (data.get("email") as string).trim();
+    const password = data.get("password") as string;
     const found = check(words, email, password);
     if (Object.keys(found).length > 0) return showFieldErrors(found);
     void attempt(email, password);

@@ -76,7 +76,8 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
   // On load: the refresh cookie, if there is a usable one, says who is signed in.
   useEffect(() => {
     let current = true;
-    renewOnce()
+    // stateFor never rejects, and a failed renewal becomes "signed out", so nothing is left over.
+    void renewOnce()
       .then(stateFor, () => SIGNED_OUT)
       .then((next) => {
         if (current) setState(next);
@@ -92,7 +93,7 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
     if (expiresIn === null) return;
     const seconds = Math.max(MIN_RENEW_SECONDS, expiresIn - RENEW_EARLY_SECONDS);
     const timer = setTimeout(() => {
-      renewOnce()
+      void renewOnce()
         .then(stateFor, () => SIGNED_OUT)
         .then(setState);
     }, seconds * 1000);
