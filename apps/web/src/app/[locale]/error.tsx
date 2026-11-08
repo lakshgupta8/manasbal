@@ -2,12 +2,11 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import en from "../../../messages/en.json";
-import hi from "../../../messages/hi.json";
+import WORDS from "../../../messages/error-page.json";
 
-// An error page is a client component, so it reads its words straight from the message files
-// rather than shipping a translation library to the browser.
-const WORDS = { en: en.Error, hi: hi.Error } as const;
+// An error page is a client component, so it reads its words straight from a message file rather
+// than shipping a translation library to the browser. They have a file of their own, in both
+// languages: importing en.json and hi.json here would send every page's words to the browser.
 
 export interface ErrorPageProps {
   readonly error: Error & { digest?: string };

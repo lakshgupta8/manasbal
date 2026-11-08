@@ -1,25 +1,8 @@
 import { createApiClient, type ApiClient } from "@manasbal/sdk";
+import { API_TIMEOUT_MS, ApiResponseError, ApiUnavailableError } from "./api-errors";
 import { shopPath } from "./api-routes";
 
-// How long a call may take before it counts as the API being unavailable.
-export const API_TIMEOUT_MS = 5000;
-
-// The API could not be reached: API_URL is not set, the network failed or the call timed out.
-export class ApiUnavailableError extends Error {
-  override readonly name = "ApiUnavailableError";
-}
-
-// The API answered with an error status. `title` is the problem document's title when it sent one.
-export class ApiResponseError extends Error {
-  override readonly name = "ApiResponseError";
-
-  constructor(
-    readonly status: number,
-    readonly title: string,
-  ) {
-    super(`The API answered ${status}: ${title}`);
-  }
-}
+export { API_TIMEOUT_MS, ApiResponseError, ApiUnavailableError } from "./api-errors";
 
 // On the server (pages rendered by Next.js) the client calls API_URL directly. In the browser it
 // calls the shop's own address, which forwards to the API (next.config.ts), so the refresh cookie

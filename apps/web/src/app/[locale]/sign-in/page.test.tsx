@@ -7,7 +7,7 @@ import SignInPage, { generateMetadata } from "./page";
 vi.mock("next-intl/server", () => import("@/test/intl"));
 // The form has its own tests; here it shows what the page passes it.
 const passed: SignInFormProps[] = [];
-vi.mock("@/components/sign-in-form", () => ({
+vi.mock("@/components/auth-forms", () => ({
   SignInForm: (props: SignInFormProps) => {
     passed.push(props);
     return <p>{props.words.submit}</p>;

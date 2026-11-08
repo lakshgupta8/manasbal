@@ -623,6 +623,8 @@ export interface components {
       id: string;
       email: string;
       name: string;
+      /** @description True when the account can sign in now (mail is off); false when a link to confirm the email was mailed */
+      emailConfirmed: boolean;
     };
     TwoStepSetupResult: {
       /**

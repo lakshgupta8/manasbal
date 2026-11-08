@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import ERROR_WORDS from "../../../messages/error-page.json";
 import { MESSAGES, withIntl } from "@/test/intl";
 import ErrorPage from "./error";
 import Loading from "./loading";
@@ -56,7 +57,7 @@ describe("ErrorPage", () => {
     params.locale = "hi";
     render(<ErrorPage error={new Error("down")} retry={vi.fn()} />);
 
-    const words = MESSAGES.hi.Error;
+    const words = ERROR_WORDS.hi;
     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe(words.heading);
     expect(screen.getByRole("button", { name: words.retry })).toBeDefined();
     expect(screen.getByRole("link", { name: words.home }).getAttribute("href")).toBe("/hi");

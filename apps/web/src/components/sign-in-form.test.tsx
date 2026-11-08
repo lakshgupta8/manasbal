@@ -5,13 +5,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as auth from "@/lib/auth";
 import { MESSAGES } from "@/test/intl";
 import { useAuth } from "./auth-provider";
-import {
-  DEFAULT_WAIT_SECONDS,
-  looksLikeEmail,
-  SignInForm,
-  tooManyTriesText,
-  type SignInWords,
-} from "./sign-in-form";
+import { DEFAULT_WAIT_SECONDS } from "./auth-form-parts";
+import { SignInForm, type SignInWords } from "./sign-in-form";
 
 const push = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
@@ -226,43 +221,5 @@ describe("SignInForm", () => {
     expect(screen.getByRole("link", { name: "Create an account" }).getAttribute("href")).toBe(
       "/en/sign-up",
     );
-  });
-});
-
-describe("tooManyTriesText", () => {
-  it.each([
-    [undefined, "Too many tries. Wait a little and try again."],
-    [0, "Too many tries. Wait 1 minute and try again."],
-    [60, "Too many tries. Wait 1 minute and try again."],
-    [61, "Too many tries. Wait 2 minutes and try again."],
-    [900, "Too many tries. Wait 15 minutes and try again."],
-  ])("for %s seconds says %s", (seconds, text) => {
-    expect(tooManyTriesText(WORDS, seconds)).toBe(text);
-  });
-});
-
-describe("looksLikeEmail", () => {
-  it.each(["name@example.test", "a.b@sub.example.co.in"])("takes %s", (email) => {
-    expect(looksLikeEmail(email)).toBe(true);
-  });
-
-  it.each([
-    "",
-    "name",
-    "@example.test",
-    "name@",
-    "name@example",
-    "name@.test",
-    "name@example.",
-    "a@b@example.test",
-    "name @example.test",
-  ])("refuses %j", (email) => {
-    expect(looksLikeEmail(email)).toBe(false);
-  });
-
-  it("stays fast on a long input with no @", () => {
-    const start = performance.now();
-    looksLikeEmail("a".repeat(100_000));
-    expect(performance.now() - start).toBeLessThan(100);
   });
 });

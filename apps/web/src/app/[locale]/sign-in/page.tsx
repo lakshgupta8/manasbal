@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { SignInForm, type SignInWords } from "@/components/sign-in-form";
+import { AuthCard } from "@/components/auth-form-parts";
+import { SignInForm } from "@/components/auth-forms";
+import type { SignInWords } from "@/components/sign-in-form";
 
 export async function generateMetadata({
   params,
@@ -47,16 +49,14 @@ export default async function SignInPage({ params }: PageProps<"/[locale]/sign-i
   };
 
   return (
-    <div className="flex flex-1 justify-center px-4 py-6 sm:px-6 sm:py-16">
-      <div className="flex flex-col gap-6 bg-surface-page p-6 sm:p-8 border border-border-default rounded-2xl w-full max-w-96 self-start text-text-default">
-        <h1 className="font-semibold text-heading-2">{t("title")}</h1>
-        <SignInForm
-          words={words}
-          homeHref={`/${locale}`}
-          forgotPasswordHref={`/${locale}/forgot-password`}
-          createAccountHref={`/${locale}/sign-up`}
-        />
-      </div>
-    </div>
+    <AuthCard>
+      <h1 className="font-semibold text-heading-2">{t("title")}</h1>
+      <SignInForm
+        words={words}
+        homeHref={`/${locale}`}
+        forgotPasswordHref={`/${locale}/forgot-password`}
+        createAccountHref={`/${locale}/sign-up`}
+      />
+    </AuthCard>
   );
 }

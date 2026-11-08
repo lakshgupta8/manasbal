@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ApiResponseError, ApiUnavailableError } from "./api";
-import { me, refresh, retryAfterSeconds, signIn, signOut } from "./auth";
+import { API_TIMEOUT_MS, ApiResponseError, ApiUnavailableError } from "./api-errors";
+import { me, refresh, retryAfterSeconds, signIn, signOut, signUp, verifyEmail } from "./auth";
 
 const SESSION = { accessToken: "token-from-the-api", expiresIn: 900 };
 const ME = { id: "u1", email: "customer@example.com", name: "Demo Customer", role: "customer" };
@@ -18,6 +18,30 @@ function api(status: number, body?: unknown, headers: Record<string, string> = {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  vi.restoreAllMocks();
+});
+
+describe("every call", () => {
+  it("sends JSON to the shop's own address, with a timeout", async () => {
+    const fetchMock = api(200, SESSION);
+    const timeout = vi.spyOn(AbortSignal, "timeout");
+
+    await signIn("a@example.test", "p");
+
+    const [request] = fetchMock.mock.calls[0]!;
+    expect(request.headers.get("content-type")).toBe("application/json");
+    expect(request.headers.has("authorization")).toBe(false);
+    expect(timeout).toHaveBeenCalledWith(API_TIMEOUT_MS);
+  });
+
+  it("treats an answer that isn't JSON as having no body", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response("<html>Bad gateway</html>", { status: 502 })),
+    );
+
+    await expect(refresh()).rejects.toEqual(new ApiResponseError(502, ""));
+  });
 });
 
 describe("signIn", () => {
@@ -154,5 +178,80 @@ describe("me", () => {
     api(401, { title: "Sign in again" });
 
     await expect(me("old")).rejects.toBeInstanceOf(ApiResponseError);
+  });
+});
+
+describe("signUp", () => {
+  const details = { name: "Asha Rao", email: "asha@example.test", password: "a long passphrase" };
+
+  it.each([true, false])(
+    "posts the details with the 18+ confirmation, and says whether the account is confirmed (%s)",
+    async (emailConfirmed) => {
+      const fetchMock = api(201, {
+        id: "u2",
+        email: details.email,
+        name: details.name,
+        emailConfirmed,
+      });
+
+      await expect(signUp(details)).resolves.toEqual({ kind: "created", emailConfirmed });
+      const [request] = fetchMock.mock.calls[0]!;
+      expect(request.url).toBe(`${window.location.origin}/auth/sign-up`);
+      expect(await request.json()).toEqual({ ...details, confirmAdult: true });
+    },
+  );
+
+  it("sends only the fields the API knows", async () => {
+    const fetchMock = api(201, { emailConfirmed: true });
+
+    await signUp({ ...details, adult: true } as typeof details);
+
+    expect(Object.keys(await fetchMock.mock.calls[0]![0].json())).toEqual([
+      "name",
+      "email",
+      "password",
+      "confirmAdult",
+    ]);
+  });
+
+  it("is refused without saying why when the details or the email won't do", async () => {
+    api(400, { title: "We could not create this account" });
+
+    await expect(signUp(details)).resolves.toEqual({ kind: "refused" });
+  });
+
+  it("says how long to wait after too many tries", async () => {
+    api(429, { title: "Too many" }, { "retry-after": "60" });
+
+    await expect(signUp(details)).resolves.toEqual({ kind: "tooManyTries", retryAfterSeconds: 60 });
+  });
+
+  it("throws on any other answer", async () => {
+    api(500, { title: "Broken" });
+
+    await expect(signUp(details)).rejects.toBeInstanceOf(ApiResponseError);
+  });
+});
+
+describe("verifyEmail", () => {
+  it("posts the token from the link and answers true when the email is confirmed", async () => {
+    const fetchMock = api(204);
+
+    await expect(verifyEmail("link-token")).resolves.toBe(true);
+    const [request] = fetchMock.mock.calls[0]!;
+    expect(request.url).toBe(`${window.location.origin}/auth/verify-email`);
+    expect(await request.json()).toEqual({ token: "link-token" });
+  });
+
+  it("answers false when the link is not valid any more", async () => {
+    api(400, { title: "This link is not valid any more" });
+
+    await expect(verifyEmail("used")).resolves.toBe(false);
+  });
+
+  it("throws on any other answer", async () => {
+    api(503, { title: "Down" });
+
+    await expect(verifyEmail("t")).rejects.toBeInstanceOf(ApiResponseError);
   });
 });

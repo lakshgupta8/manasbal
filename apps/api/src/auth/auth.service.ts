@@ -122,7 +122,8 @@ export class AuthService {
     await this.audit.record({ userId: user.id, requestId }, "auth.sign_up", account(user.id));
     // Only a new account gets a mail: a taken email has already been refused above.
     if (mailOn) await this.sendVerification(user);
-    return user;
+    // The shop says "Check your email" only when a link is on its way.
+    return { ...user, emailConfirmed: !mailOn };
   }
 
   // Confirms the address of the account the link was sent to. The token works once; an unknown,
