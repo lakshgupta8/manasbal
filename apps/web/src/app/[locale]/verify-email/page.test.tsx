@@ -28,8 +28,7 @@ describe("VerifyEmailPage", () => {
     passed.length = 0;
     render(await VerifyEmailPage(args(locale)));
 
-    const { pageTitle, ...words } = MESSAGES[locale].VerifyEmail;
-    expect(pageTitle).not.toBe("");
+    const words = MESSAGES[locale].VerifyEmail;
     expect(passed[0]!.words).toEqual(words);
     expect(passed[0]!.signInHref).toBe(`/${locale}/sign-in`);
     expect(passed[0]!.newLinkHref).toBe(`/${locale}/forgot-password`);

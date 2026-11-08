@@ -10,10 +10,11 @@ import { SignInForm, type SignInWords } from "./sign-in-form";
 
 const push = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
-vi.mock("@/lib/auth", () => ({ signIn: vi.fn() }));
+vi.mock("@/lib/auth", () => ({ signIn: vi.fn(), verifyTwoStep: vi.fn() }));
 vi.mock("./auth-provider", () => ({ useAuth: vi.fn() }));
 
 const signIn = vi.mocked(auth.signIn);
+const verifyTwoStep = vi.mocked(auth.verifyTwoStep);
 const signedIn = vi.fn(async () => undefined);
 
 // The words the page passes, straight from the English messages.
@@ -24,6 +25,7 @@ function form() {
   return render(
     <SignInForm
       words={WORDS}
+      twoStepWords={MESSAGES.en.TwoStep}
       homeHref="/en"
       forgotPasswordHref="/en/forgot-password"
       createAccountHref="/en/sign-up"
@@ -184,17 +186,46 @@ describe("SignInForm", () => {
     expect(submit().disabled).toBe(false);
   });
 
-  it.each([
-    [{ kind: "twoStep", challengeToken: "c" } as const, WORDS.twoStep],
-    [undefined, WORDS.unavailable],
-  ])("shows an alert under the title when it can't sign in here", async (outcome, words) => {
-    if (outcome) signIn.mockResolvedValue(outcome);
-    else signIn.mockRejectedValue(new Error("offline"));
+  it("shows an alert under the title when the API can't be reached", async () => {
+    signIn.mockRejectedValue(new Error("offline"));
     form();
 
     fillAndSubmit("buyer@example.test", "a long passphrase");
 
-    expect((await screen.findByRole("alert")).textContent).toBe(words);
+    expect((await screen.findByRole("alert")).textContent).toBe(WORDS.unavailable);
+  });
+
+  it("asks for the code when the account uses two-step sign-in, then signs in with it", async () => {
+    signIn.mockResolvedValue({ kind: "twoStep", challengeToken: "challenge" });
+    verifyTwoStep.mockResolvedValue({ kind: "signedIn", session: SESSION });
+    form();
+
+    fillAndSubmit("buyer@example.test", "a long passphrase");
+    const code = await screen.findByRole("textbox", { name: "6-digit code" });
+    expect(screen.getByRole("heading", { level: 1, name: "Enter your code" })).toBeDefined();
+    expect(screen.queryByRole("textbox", { name: "Email" })).toBeNull();
+    fireEvent.change(code, { target: { value: "123 456" } });
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/en"));
+    expect(verifyTwoStep).toHaveBeenCalledWith("challenge", "123456");
+    expect(signedIn).toHaveBeenCalledWith(SESSION);
+  });
+
+  it("goes back to the password, saying to sign in again, when the challenge runs out", async () => {
+    signIn.mockResolvedValue({ kind: "twoStep", challengeToken: "challenge" });
+    verifyTwoStep.mockResolvedValue({ kind: "signInAgain" });
+    form();
+
+    fillAndSubmit("buyer@example.test", "a long passphrase");
+    fireEvent.change(await screen.findByRole("textbox", { name: "6-digit code" }), {
+      target: { value: "123456" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+
+    expect((await screen.findByRole("alert")).textContent).toBe(WORDS.signInAgain);
+    expect(screen.getByRole("heading", { level: 1, name: "Sign in" })).toBeDefined();
+    expect(email()).toBeDefined();
   });
 
   it("can't be sent twice while it is signing in", async () => {

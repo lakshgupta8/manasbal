@@ -5,20 +5,16 @@ import type { Role } from "@manasbal/types";
 import { DEMO_EMAILS } from "@manasbal/types/demo-logins";
 import { Button, TextField } from "@manasbal/ui";
 import { useRouter } from "next/navigation";
-import { useEffect, useId, useRef, useState, type FormEvent } from "react";
-import { signIn, type SignInOutcome } from "@/lib/auth";
-import {
-  CardLink,
-  DEFAULT_WAIT_SECONDS,
-  FormAlert,
-  looksLikeEmail,
-  tooManyTriesText,
-  type TooManyTriesWords,
-} from "./auth-form-parts";
+import { useId, useRef, useState, type FormEvent } from "react";
+import { signIn, type Session, type SignInOutcome } from "@/lib/auth";
+import { CardLink, FormAlert, looksLikeEmail, type TooManyTriesWords } from "./auth-form-parts";
 import { useAuth } from "./auth-provider";
+import { TwoStepForm, type TwoStepWords } from "./two-step-form";
+import { useFormAlert } from "./use-form-alert";
 
 // Every word on the form, translated on the server so no translation code reaches the browser.
 export interface SignInWords extends TooManyTriesWords {
+  readonly title: string;
   readonly demoHeading: string;
   readonly roles: Readonly<Record<Role, string>>;
   readonly email: string;
@@ -35,12 +31,14 @@ export interface SignInWords extends TooManyTriesWords {
   readonly passwordMissing: string;
   readonly wrongPassword: string;
   readonly notConfirmed: string;
-  readonly twoStep: string;
+  // After the second step's challenge ran out: sign in again.
+  readonly signInAgain: string;
   readonly unavailable: string;
 }
 
 export interface SignInFormProps {
   readonly words: SignInWords;
+  readonly twoStepWords: TwoStepWords;
   // Where a signed-in visitor goes next.
   readonly homeHref: string;
   readonly forgotPasswordHref: string;
@@ -64,8 +62,10 @@ function check(words: SignInWords, email: string, password: string): FieldErrors
 // Sign in with an email and password, or with one click as one of the demo logins (the default
 // path: their password is public). Each problem is said in words next to the field it is about;
 // too many tries is an alert under the title, with the wait the API gave, and the button waits too.
+// An account with two-step sign-in on then asks for its code, in the same card.
 export function SignInForm({
   words,
+  twoStepWords,
   homeHref,
   forgotPasswordHref,
   createAccountHref,
@@ -76,17 +76,8 @@ export function SignInForm({
   const demoHeadingId = useId();
   const [busy, setBusy] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
-  const [alert, setAlert] = useState<string | null>(null);
-  const [waitUntil, setWaitUntil] = useState<number | null>(null);
-
-  useEffect(() => {
-    if (waitUntil === null) return;
-    const timer = setTimeout(() => {
-      setWaitUntil(null);
-      setAlert(null);
-    }, waitUntil - Date.now());
-    return () => clearTimeout(timer);
-  }, [waitUntil]);
+  const { alert, waiting, show, tooManyTries } = useFormAlert(words);
+  const [challenge, setChallenge] = useState<string | null>(null);
 
   // Shows at least one error, and moves to the first field that has one.
   function showFieldErrors(found: FieldErrors) {
@@ -95,26 +86,25 @@ export function SignInForm({
     (form.current?.elements.namedItem(first) as HTMLInputElement).focus();
   }
 
+  async function finish(session: Session) {
+    await signedIn(session);
+    router.push(homeHref);
+  }
+
   async function explain(outcome: SignInOutcome) {
     switch (outcome.kind) {
       case "signedIn":
-        await signedIn(outcome.session);
-        router.push(homeHref);
-        return;
+        return finish(outcome.session);
       case "wrongPassword":
         return showFieldErrors({ password: words.wrongPassword });
       case "notConfirmed":
         return showFieldErrors({ email: words.notConfirmed });
       case "invalid":
         return showFieldErrors({ email: words.emailInvalid });
-      case "tooManyTries": {
-        const seconds = outcome.retryAfterSeconds;
-        setAlert(tooManyTriesText(words, seconds));
-        setWaitUntil(Date.now() + (seconds ?? DEFAULT_WAIT_SECONDS) * 1000);
-        return;
-      }
+      case "tooManyTries":
+        return tooManyTries(outcome.retryAfterSeconds);
       case "twoStep":
-        setAlert(words.twoStep);
+        setChallenge(outcome.challengeToken);
         return;
     }
   }
@@ -122,11 +112,11 @@ export function SignInForm({
   async function attempt(email: string, password: string) {
     setBusy(true);
     setErrors({});
-    setAlert(null);
+    show(null);
     try {
       await explain(await signIn(email, password));
     } catch {
-      setAlert(words.unavailable);
+      show(words.unavailable);
     } finally {
       setBusy(false);
     }
@@ -143,8 +133,23 @@ export function SignInForm({
     void attempt(email, password);
   }
 
+  if (challenge !== null) {
+    return (
+      <TwoStepForm
+        words={twoStepWords}
+        challengeToken={challenge}
+        onSignedIn={finish}
+        onSignInAgain={() => {
+          setChallenge(null);
+          show(words.signInAgain);
+        }}
+      />
+    );
+  }
+
   return (
     <>
+      <h1 className="font-semibold text-heading-2">{words.title}</h1>
       {alert !== null && <FormAlert>{alert}</FormAlert>}
       <section aria-labelledby={demoHeadingId} className="flex flex-col gap-4">
         <h2 id={demoHeadingId} className="font-medium text-body">
@@ -190,7 +195,7 @@ export function SignInForm({
           hint={words.passwordHint}
           error={errors.password}
         />
-        <Button type="submit" className="mt-2 w-full" disabled={busy || waitUntil !== null}>
+        <Button type="submit" className="mt-2 w-full" disabled={busy || waiting}>
           {words.submit}
         </Button>
       </form>

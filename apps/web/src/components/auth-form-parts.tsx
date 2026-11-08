@@ -11,6 +11,10 @@ export interface TooManyTriesWords {
   readonly tooManyTries: string;
 }
 
+// The sign-up rule for passwords, which a new password follows too (the API checks it as well).
+export const MIN_PASSWORD_LENGTH = 12;
+export const MAX_PASSWORD_LENGTH = 128;
+
 // With no Retry-After, a button waits this long before it can be pressed again.
 export const DEFAULT_WAIT_SECONDS = 60;
 

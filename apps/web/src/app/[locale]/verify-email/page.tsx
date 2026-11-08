@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import { AuthCard } from "@/components/auth-form-parts";
 import { VerifyEmail } from "@/components/auth-forms";
-import type { VerifyEmailWords } from "@/components/verify-email";
+import { wordsFor } from "@/i18n/words";
 
 export async function generateMetadata({
   params,
@@ -17,20 +17,7 @@ export async function generateMetadata({
 // in the browser, so the page itself is the same for everyone and is built ahead of time.
 export default async function VerifyEmailPage({ params }: PageProps<"/[locale]/verify-email">) {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "VerifyEmail" });
-  const words: VerifyEmailWords = {
-    checkingTitle: t("checkingTitle"),
-    confirmedTitle: t("confirmedTitle"),
-    confirmedBody: t("confirmedBody"),
-    signIn: t("signIn"),
-    invalidTitle: t("invalidTitle"),
-    invalidBody: t("invalidBody"),
-    askForNewLink: t("askForNewLink"),
-    backToSignIn: t("backToSignIn"),
-    unavailableTitle: t("unavailableTitle"),
-    unavailableBody: t("unavailableBody"),
-    tryAgain: t("tryAgain"),
-  };
+  const words = await wordsFor(locale, "VerifyEmail");
 
   return (
     <AuthCard>
