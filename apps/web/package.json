@@ -12,7 +12,10 @@
     "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
+    "@manasbal/icons": "workspace:*",
     "@manasbal/sdk": "workspace:*",
+    "@manasbal/seed": "workspace:*",
+    "@manasbal/types": "workspace:*",
     "@manasbal/ui": "workspace:*",
     "next": "16.4.1",
     "next-intl": "4.14.9",

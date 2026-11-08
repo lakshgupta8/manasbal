@@ -2,6 +2,7 @@ import { DemoBanner, Footer, Header } from "@manasbal/ui";
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 import { LANGUAGE_NAMES, otherLocale, type Locale } from "@/i18n/routing";
+import { AccountMenu } from "./account-menu";
 import { LanguageSwitch } from "./language-switch";
 
 export const MAIN_ID = "main-content";
@@ -13,8 +14,8 @@ export interface SiteFrameProps {
 }
 
 // The frame of every page: the skip link first (so Tab reaches it before anything else), the demo
-// banner, the header, the page and the footer, all in the page's language. The account and cart
-// slots are filled once those pages exist.
+// banner, the header, the page and the footer, all in the page's language. The cart slot is
+// filled once the cart page exists.
 export async function SiteFrame({ locale, children }: SiteFrameProps) {
   const t = await getTranslations({ locale, namespace: "Frame" });
   const home = `/${locale}`;
@@ -45,6 +46,14 @@ export async function SiteFrame({ locale, children }: SiteFrameProps) {
               lang: () => <span lang={target}>{LANGUAGE_NAMES[target]}</span>,
             })}
           </LanguageSwitch>
+        }
+        account={
+          <AccountMenu
+            signInHref={`${home}/sign-in`}
+            signInLabel={t("signIn")}
+            signOutLabel={t("signOut")}
+            signedInAs={t("signedInAs", { name: "{name}" })}
+          />
         }
       />
       <main id={MAIN_ID} tabIndex={-1} className="flex flex-1 flex-col focus:outline-none">
