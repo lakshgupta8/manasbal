@@ -6,12 +6,12 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { signUp, type SignUpOutcome } from "@/lib/auth";
 import {
   CardLink,
-  DEFAULT_WAIT_SECONDS,
   FormAlert,
   looksLikeEmail,
-  tooManyTriesText,
+  MIN_PASSWORD_LENGTH,
   type TooManyTriesWords,
 } from "./auth-form-parts";
+import { useFormAlert } from "./use-form-alert";
 
 // Every word on the form, translated on the server so no translation code reaches the browser.
 export interface SignUpWords extends TooManyTriesWords {
@@ -49,8 +49,6 @@ export interface SignUpFormProps {
 type Field = "name" | "email" | "password" | "confirmAdult";
 type FieldErrors = Partial<Record<Field, string>>;
 
-// The sign-up rule for passwords (the API checks it too).
-export const MIN_PASSWORD_LENGTH = 12;
 const FIELDS: readonly Field[] = ["name", "email", "password", "confirmAdult"];
 
 interface Details {
@@ -79,18 +77,8 @@ export function SignUpForm({ words, signInHref }: SignUpFormProps) {
   const heading = useRef<HTMLHeadingElement>(null);
   const [busy, setBusy] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
-  const [alert, setAlert] = useState<string | null>(null);
-  const [waitUntil, setWaitUntil] = useState<number | null>(null);
+  const { alert, waiting, show, tooManyTries } = useFormAlert(words);
   const [mailedTo, setMailedTo] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (waitUntil === null) return;
-    const timer = setTimeout(() => {
-      setWaitUntil(null);
-      setAlert(null);
-    }, waitUntil - Date.now());
-    return () => clearTimeout(timer);
-  }, [waitUntil]);
 
   // The card's content changes, so the new heading takes the focus and is read out.
   useEffect(() => {
@@ -111,26 +99,23 @@ export function SignUpForm({ words, signInHref }: SignUpFormProps) {
         else setMailedTo(email);
         return;
       case "refused":
-        setAlert(words.refused);
+        show(words.refused);
         return;
-      case "tooManyTries": {
-        const seconds = outcome.retryAfterSeconds;
-        setAlert(tooManyTriesText(words, seconds));
-        setWaitUntil(Date.now() + (seconds ?? DEFAULT_WAIT_SECONDS) * 1000);
+      case "tooManyTries":
+        tooManyTries(outcome.retryAfterSeconds);
         return;
-      }
     }
   }
 
   async function create(details: Details) {
     setBusy(true);
     setErrors({});
-    setAlert(null);
+    show(null);
     try {
       const { name, email, password } = details;
       explain(await signUp({ name, email, password }), email);
     } catch {
-      setAlert(words.unavailable);
+      show(words.unavailable);
     } finally {
       setBusy(false);
     }
@@ -202,7 +187,7 @@ export function SignUpForm({ words, signInHref }: SignUpFormProps) {
         />
         <Checkbox name="confirmAdult" label={words.adult} error={errors.confirmAdult} />
         <p className="text-text-muted">{words.demoNote}</p>
-        <Button type="submit" className="w-full" disabled={busy || waitUntil !== null}>
+        <Button type="submit" className="w-full" disabled={busy || waiting}>
           {words.submit}
         </Button>
       </form>

@@ -5,16 +5,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { verifyEmail } from "@/lib/auth";
 import { CardLink } from "./auth-form-parts";
+import { LinkNotValid, type LinkNotValidWords } from "./link-not-valid";
 
-export interface VerifyEmailWords {
+export interface VerifyEmailWords extends LinkNotValidWords {
   readonly checkingTitle: string;
   readonly confirmedTitle: string;
   readonly confirmedBody: string;
   readonly signIn: string;
-  readonly invalidTitle: string;
-  readonly invalidBody: string;
-  readonly askForNewLink: string;
-  readonly backToSignIn: string;
   readonly unavailableTitle: string;
   readonly unavailableBody: string;
   readonly tryAgain: string;
@@ -72,6 +69,14 @@ export function VerifyEmail({ words, signInHref, newLinkHref }: VerifyEmailProps
     setAttempt((count) => count + 1);
   }
 
+  if (result === "invalid") {
+    return (
+      <div aria-live="polite" className="flex flex-col gap-6">
+        <LinkNotValid words={words} newLinkHref={newLinkHref} signInHref={signInHref} />
+      </div>
+    );
+  }
+
   const view = {
     checking: { title: words.checkingTitle, body: null, action: null },
     confirmed: {
@@ -80,15 +85,6 @@ export function VerifyEmail({ words, signInHref, newLinkHref }: VerifyEmailProps
       action: (
         <Button className="w-full" onClick={() => router.push(signInHref)}>
           {words.signIn}
-        </Button>
-      ),
-    },
-    invalid: {
-      title: words.invalidTitle,
-      body: words.invalidBody,
-      action: (
-        <Button className="w-full" onClick={() => router.push(newLinkHref)}>
-          {words.askForNewLink}
         </Button>
       ),
     },
@@ -109,7 +105,7 @@ export function VerifyEmail({ words, signInHref, newLinkHref }: VerifyEmailProps
       <h1 className="font-semibold text-heading-2">{view.title}</h1>
       {view.body !== null && <p>{view.body}</p>}
       {view.action}
-      {result !== "confirmed" && result !== "checking" && (
+      {result === "unavailable" && (
         <div>
           <CardLink href={signInHref}>{words.backToSignIn}</CardLink>
         </div>

@@ -17,7 +17,7 @@ export default defineConfig({
         "src/lib/**/*.ts",
         "src/i18n/**/*.ts",
         "src/proxy.ts",
-        "src/components/**/*.tsx",
+        "src/components/**/*.{ts,tsx}",
         // The brackets are literal, not a glob character class.
         String.raw`src/app/\[locale\]/**/*.tsx`,
       ],

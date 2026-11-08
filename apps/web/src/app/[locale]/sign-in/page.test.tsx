@@ -10,7 +10,7 @@ const passed: SignInFormProps[] = [];
 vi.mock("@/components/auth-forms", () => ({
   SignInForm: (props: SignInFormProps) => {
     passed.push(props);
-    return <p>{props.words.submit}</p>;
+    return <h1>{props.words.title}</h1>;
   },
 }));
 
@@ -24,29 +24,23 @@ describe("SignInPage", () => {
     });
   });
 
-  it("puts the title above the form and passes it every word and link", async () => {
-    passed.length = 0;
-    render(await SignInPage(args("en")));
+  it.each(["en", "hi"] as const)(
+    "passes the form its %s words, the second step's and the links",
+    async (locale) => {
+      passed.length = 0;
+      render(await SignInPage(args(locale)));
 
-    expect(screen.getByRole("heading", { level: 1, name: "Sign in" })).toBeDefined();
-    const [props] = passed;
-    // Every message but the two the page shows itself.
-    const { pageTitle, title, ...words } = MESSAGES.en.SignIn;
-    expect([pageTitle, title]).toEqual(["Sign in — Manasbal", "Sign in"]);
-    expect(props!.words).toEqual(words);
-    expect(props!.homeHref).toBe("/en");
-    expect(props!.forgotPasswordHref).toBe("/en/forgot-password");
-    expect(props!.createAccountHref).toBe("/en/sign-up");
-  });
-
-  it("is in Hindi on a Hindi page, keeping the {minutes} for the browser to fill", async () => {
-    passed.length = 0;
-    render(await SignInPage(args("hi")));
-
-    const words = MESSAGES.hi.SignIn;
-    expect(screen.getByRole("heading", { level: 1, name: words.title })).toBeDefined();
-    expect(passed[0]!.words.roles.seller_staff).toBe(words.roles.seller_staff);
-    expect(passed[0]!.words.tooManyTriesMinutes).toBe(words.tooManyTriesMinutes);
-    expect(passed[0]!.homeHref).toBe("/hi");
-  });
+      const [props] = passed;
+      expect(props!.words).toEqual(MESSAGES[locale].SignIn);
+      expect(props!.twoStepWords).toEqual(MESSAGES[locale].TwoStep);
+      // The browser fills the wait in.
+      expect(props!.words.tooManyTriesMinutes).toContain("{minutes}");
+      expect(props!.homeHref).toBe(`/${locale}`);
+      expect(props!.forgotPasswordHref).toBe(`/${locale}/forgot-password`);
+      expect(props!.createAccountHref).toBe(`/${locale}/sign-up`);
+      expect(
+        screen.getByRole("heading", { level: 1, name: MESSAGES[locale].SignIn.title }),
+      ).toBeDefined();
+    },
+  );
 });

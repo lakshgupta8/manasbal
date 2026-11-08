@@ -1,6 +1,18 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { API_TIMEOUT_MS, ApiResponseError, ApiUnavailableError } from "./api-errors";
-import { me, refresh, retryAfterSeconds, signIn, signOut, signUp, verifyEmail } from "./auth";
+import {
+  forgotPassword,
+  me,
+  refresh,
+  resetPassword,
+  retryAfterSeconds,
+  SIGN_IN_AGAIN,
+  signIn,
+  signOut,
+  signUp,
+  verifyEmail,
+  verifyTwoStep,
+} from "./auth";
 
 const SESSION = { accessToken: "token-from-the-api", expiresIn: 900 };
 const ME = { id: "u1", email: "customer@example.com", name: "Demo Customer", role: "customer" };
@@ -253,5 +265,115 @@ describe("verifyEmail", () => {
     api(503, { title: "Down" });
 
     await expect(verifyEmail("t")).rejects.toBeInstanceOf(ApiResponseError);
+  });
+});
+
+describe("verifyTwoStep", () => {
+  it("sends the code with the challenge and answers the session", async () => {
+    const fetchMock = api(200, SESSION);
+
+    await expect(verifyTwoStep("challenge", "123456")).resolves.toEqual({
+      kind: "signedIn",
+      session: SESSION,
+    });
+    const [request] = fetchMock.mock.calls[0]!;
+    expect(request.url).toBe(`${window.location.origin}/auth/2fa/verify`);
+    expect(await request.json()).toEqual({ challengeToken: "challenge", code: "123456" });
+  });
+
+  it.each([
+    [400, { detail: "code: Enter the code" }],
+    [401, { detail: "That code is not right. Check the time on your phone and try again" }],
+    [401, "not json"],
+  ])("calls a %i a wrong code", async (status, body) => {
+    api(status, body);
+
+    await expect(verifyTwoStep("challenge", "000000")).resolves.toEqual({ kind: "wrongCode" });
+  });
+
+  it("asks to sign in again when the challenge can't be used any more", async () => {
+    api(401, { detail: SIGN_IN_AGAIN });
+
+    await expect(verifyTwoStep("old", "123456")).resolves.toEqual({ kind: "signInAgain" });
+  });
+
+  it("says how long to wait after too many wrong codes", async () => {
+    api(429, { title: "Too many" }, { "retry-after": "900" });
+
+    await expect(verifyTwoStep("c", "123456")).resolves.toEqual({
+      kind: "tooManyTries",
+      retryAfterSeconds: 900,
+    });
+  });
+
+  it("throws on any other answer", async () => {
+    api(500, { title: "Broken" });
+
+    await expect(verifyTwoStep("c", "123456")).rejects.toBeInstanceOf(ApiResponseError);
+  });
+});
+
+describe("forgotPassword", () => {
+  it.each([202, 400])(
+    "says the same thing whatever the API answers about the email (%i)",
+    async (status) => {
+      const fetchMock = api(status, status === 400 ? { title: "Bad Request" } : undefined);
+
+      await expect(forgotPassword("anyone@example.test")).resolves.toEqual({ kind: "sent" });
+      const [request] = fetchMock.mock.calls[0]!;
+      expect(request.url).toBe(`${window.location.origin}/auth/forgot-password`);
+      expect(await request.json()).toEqual({ email: "anyone@example.test" });
+    },
+  );
+
+  it("says how long to wait after too many tries", async () => {
+    api(429, { title: "Too many" }, { "retry-after": "30" });
+
+    await expect(forgotPassword("a@example.test")).resolves.toEqual({
+      kind: "tooManyTries",
+      retryAfterSeconds: 30,
+    });
+  });
+
+  it("throws on any other answer", async () => {
+    api(502, { title: "Bad gateway" });
+
+    await expect(forgotPassword("a@example.test")).rejects.toBeInstanceOf(ApiResponseError);
+  });
+});
+
+describe("resetPassword", () => {
+  it("sends the token and the new password", async () => {
+    const fetchMock = api(204);
+
+    await expect(resetPassword("link-token", "a new passphrase")).resolves.toEqual({
+      kind: "changed",
+    });
+    const [request] = fetchMock.mock.calls[0]!;
+    expect(request.url).toBe(`${window.location.origin}/auth/reset-password`);
+    expect(await request.json()).toEqual({ token: "link-token", password: "a new passphrase" });
+  });
+
+  it("says the link is not valid any more on a 400", async () => {
+    api(400, { detail: "This link is not valid any more" });
+
+    await expect(resetPassword("used", "a new passphrase")).resolves.toEqual({
+      kind: "linkInvalid",
+    });
+  });
+
+  it("says how long to wait after too many tries", async () => {
+    api(429, { title: "Too many" });
+
+    await expect(resetPassword("t", "a new passphrase")).resolves.toEqual({
+      kind: "tooManyTries",
+      retryAfterSeconds: undefined,
+    });
+  });
+
+  it("throws on any other answer", async () => {
+    api(500, { title: "Broken" });
+
+    await expect(resetPassword("t", "a new passphrase")).rejects.toBeInstanceOf(ApiResponseError);
   });
 });

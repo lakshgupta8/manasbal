@@ -1,4 +1,10 @@
-import type { SignInInput, SignUpInput } from "@manasbal/types";
+import type {
+  ForgotPasswordInput,
+  ResetPasswordInput,
+  SignInInput,
+  SignUpInput,
+  TwoStepVerifyInput,
+} from "@manasbal/types";
 import { API_TIMEOUT_MS, ApiResponseError, ApiUnavailableError } from "./api-errors";
 import { shopPath } from "./api-routes";
 
@@ -176,4 +182,87 @@ export async function verifyEmail(token: string): Promise<boolean> {
   if (response.ok) return true;
   if (response.status === 400) return false;
   throw unexpected(response);
+}
+
+// The API's words when a challenge can't be used any more (expired, or 5 wrong codes on it).
+export const SIGN_IN_AGAIN = "Sign in again";
+
+// What the second step of sign-in came to.
+export type TwoStepOutcome =
+  | { readonly kind: "signedIn"; readonly session: Session }
+  | { readonly kind: "wrongCode" }
+  | { readonly kind: "signInAgain" }
+  | { readonly kind: "tooManyTries"; readonly retryAfterSeconds?: number };
+
+function detailOf(data: unknown): unknown {
+  return typeof data === "object" && data !== null && "detail" in data ? data.detail : undefined;
+}
+
+// Sends the 6-digit code, or a recovery code, with the challenge sign-in answered.
+export async function verifyTwoStep(challengeToken: string, code: string): Promise<TwoStepOutcome> {
+  const body: TwoStepVerifyInput = { challengeToken, code };
+  const { data, response } = await reach("/auth/2fa/verify", { body });
+  switch (response.status) {
+    case 200:
+      return { kind: "signedIn", session: data as Session };
+    // 400 is a code in the wrong shape, which the form mostly catches first.
+    case 400:
+      return { kind: "wrongCode" };
+    case 401:
+      return detailOf(data) === SIGN_IN_AGAIN ? { kind: "signInAgain" } : { kind: "wrongCode" };
+    case 429:
+      return {
+        kind: "tooManyTries",
+        retryAfterSeconds: retryAfterSeconds(response.headers.get("retry-after")),
+      };
+    default:
+      throw unexpected(response);
+  }
+}
+
+// Asks for a reset link. The API answers the same whether or not the email has an account, and
+// so does the page: "sent" never says which.
+export type ForgotPasswordOutcome =
+  | { readonly kind: "sent" }
+  | { readonly kind: "tooManyTries"; readonly retryAfterSeconds?: number };
+
+export async function forgotPassword(email: string): Promise<ForgotPasswordOutcome> {
+  const body: ForgotPasswordInput = { email };
+  const { response } = await reach("/auth/forgot-password", { body });
+  if (response.status === 202 || response.status === 400) return { kind: "sent" };
+  if (response.status === 429) {
+    return {
+      kind: "tooManyTries",
+      retryAfterSeconds: retryAfterSeconds(response.headers.get("retry-after")),
+    };
+  }
+  throw unexpected(response);
+}
+
+// Sets a new password with the token from the reset link. The form checks the password rule
+// first, so a 400 means the link is not valid any more (used, expired or unknown).
+export type ResetPasswordOutcome =
+  | { readonly kind: "changed" }
+  | { readonly kind: "linkInvalid" }
+  | { readonly kind: "tooManyTries"; readonly retryAfterSeconds?: number };
+
+export async function resetPassword(
+  token: string,
+  password: string,
+): Promise<ResetPasswordOutcome> {
+  const body: ResetPasswordInput = { token, password };
+  const { response } = await reach("/auth/reset-password", { body });
+  switch (response.status) {
+    case 204:
+      return { kind: "changed" };
+    case 400:
+      return { kind: "linkInvalid" };
+    case 429:
+      return {
+        kind: "tooManyTries",
+        retryAfterSeconds: retryAfterSeconds(response.headers.get("retry-after")),
+      };
+    default:
+      throw unexpected(response);
+  }
 }

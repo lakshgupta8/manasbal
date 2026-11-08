@@ -23,3 +23,8 @@ export function getTranslations({ locale, namespace }: { locale: TestLocale; nam
     createTranslator({ locale, messages: MESSAGES[locale], namespace: namespace as never }),
   );
 }
+
+// Stands in for next-intl/server's getMessages: the real message files.
+export function getMessages({ locale }: { locale: TestLocale }) {
+  return Promise.resolve(MESSAGES[locale]);
+}

@@ -30,8 +30,7 @@ describe("SignUpPage", () => {
       passed.length = 0;
       render(await SignUpPage(args(locale)));
 
-      const { pageTitle, ...words } = MESSAGES[locale].SignUp;
-      expect(pageTitle).not.toBe("");
+      const words = MESSAGES[locale].SignUp;
       expect(passed[0]!.words).toEqual(words);
       expect(passed[0]!.words.checkEmailBody).toContain("{email}");
       expect(passed[0]!.signInHref).toBe(`/${locale}/sign-in`);
