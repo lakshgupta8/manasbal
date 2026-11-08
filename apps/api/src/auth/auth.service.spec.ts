@@ -137,7 +137,7 @@ describe("AuthService", () => {
     User.create.mockResolvedValue(created);
     const before = Temporal.Now.instant();
 
-    await expect(service.signUp(input, REQ)).resolves.toBe(created);
+    await expect(service.signUp(input, REQ)).resolves.toEqual({ ...created, emailConfirmed: true });
 
     expect(passwords.hash).toHaveBeenCalledWith(input.password);
     expect(User.filters).toEqual([{ email: input.email }]);
@@ -168,7 +168,10 @@ describe("AuthService", () => {
     User.create.mockResolvedValue(created);
     const before = Temporal.Now.instant();
 
-    await expect(service.signUp(input, REQ)).resolves.toBe(created);
+    await expect(service.signUp(input, REQ)).resolves.toEqual({
+      ...created,
+      emailConfirmed: false,
+    });
 
     expect(User.create.mock.calls[0]?.[0]).toMatchObject({ emailVerifiedAt: null });
     const token = EmailToken.create.mock.calls[0]?.[0] as Record<string, unknown>;

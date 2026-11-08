@@ -1468,9 +1468,13 @@
           },
           "name": {
             "type": "string"
+          },
+          "emailConfirmed": {
+            "type": "boolean",
+            "description": "True when the account can sign in now (mail is off); false when a link to confirm the email was mailed"
           }
         },
-        "required": ["id", "email", "name"]
+        "required": ["id", "email", "name", "emailConfirmed"]
       },
       "TwoStepSetupResult": {
         "type": "object",

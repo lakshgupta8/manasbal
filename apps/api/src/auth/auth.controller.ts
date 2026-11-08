@@ -61,6 +61,12 @@ export class SignUpResult {
 
   @ApiProperty()
   name: string;
+
+  @ApiProperty({
+    description:
+      "True when the account can sign in now (mail is off); false when a link to confirm the email was mailed",
+  })
+  emailConfirmed: boolean;
 }
 
 // The refresh token is never in the body: it goes only into the httpOnly cookie.

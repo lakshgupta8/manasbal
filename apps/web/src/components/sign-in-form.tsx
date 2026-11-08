@@ -1,6 +1,5 @@
 "use client";
 
-import { AlertIcon } from "@manasbal/icons";
 import { DEMO_PASSWORD } from "@manasbal/seed/demo-logins";
 import type { Role } from "@manasbal/types";
 import { DEMO_EMAILS } from "@manasbal/types/demo-logins";
@@ -8,10 +7,18 @@ import { Button, TextField } from "@manasbal/ui";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { signIn, type SignInOutcome } from "@/lib/auth";
+import {
+  CardLink,
+  DEFAULT_WAIT_SECONDS,
+  FormAlert,
+  looksLikeEmail,
+  tooManyTriesText,
+  type TooManyTriesWords,
+} from "./auth-form-parts";
 import { useAuth } from "./auth-provider";
 
 // Every word on the form, translated on the server so no translation code reaches the browser.
-export interface SignInWords {
+export interface SignInWords extends TooManyTriesWords {
   readonly demoHeading: string;
   readonly roles: Readonly<Record<Role, string>>;
   readonly email: string;
@@ -28,10 +35,6 @@ export interface SignInWords {
   readonly passwordMissing: string;
   readonly wrongPassword: string;
   readonly notConfirmed: string;
-  // Too many tries: a wait of one minute, of {minutes} minutes, or one the API didn't give.
-  readonly tooManyTriesOneMinute: string;
-  readonly tooManyTriesMinutes: string;
-  readonly tooManyTries: string;
   readonly twoStep: string;
   readonly unavailable: string;
 }
@@ -49,26 +52,6 @@ type FieldErrors = Partial<Record<Field, string>>;
 
 // The demo logins, in the order of the roles.
 const DEMO_ROLES = Object.keys(DEMO_EMAILS) as Role[];
-// With no Retry-After, the button waits this long before it can be pressed again.
-export const DEFAULT_WAIT_SECONDS = 60;
-
-export function tooManyTriesText(words: SignInWords, seconds: number | undefined): string {
-  if (seconds === undefined) return words.tooManyTries;
-  const minutes = Math.max(1, Math.ceil(seconds / 60));
-  return minutes === 1
-    ? words.tooManyTriesOneMinute
-    : words.tooManyTriesMinutes.replace("{minutes}", String(minutes));
-}
-
-// Something@something.something, with no spaces: the API checks the rest. No regular expression,
-// so a long input can't make it slow.
-export function looksLikeEmail(email: string): boolean {
-  const at = email.indexOf("@");
-  const domain = email.slice(at + 1);
-  const dot = domain.lastIndexOf(".");
-  return at > 0 && !domain.includes("@") && dot > 0 && dot < domain.length - 1 && !/\s/.test(email);
-}
-
 // The empty fields and a malformed email, before anything is sent.
 function check(words: SignInWords, email: string, password: string): FieldErrors {
   const errors: FieldErrors = {};
@@ -162,15 +145,7 @@ export function SignInForm({
 
   return (
     <>
-      {alert !== null && (
-        <div
-          role="alert"
-          className="flex gap-2 rounded-lg border border-feedback-error-border bg-feedback-error-border/8 px-3 py-2 text-small text-feedback-error"
-        >
-          <AlertIcon size={16} className="mt-0.5 flex-none" />
-          <p>{alert}</p>
-        </div>
-      )}
+      {alert !== null && <FormAlert>{alert}</FormAlert>}
       <section aria-labelledby={demoHeadingId} className="flex flex-col gap-4">
         <h2 id={demoHeadingId} className="font-medium text-body">
           {words.demoHeading}
@@ -220,12 +195,8 @@ export function SignInForm({
         </Button>
       </form>
       <div className="flex flex-col items-start gap-2">
-        <a href={forgotPasswordHref} className="text-text-action underline">
-          {words.forgotPassword}
-        </a>
-        <a href={createAccountHref} className="text-text-action underline">
-          {words.createAccount}
-        </a>
+        <CardLink href={forgotPasswordHref}>{words.forgotPassword}</CardLink>
+        <CardLink href={createAccountHref}>{words.createAccount}</CardLink>
       </div>
     </>
   );

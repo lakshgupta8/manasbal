@@ -120,7 +120,13 @@ describe("/auth (e2e)", () => {
 
     expect(created.statusCode).toBe(201);
     const { id } = created.json<{ id: string }>();
-    expect(created.json()).toEqual({ id, email: signUp.email, name: signUp.name });
+    // Mail is off here, so the account can sign in straight away.
+    expect(created.json()).toEqual({
+      id,
+      email: signUp.email,
+      name: signUp.name,
+      emailConfirmed: true,
+    });
 
     const hash = await database.sql(`select password_hash from users where id = '${id}'`);
     expect(hash).toMatch(/^\$argon2id\$/);
@@ -447,7 +453,10 @@ describe("/auth (e2e)", () => {
     });
 
     it("mails a link, refuses sign-in until it is used, then lets the account in", async () => {
-      expect((await post(signUp)).statusCode).toBe(201);
+      const created = await post(signUp);
+      expect(created.statusCode).toBe(201);
+      // The shop says "Check your email".
+      expect(created.json()).toMatchObject({ emailConfirmed: false });
       expect(sent).toHaveLength(1);
       expect(sent[0]?.to).toBe(signUp.email);
       expect(sent[0]?.text).toContain("Use made-up details. This is a demo.");

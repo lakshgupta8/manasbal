@@ -9,13 +9,15 @@ pnpm --filter @manasbal/web dev    # http://localhost:3000
 
 ## Reaching the API
 
-Use the helper in `src/lib/api.ts` for every call: `apiCall((api) => api.GET("/categories"))`. On the server it calls `API_URL` directly; in the browser it calls the shop's own address, which forwards to the API, so the refresh cookie is first-party ([ADR 0012](../../docs/adr/0012-shop-reaches-the-api-through-its-own-address.md)). Every call times out after 5 seconds and fails with a typed error (`ApiUnavailableError` or `ApiResponseError`), which the page's `error.tsx` shows as "This page couldn't load".
+Use the helper in `src/lib/api.ts` for every call: `apiCall((api) => api.GET("/categories"))`. On the server it calls `API_URL` directly; in the browser it calls the shop's own address, which forwards to the API, so the refresh cookie is first-party ([ADR 0012](../../docs/adr/0012-shop-reaches-the-api-through-its-own-address.md)). Every call times out after 5 seconds and fails with a typed error (`ApiUnavailableError` or `ApiResponseError`), which the page's `error.tsx` shows as "This page couldn't load". `error.tsx` is a client component, so its words live in their own small file, `messages/error-page.json` (both languages), rather than in `en.json` and `hi.json`, which would send every page's words to the browser.
 
 The forwarded paths are `/auth/*` (kept as it is, where the refresh cookie lives) and `/api/*` (everything else). No page may use them. The rewrites read `API_URL` when the shop is built.
 
 ## Signing in
 
-`/[locale]/sign-in` signs in with an email and password, or with one click as one of the demo logins (`DEMO_EMAILS` from `@manasbal/types`, with the public `DEMO_PASSWORD` from `@manasbal/seed`). `src/lib/auth.ts` makes the calls (`/auth/sign-in`, `/auth/refresh`, `/auth/sign-out`, `/me`) through the shop's own address.
+`/[locale]/sign-in` signs in with an email and password, or with one click as one of the demo logins (`DEMO_EMAILS` from `@manasbal/types`, with the public `DEMO_PASSWORD` from `@manasbal/seed`). `/[locale]/sign-up` creates an account with made-up details and an unticked 18+ box: with mail off the account can sign in at once, so the visitor goes to sign-in; with mail on, the page says "Check your email" (the API's `emailConfirmed` says which). The link in that mail leads to `/[locale]/verify-email?token=...`, which uses the token once and says "Your email is confirmed" or "This link is not valid any more".
+
+`src/lib/auth.ts` makes these calls (`/auth/*` and `/me`) through the shop's own address with `fetch` itself rather than the typed client, which keeps that client out of the browser's bundle; the bodies are still typed from `@manasbal/types`. The three forms are exported together from `src/components/auth-forms.tsx`, so the pages share one chunk instead of each carrying its own copy of the fields.
 
 The access token lives only in memory, in `AuthProvider` (`src/components/auth-provider.tsx`), never in storage. On load it renews the session from the refresh cookie, so a reload keeps you signed in, and it renews it again a minute before the token expires. Only one renewal runs at a time, because each refresh cookie works once. The header's account slot shows "Sign in", or who is signed in and **Sign out**.
 
