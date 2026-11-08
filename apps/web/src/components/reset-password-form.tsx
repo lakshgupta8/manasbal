@@ -78,7 +78,7 @@ export function ResetPasswordForm({ words, signInHref, newLinkHref }: ResetPassw
     return (
       <>
         <h1 className="font-semibold text-heading-2">{words.changedTitle}</h1>
-        <p role="status">{words.changedBody}</p>
+        <output className="block">{words.changedBody}</output>
         <div>
           <CardLink href={signInHref}>{words.signIn}</CardLink>
         </div>

@@ -61,7 +61,7 @@ export function ForgotPasswordForm({ words, signInHref }: ForgotPasswordFormProp
       <h1 className="font-semibold text-heading-2">{words.title}</h1>
       {alert !== null && <FormAlert>{alert}</FormAlert>}
       {sent ? (
-        <p role="status">{words.sent}</p>
+        <output className="block">{words.sent}</output>
       ) : (
         <>
           <p className="text-text-muted">{words.intro}</p>
