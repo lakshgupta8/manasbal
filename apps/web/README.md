@@ -21,7 +21,7 @@ The access token lives only in memory, in `AuthProvider` (`src/components/auth-p
 
 ## Languages
 
-The shop speaks English (`/en/...`, the default: `/` goes to `/en`) and Hindi (`/hi/...`), with [next-intl](https://next-intl.dev). Every word on a page lives in `messages/en.json` and `messages/hi.json`; a test checks both have the same keys. The Hindi is a draft until a native speaker reads it: `hi.json` says so in `_status`, and Hindi pages say so in the footer. The header's switch links to the same page in the other language.
+The shop speaks English (`/en/...`, the default: `/` goes to `/en`) and Hindi (`/hi/...`), with [next-intl](https://next-intl.dev). Every word on a page lives in `messages/en.json` and `messages/hi.json`; a test checks both have the same keys. A native speaker has read the Hindi, and `hi.json` says so in `_status`. New Hindi words are listed in their pull request until they are read too. A language still in draft gets a note after the footer's small print (`Frame.draftNote`, empty in both files today). The header's switch links to the same page in the other language.
 
 - `src/i18n/routing.ts` lists the languages; `src/i18n/request.ts` loads each page's messages, reading the language from the address with `next/root-params`.
 - `src/proxy.ts` puts every page under a language. It never touches `/api/*` or `/auth/*`, which go to the API (see above), and `src/proxy.test.ts` checks that.

@@ -1,5 +1,5 @@
 {
-  "_status": "draft: not yet read by a native speaker",
+  "_status": "reviewed by a native speaker",
   "Metadata": {
     "title": "Manasbal — एक डेमो मार्केटप्लेस",
     "description": "कई विक्रेताओं वाले मार्केटप्लेस का एक पोर्टफ़ोलियो डेमो। यहाँ कुछ भी बिक्री के लिए नहीं है; भुगतान और डिलीवरी असली नहीं, सिर्फ़ नमूने के लिए हैं।"
@@ -16,7 +16,7 @@
     "footerNav": "फ़ुटर",
     "sourceCode": "GitHub पर सोर्स कोड",
     "smallPrint": "Manasbal एक पोर्टफ़ोलियो डेमो है: यहाँ कुछ भी बिक्री के लिए नहीं है, और भुगतान व डिलीवरी असली नहीं हैं।",
-    "draftNote": "यह हिंदी अनुवाद अभी एक मसौदा है, जिसे किसी हिंदी भाषी ने अभी तक जाँचा नहीं है। (Draft Hindi: not yet read by a native speaker.)",
+    "draftNote": "",
     "signIn": "साइन इन करें",
     "signOut": "साइन आउट करें",
     "signedInAs": "{name} के रूप में साइन इन"

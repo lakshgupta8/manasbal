@@ -90,7 +90,7 @@ describe("SiteFrame", () => {
     expect(screen.getByRole("contentinfo").textContent).not.toContain("Draft");
   });
 
-  it("shows everything in Hindi on a Hindi page, and says the Hindi is a draft", async () => {
+  it("shows everything in Hindi on a Hindi page, with no draft note now it has been read", async () => {
     await frame("hi");
 
     const { Frame } = MESSAGES.hi;
@@ -101,8 +101,22 @@ describe("SiteFrame", () => {
     expect(screen.getByRole("navigation", { name: Frame.mainNav })).toBeDefined();
     expect(screen.getByRole("link", { name: Frame.home }).getAttribute("href")).toBe("/hi");
     expect(screen.getByRole("navigation", { name: Frame.footerNav })).toBeDefined();
-    expect(screen.getByRole("contentinfo").textContent).toContain(
-      `${Frame.smallPrint} ${Frame.draftNote}`,
-    );
+    expect(screen.getByRole("contentinfo").textContent).toContain(Frame.smallPrint);
+    expect(screen.getByRole("contentinfo").textContent).not.toContain("Draft");
+  });
+
+  // A language whose translation is still a draft says so after the small print.
+  it("adds a draft note to the small print when a language has one", async () => {
+    const { Frame } = MESSAGES.hi;
+    Frame.draftNote = "Draft Hindi.";
+    try {
+      await frame("hi");
+
+      expect(screen.getByRole("contentinfo").textContent).toContain(
+        `${Frame.smallPrint} Draft Hindi.`,
+      );
+    } finally {
+      Frame.draftNote = "";
+    }
   });
 });

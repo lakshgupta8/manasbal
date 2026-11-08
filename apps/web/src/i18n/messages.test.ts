@@ -19,9 +19,9 @@ describe("messages", () => {
     expect(keys(hi)).toEqual(keys(en));
   });
 
-  it("marks the Hindi as a draft until a native speaker reads it", () => {
-    expect(hi._status).toBe("draft: not yet read by a native speaker");
-    expect(hi.Frame.draftNote).not.toBe("");
+  it("marks the Hindi as read by a native speaker, so neither language has a draft note", () => {
+    expect(hi._status).toBe("reviewed by a native speaker");
+    expect(hi.Frame.draftNote).toBe("");
     expect(en.Frame.draftNote).toBe("");
   });
 });
