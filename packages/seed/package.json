@@ -4,6 +4,9 @@
   "private": true,
   "license": "Apache-2.0",
   "type": "module",
+  "exports": {
+    "./demo-logins": "./src/demo-logins.ts"
+  },
   "scripts": {
     "seed": "pnpm --filter @manasbal/types build && node --env-file-if-exists=../../apps/api/.env src/cli.ts",
     "seed:reset": "pnpm --filter @manasbal/types build && node --env-file-if-exists=../../apps/api/.env src/reset-cli.ts",

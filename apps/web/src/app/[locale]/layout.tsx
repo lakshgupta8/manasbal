@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Noto_Sans_Devanagari } from "next/font/google";
 import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { getTranslations } from "next-intl/server";
+import { AuthProvider } from "@/components/auth-provider";
 import { SiteFrame } from "@/components/site-frame";
 import { routing } from "@/i18n/routing";
 import "../globals.css";
@@ -47,8 +48,11 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
       className={`${geistSans.variable} ${geistMono.variable} ${devanagari.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
-        {/* Pages are translated on the server; no translation code is sent to the browser. */}
-        <SiteFrame locale={locale}>{children}</SiteFrame>
+        {/* Pages are translated on the server; no translation code is sent to the browser. The
+            access token lives in memory, in AuthProvider, for every page. */}
+        <AuthProvider>
+          <SiteFrame locale={locale}>{children}</SiteFrame>
+        </AuthProvider>
       </body>
     </html>
   );

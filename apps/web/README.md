@@ -13,6 +13,12 @@ Use the helper in `src/lib/api.ts` for every call: `apiCall((api) => api.GET("/c
 
 The forwarded paths are `/auth/*` (kept as it is, where the refresh cookie lives) and `/api/*` (everything else). No page may use them. The rewrites read `API_URL` when the shop is built.
 
+## Signing in
+
+`/[locale]/sign-in` signs in with an email and password, or with one click as one of the demo logins (`DEMO_EMAILS` from `@manasbal/types`, with the public `DEMO_PASSWORD` from `@manasbal/seed`). `src/lib/auth.ts` makes the calls (`/auth/sign-in`, `/auth/refresh`, `/auth/sign-out`, `/me`) through the shop's own address.
+
+The access token lives only in memory, in `AuthProvider` (`src/components/auth-provider.tsx`), never in storage. On load it renews the session from the refresh cookie, so a reload keeps you signed in, and it renews it again a minute before the token expires. Only one renewal runs at a time, because each refresh cookie works once. The header's account slot shows "Sign in", or who is signed in and **Sign out**.
+
 ## Languages
 
 The shop speaks English (`/en/...`, the default: `/` goes to `/en`) and Hindi (`/hi/...`), with [next-intl](https://next-intl.dev). Every word on a page lives in `messages/en.json` and `messages/hi.json`; a test checks both have the same keys. The Hindi is a draft until a native speaker reads it: `hi.json` says so in `_status`, and Hindi pages say so in the footer. The header's switch links to the same page in the other language.

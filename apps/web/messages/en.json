@@ -15,7 +15,10 @@
     "footerNav": "Footer",
     "sourceCode": "Source code on GitHub",
     "smallPrint": "Manasbal is a portfolio demo: nothing here is for sale, and payments and delivery are simulated.",
-    "draftNote": ""
+    "draftNote": "",
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "signedInAs": "Signed in as {name}"
   },
   "Home": {
     "title": "Manasbal",
@@ -38,5 +41,36 @@
     "heading": "Page not found",
     "body": "There's nothing at this address. The link may be mistyped, or the page may have moved.",
     "home": "Go to the home page"
+  },
+  "SignIn": {
+    "pageTitle": "Sign in — Manasbal",
+    "title": "Sign in",
+    "demoHeading": "Try it with a demo login",
+    "roles": {
+      "customer": "Customer",
+      "seller": "Seller",
+      "seller_staff": "Seller staff",
+      "support": "Support",
+      "admin": "Admin"
+    },
+    "email": "Email",
+    "emailHint": "We use it only to sign you in",
+    "password": "Password",
+    "passwordHint": "At least 12 characters",
+    "required": "(required)",
+    "showPassword": "Show password",
+    "submit": "Sign in",
+    "forgotPassword": "Forgot password?",
+    "createAccount": "Create an account",
+    "emailMissing": "Enter your email",
+    "emailInvalid": "Enter an email like name@example.test",
+    "passwordMissing": "Enter your password",
+    "wrongPassword": "That email and password do not match. Check them and try again.",
+    "notConfirmed": "Confirm your email first: open the link we sent you.",
+    "tooManyTriesOneMinute": "Too many tries. Wait 1 minute and try again.",
+    "tooManyTriesMinutes": "Too many tries. Wait {minutes} minutes and try again.",
+    "tooManyTries": "Too many tries. Wait a little and try again.",
+    "twoStep": "This account uses two-step sign-in, which this page can't do yet.",
+    "unavailable": "We couldn't sign you in just now. Try again in a little while."
   }
 }

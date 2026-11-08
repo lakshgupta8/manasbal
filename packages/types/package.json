@@ -8,6 +8,10 @@
     ".": {
       "types": "./src/index.ts",
       "default": "./dist/index.js"
+    },
+    "./demo-logins": {
+      "types": "./src/demo-logins.ts",
+      "default": "./dist/demo-logins.js"
     }
   },
   "files": [

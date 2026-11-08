@@ -1,10 +1,23 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { MESSAGES, type TestLocale, withIntl } from "@/test/intl";
+import type { AccountMenuProps } from "./account-menu";
 import { MAIN_ID, REPO_URL, SiteFrame } from "./site-frame";
 
 vi.mock("next-intl/server", () => import("@/test/intl"));
 vi.mock("next/navigation", () => ({ usePathname: () => "/en" }));
+// The menu has its own tests; here it shows what the frame passes it.
+vi.mock("./account-menu", () => ({
+  AccountMenu: (props: AccountMenuProps) => (
+    <a
+      href={props.signInHref}
+      data-sign-out={props.signOutLabel}
+      data-signed-in-as={props.signedInAs}
+    >
+      {props.signInLabel}
+    </a>
+  ),
+}));
 
 // What Tab reaches, in order: nothing in the frame sets a positive tabindex.
 const FOCUSABLE = 'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])';
@@ -53,6 +66,19 @@ describe("SiteFrame", () => {
       ["Categories", "/en#categories"],
     ]);
     expect(screen.getByRole("link", { name: "Read in हिन्दी" })).toBeDefined();
+  });
+
+  it.each(["en", "hi"] as const)("puts the account menu in the header, in %s", async (locale) => {
+    await frame(locale);
+
+    const { Frame } = MESSAGES[locale];
+    const account = screen.getByRole("link", { name: Frame.signIn });
+    expect(screen.getByRole("banner").contains(account)).toBe(true);
+    expect(account.getAttribute("href")).toBe(`/${locale}/sign-in`);
+    expect(account.dataset.signOut).toBe(Frame.signOut);
+    // The name is filled in the browser, once it is known.
+    expect(account.dataset.signedInAs).toBe(Frame.signedInAs);
+    expect(Frame.signedInAs).toContain("{name}");
   });
 
   it("links the source code from the footer, with no draft note in English", async () => {
