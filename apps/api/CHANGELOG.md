@@ -1,5 +1,23 @@
 # @manasbal/api
 
+## 0.8.0
+
+### Minor Changes
+
+- 85a4a59: Keeps the demo logins open for everyone: wrong passwords never lock them (the rate limit still applies) and two-step set-up answers 403 for them. Their emails move to `DEMO_EMAILS` in `@manasbal/types`, with `isDemoEmail`, shared by the API and the seed.
+- c4c3a1b: The shop has a sign-up page (`/en/sign-up`) with an unticked 18+ box and a "use made-up details" note, and a confirm-email page (`/en/verify-email?token=...`). With mail off sign-up goes straight to sign-in; with mail on it says "Check your email". `POST /auth/sign-up` now answers `emailConfirmed`, so the shop knows which. The shop's error page reads its words from its own small file, and the browser's auth calls use `fetch` directly, which keeps the shop's client JS under its 200 kB budget.
+- 8084d80: Every wrong two-step code counts: wrong codes on `POST /auth/2fa/enable` and `/auth/2fa/disable` now count against the account's lockout (5 lock its codes for 15 minutes, 429) and are audited as `auth.2fa.failed`, as at sign-in. Each sign-in challenge allows at most 5 wrong codes, then answers "Sign in again". The API types list the new 429 answers.
+
+### Patch Changes
+
+- 75b3ef3: The CORS settings move into `corsOptions` (same behaviour), so tests can check them; the threat model's rate-limit, token-algorithm and CORS rows now name their tests.
+- 8e03988: Counts each visitor by their own address behind a proxy: `TRUSTED_PROXY_HOPS` says how many proxies to trust in `X-Forwarded-For` (0, the default, ignores it).
+- Updated dependencies [85a4a59]
+- Updated dependencies [79cce7c]
+- Updated dependencies [c4c3a1b]
+- Updated dependencies [8084d80]
+  - @manasbal/types@0.6.0
+
 ## 0.7.0
 
 ### Minor Changes
