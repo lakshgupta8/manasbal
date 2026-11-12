@@ -40,6 +40,12 @@ jobs:
 
       - uses: ./.github/actions/setup
 
+      # The seed imports slugify and the demo emails from @manasbal/types, which runs from its
+      # build (dist/). seed:reset builds it too; this step makes the order explicit and fails
+      # here, before the database is touched, if the build breaks.
+      - name: Build @manasbal/types
+        run: pnpm --filter @manasbal/types build
+
       # DATABASE_URL is Neon's direct (unpooled) string: TRUNCATE and migrations must not go
       # through the pooler, as in deploy.yml.
       - name: Reset to the demo profile
