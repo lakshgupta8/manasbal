@@ -5,5 +5,7 @@ export { Footer, type FooterLink, type FooterProps } from "./components/Footer";
 export { Header, type HeaderLink, type HeaderProps } from "./components/Header";
 export { LotusMark, type LotusMarkProps } from "./components/LotusMark";
 export { Notice, type NoticeProps, type NoticeTone } from "./components/Notice";
-export { SampleBadge, type SampleBadgeProps } from "./components/SampleBadge";
+export { formatPaise, Price, type PriceProps, type PriceSize } from "./components/Price";
+export { Rating, type RatingProps } from "./components/Rating";
+export { SampleBadge, type SampleBadgeKind, type SampleBadgeProps } from "./components/SampleBadge";
 export { TextField, type TextFieldProps, type TextFieldType } from "./components/TextField";
