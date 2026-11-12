@@ -104,7 +104,7 @@ One account per role, so you can try the demo without signing up. They all use t
 
 These are public on purpose; the nightly reset restores them. Anything you change while signed in to one of them is undone that night.
 
-The seed writes them ([`packages/seed/src/demo-logins.ts`](packages/seed/src/demo-logins.ts) holds the emails and the password). The demo customer has orders and addresses, and the demo seller owns the biggest store. After a local `seed` or `seed:reset`, they sign in locally too.
+The seed writes them ([`packages/types/src/demo-logins.ts`](packages/types/src/demo-logins.ts) holds the emails, [`packages/seed/src/demo-logins.ts`](packages/seed/src/demo-logins.ts) the password). Nobody can lock them or switch two-step on for them, so they stay open for everyone. The demo customer has orders and addresses, and the demo seller owns the biggest store. After a local `seed` or `seed:reset`, they sign in locally too.
 
 ## Documentation
 

@@ -1,5 +1,15 @@
 # @manasbal/sdk
 
+## 0.2.2
+
+### Patch Changes
+
+- Updated dependencies [85a4a59]
+- Updated dependencies [79cce7c]
+- Updated dependencies [c4c3a1b]
+- Updated dependencies [8084d80]
+  - @manasbal/types@0.6.0
+
 ## 0.2.1
 
 ### Patch Changes

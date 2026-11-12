@@ -1,13 +1,13 @@
 import type { Faker } from "@faker-js/faker";
 import { hash } from "@node-rs/argon2";
-import { slugify, type Role } from "@manasbal/types";
+import { DEMO_EMAILS, slugify, type Role } from "@manasbal/types";
 // Prisma reads and writes timestamps as Temporal.Instant, which Node 24 doesn't have yet.
 import "temporal-polyfill/global";
 import { ARGON2_OPTIONS } from "../../../apps/api/src/auth/argon2-options.ts";
 import places from "../data/places.json" with { type: "json" };
 import storeNames from "../data/store-names.json" with { type: "json" };
 import { insertInBatches } from "./batches.ts";
-import { DEMO_EMAILS, DEMO_PASSWORD, DEMO_STAFF } from "./demo-logins.ts";
+import { DEMO_PASSWORD, DEMO_STAFF } from "./demo-logins.ts";
 import type { createDb } from "./db.ts";
 import type { SeedProfile } from "./profiles.ts";
 import { REFERENCE_DATE } from "./random.ts";

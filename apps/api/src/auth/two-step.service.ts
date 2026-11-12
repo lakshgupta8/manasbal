@@ -1,15 +1,17 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Inject,
   Injectable,
   UnauthorizedException,
 } from "@nestjs/common";
-import type { TwoStepEnabled, TwoStepSetup } from "@manasbal/types";
+import { isDemoEmail, type TwoStepEnabled, type TwoStepSetup } from "@manasbal/types";
 import { generateSecret, generateURI, verify } from "otplib";
 import { AuditService } from "../audit/audit.service.js";
 import { getDb } from "../prisma/db.js";
 import type { Actor } from "./current-user.js";
+import { LockoutService, userLockKey } from "./lockout.service.js";
 import { hashRecoveryCode, newRecoveryCodes } from "./recovery-codes.js";
 import { open, seal } from "./secret-box.js";
 
@@ -19,6 +21,8 @@ export const ISSUER = "Manasbal";
 export const TWO_STEP_ALREADY_ON = "Two-step sign-in is already on";
 export const TWO_STEP_NOT_SET_UP = "Start the two-step set-up first";
 export const TWO_STEP_OFF = "Two-step sign-in is not on";
+// A visitor who switched two-step on for a shared demo login would shut everyone else out of it.
+export const DEMO_TWO_STEP_OFF = "Two-step sign-in is off for demo logins";
 export const WRONG_CODE = "That code is not right. Check the time on your phone and try again";
 // The access token is valid but its account is gone (the nightly reset).
 export const ACCOUNT_GONE = "Sign in again";
@@ -48,7 +52,11 @@ const TOLERANCE_SECONDS = 30;
 export class TwoStepService {
   // Typed as the part it uses: a class type makes the decorator metadata emit a branch that never
   // runs. @Inject still names the provider.
-  constructor(@Inject(AuditService) private readonly audit: Pick<AuditService, "record">) {}
+  constructor(
+    @Inject(AuditService) private readonly audit: Pick<AuditService, "record">,
+    @Inject(LockoutService)
+    private readonly lockout: Pick<LockoutService, "assertOpen" | "fail" | "clear">,
+  ) {}
 
   // A new secret, stored encrypted but not switched on until a code from the app proves it was
   // added. Running set-up again replaces an unconfirmed secret.
@@ -57,6 +65,7 @@ export class TwoStepService {
       const users = tx.orm.public.User;
       const user = await users.where({ id: who.userId }).select("email", "totpEnabledAt").first();
       if (user === null) throw new UnauthorizedException(ACCOUNT_GONE);
+      if (isDemoEmail(user.email)) throw new ForbiddenException(DEMO_TWO_STEP_OFF);
       if (user.totpEnabledAt !== null) throw new ConflictException(TWO_STEP_ALREADY_ON);
 
       const secret = generateSecret();
@@ -68,6 +77,10 @@ export class TwoStepService {
 
   // Switches two-step on with a code from the app, and answers the recovery codes, once.
   enable(who: Actor, code: string): Promise<TwoStepEnabled> {
+    return this.countingWrongCodes(who, () => this.switchOn(who, code));
+  }
+
+  private switchOn(who: Actor, code: string): Promise<TwoStepEnabled> {
     return getDb().transaction(async (tx) => {
       const { RecoveryCode, User } = tx.orm.public;
       const user = await User.where({ id: who.userId })
@@ -129,6 +142,10 @@ export class TwoStepService {
   // Switches two-step off with a current code, so an access token alone can't. The secret and
   // every recovery code go with it.
   disable(who: Actor, code: string): Promise<void> {
+    return this.countingWrongCodes(who, () => this.switchOff(who, code));
+  }
+
+  private switchOff(who: Actor, code: string): Promise<void> {
     return getDb().transaction(async (tx) => {
       const { RecoveryCode, User } = tx.orm.public;
       const user = await User.where({ id: who.userId })
@@ -150,6 +167,25 @@ export class TwoStepService {
       await RecoveryCode.where({ userId: who.userId }).deleteAndCount();
       await this.audit.record(who, "auth.2fa.disable", { type: "user", id: who.userId }, tx.orm);
     });
+  }
+
+  // Wrong codes on enable and disable count against the account exactly as at sign-in: 5 lock
+  // its codes for 15 minutes (429), each is audited as auth.2fa.failed, and a right one starts the
+  // count again. The audit rows are written after the transaction, which a wrong code rolls back.
+  // Demo logins never get here with a code: two-step set-up is refused for them.
+  private async countingWrongCodes<T>(who: Actor, work: () => Promise<T>): Promise<T> {
+    const lockKey = userLockKey(who.userId);
+    await this.lockout.assertOpen(lockKey);
+    const result = await work().catch(async (error: unknown) => {
+      if (error instanceof BadRequestException && error.message === WRONG_CODE) {
+        const target = { type: "user", id: who.userId };
+        await this.audit.record(who, "auth.2fa.failed", target);
+        if (await this.lockout.fail(lockKey)) await this.audit.record(who, "auth.lockout", target);
+      }
+      throw error;
+    });
+    await this.lockout.clear(lockKey);
+    return result;
   }
 
   // Whether the code is right, used up so it can't work twice: a recovery code is marked used,

@@ -7,6 +7,8 @@ export interface NoticeProps {
   readonly tone: NoticeTone;
   readonly children: ReactNode;
   readonly className?: string;
+  /** The lead word in the page's language; the tone's English word when left out. */
+  readonly leadWord?: string;
 }
 
 const leadWords: Record<NoticeTone, string> = {
@@ -16,11 +18,11 @@ const leadWords: Record<NoticeTone, string> = {
 };
 
 /** Inline box that calls attention to a short message. The lead word means colour is never the only signal. */
-export function Notice({ tone, children, className }: NoticeProps) {
+export function Notice({ tone, children, className, leadWord = leadWords[tone] }: NoticeProps) {
   const classes = ["mb-notice", `mb-notice--${tone}`, className].filter(Boolean).join(" ");
   const content = (
     <>
-      <strong>{leadWords[tone]}</strong> {children}
+      <strong>{leadWord}</strong> {children}
     </>
   );
 

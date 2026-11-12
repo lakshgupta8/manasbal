@@ -1,9 +1,9 @@
 import { verify } from "@node-rs/argon2";
-import { ROLES } from "@manasbal/types";
+import { DEMO_EMAILS, ROLES } from "@manasbal/types";
 import { describe, expect, it, vi } from "vitest";
 import places from "../data/places.json" with { type: "json" };
 import { assertAllowed } from "./guardrails.ts";
-import { DEMO_EMAILS, DEMO_PASSWORD } from "./demo-logins.ts";
+import { DEMO_PASSWORD } from "./demo-logins.ts";
 import {
   allUsers,
   generatePeople,

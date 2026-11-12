@@ -1,0 +1,28 @@
+/* Colours and type come from theme.css. One style for the whole amount: sign, rupees and paise. */
+.mb-price {
+  color: var(--mb-color-text-default);
+  font-family: var(--mb-font-family-sans);
+  font-weight: var(--mb-font-weight-semibold);
+  white-space: nowrap;
+}
+
+/* The heading-2 size and line height, in semibold. */
+.mb-price--large {
+  font-size: var(--mb-font-size-heading-2);
+  line-height: var(--mb-font-line-height-heading-2);
+}
+
+.mb-price--small {
+  font-size: var(--mb-font-size-body);
+  line-height: var(--mb-font-line-height-body);
+}
+
+/* For screen readers only. */
+.mb-price__spoken {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

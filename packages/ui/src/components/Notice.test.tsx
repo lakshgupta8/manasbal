@@ -1,6 +1,7 @@
 import { composeStories } from "@storybook/react-vite";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+import { Notice } from "./Notice";
 import * as stories from "./Notice.stories";
 
 const { Default, Warning, ErrorTone } = composeStories(stories);
@@ -31,5 +32,15 @@ describe("Notice", () => {
     render(<Default className="sticky" />);
 
     expect(screen.getByRole("status").className).toBe("mb-notice mb-notice--info sticky");
+  });
+
+  it("takes the lead word in the page's language", () => {
+    render(
+      <Notice tone="info" leadWord="ध्यान दें:">
+        संदेश
+      </Notice>,
+    );
+
+    expect(screen.getByRole("status").textContent).toBe("ध्यान दें: संदेश");
   });
 });

@@ -1,7 +1,7 @@
 import { Controller, Get, Module } from "@nestjs/common";
 import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fastify";
 import { Test } from "@nestjs/testing";
-import { RATE_LIMIT } from "../src/rate-limit/rate-limit.module.js";
+import { AUTH_RATE_LIMIT, RATE_LIMIT } from "../src/rate-limit/rate-limit.module.js";
 import { AppModule } from "../src/app.module.js";
 import { startTestValkey, type TestValkey } from "./support/test-valkey.js";
 
@@ -52,6 +52,32 @@ describe("rate limiting (e2e)", () => {
     const response = await app.inject({ method: "GET", url: "/ping", remoteAddress: "10.0.0.2" });
 
     expect(response.statusCode).toBe(200);
+  });
+
+  it("limits an /auth route to 10 a minute per visitor, apart from the overall 100", async () => {
+    // A malformed sign-in: the limit counts it before the body is checked, so no database is needed.
+    const signIn = () =>
+      app.inject({ method: "POST", url: "/auth/sign-in", remoteAddress: "10.0.0.4", payload: {} });
+
+    for (let i = 1; i <= AUTH_RATE_LIMIT; i++) expect((await signIn()).statusCode).toBe(400);
+    const eleventh = await signIn();
+
+    expect(eleventh.statusCode).toBe(429);
+    expect(eleventh.headers["content-type"]).toContain("application/problem+json");
+    expect(Number(eleventh.headers["retry-after"])).toBeGreaterThan(0);
+    // The same visitor is still well inside the overall limit elsewhere.
+    const elsewhere = await app.inject({ method: "GET", url: "/ping", remoteAddress: "10.0.0.4" });
+    expect(elsewhere.statusCode).toBe(200);
+  });
+
+  it("limits an /auth/2fa route to 10 a minute per visitor too", async () => {
+    // Without a token each try answers 401, after the limit has counted it.
+    const setup = () =>
+      app.inject({ method: "POST", url: "/auth/2fa/setup", remoteAddress: "10.0.0.5" });
+
+    for (let i = 1; i <= AUTH_RATE_LIMIT; i++) expect((await setup()).statusCode).toBe(401);
+
+    expect((await setup()).statusCode).toBe(429);
   });
 
   it("never limits /health", async () => {

@@ -1,9 +1,10 @@
 {
   "name": "@manasbal/icons",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "license": "Apache-2.0",
   "type": "module",
+  "sideEffects": false,
   "exports": {
     ".": "./src/index.ts"
   },

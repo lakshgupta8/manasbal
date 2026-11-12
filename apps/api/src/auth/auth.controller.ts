@@ -61,6 +61,12 @@ export class SignUpResult {
 
   @ApiProperty()
   name: string;
+
+  @ApiProperty({
+    description:
+      "True when the account can sign in now (mail is off); false when a link to confirm the email was mailed",
+  })
+  emailConfirmed: boolean;
 }
 
 // The refresh token is never in the body: it goes only into the httpOnly cookie.
@@ -170,11 +176,14 @@ export class AuthController {
   @ApiOperation({
     summary: "Second step of sign-in",
     description:
-      "Takes the challenge sign-in answered and the 6-digit code from the authenticator app, or a recovery code. Each code works once. Answers an access token and sets the refresh_token cookie, as sign-in does.",
+      "Takes the challenge sign-in answered and the 6-digit code from the authenticator app, or a recovery code. Each code works once, and a challenge allows at most 5 wrong codes. Answers an access token and sets the refresh_token cookie, as sign-in does.",
   })
   @ApiZodBody(twoStepVerifyInputSchema)
   @ApiOkResponse({ type: SignInResult })
-  @ApiUnauthorizedResponse({ description: "The code is not right, or sign in again" })
+  @ApiUnauthorizedResponse({
+    description:
+      "The code is not right, or sign in again (also after 5 wrong codes on one challenge)",
+  })
   @ApiTooManyRequestsResponse({
     description: "5 wrong codes for this account in 15 minutes: wait 15 minutes",
   })

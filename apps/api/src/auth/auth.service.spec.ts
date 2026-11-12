@@ -13,8 +13,9 @@ import {
   SIGN_IN_FAILED,
   SIGN_UP_FAILED,
 } from "./auth.service.js";
+import { DEMO_EMAILS } from "@manasbal/types";
 import { TooManyTriesException } from "../errors/too-many-tries.exception.js";
-import { emailLockKey, userLockKey } from "./lockout.service.js";
+import { challengeLockKey, emailLockKey, userLockKey } from "./lockout.service.js";
 import { hashToken } from "./tokens.service.js";
 import { SIGN_IN_AGAIN, WRONG_CODE } from "./two-step.service.js";
 
@@ -71,7 +72,7 @@ describe("AuthService", () => {
     newRefresh: vi.fn<() => { token: string; hash: string }>(),
     newEmailToken: vi.fn<() => { token: string; hash: string }>(),
     signChallenge: vi.fn<(userId: string) => Promise<string>>(),
-    verifyChallenge: vi.fn<(token: string) => Promise<string>>(),
+    verifyChallenge: vi.fn<(token: string) => Promise<{ userId: string; challengeId: string }>>(),
   };
   const twoStep = {
     verifySignIn:
@@ -85,6 +86,7 @@ describe("AuthService", () => {
   const mailer = { send: vi.fn<(mail: { to: string; text: string }) => Promise<void>>() };
   const lockout = {
     assertOpen: vi.fn<(key: string) => Promise<void>>(),
+    isLocked: vi.fn<(key: string) => Promise<boolean>>(),
     fail: vi.fn<(key: string) => Promise<boolean>>(),
     clear: vi.fn<(key: string) => Promise<void>>(),
   };
@@ -122,6 +124,7 @@ describe("AuthService", () => {
     twoStep.verifySignIn.mockReset();
     // A fresh service each time, so the cached dummy hash never carries over between tests.
     lockout.assertOpen.mockReset().mockResolvedValue(undefined);
+    lockout.isLocked.mockReset().mockResolvedValue(false);
     lockout.fail.mockReset().mockResolvedValue(false);
     lockout.clear.mockReset().mockResolvedValue(undefined);
     audit.record.mockReset().mockResolvedValue(undefined);
@@ -134,7 +137,7 @@ describe("AuthService", () => {
     User.create.mockResolvedValue(created);
     const before = Temporal.Now.instant();
 
-    await expect(service.signUp(input, REQ)).resolves.toBe(created);
+    await expect(service.signUp(input, REQ)).resolves.toEqual({ ...created, emailConfirmed: true });
 
     expect(passwords.hash).toHaveBeenCalledWith(input.password);
     expect(User.filters).toEqual([{ email: input.email }]);
@@ -165,7 +168,10 @@ describe("AuthService", () => {
     User.create.mockResolvedValue(created);
     const before = Temporal.Now.instant();
 
-    await expect(service.signUp(input, REQ)).resolves.toBe(created);
+    await expect(service.signUp(input, REQ)).resolves.toEqual({
+      ...created,
+      emailConfirmed: false,
+    });
 
     expect(User.create.mock.calls[0]?.[0]).toMatchObject({ emailVerifiedAt: null });
     const token = EmailToken.create.mock.calls[0]?.[0] as Record<string, unknown>;
@@ -341,6 +347,34 @@ describe("AuthService", () => {
       );
     });
 
+    describe("as a demo login", () => {
+      const demo = { email: DEMO_EMAILS.customer, password: input.password };
+
+      it("never counts a wrong password against it, but still records the failure", async () => {
+        User.first.mockResolvedValue(user);
+        passwords.verify.mockResolvedValue(false);
+
+        await expect(service.signIn(demo, undefined, REQ)).rejects.toThrow(
+          new UnauthorizedException(SIGN_IN_FAILED),
+        );
+        expect(lockout.assertOpen).not.toHaveBeenCalled();
+        expect(lockout.fail).not.toHaveBeenCalled();
+        expect(recorded()).toEqual(["auth.sign_in.failed"]);
+      });
+
+      it("signs in with the right password without checking or clearing a lock", async () => {
+        User.first.mockResolvedValue(user);
+        passwords.verify.mockResolvedValue(true);
+        RefreshToken.create.mockResolvedValue({});
+
+        await expect(service.signIn(demo, undefined, REQ)).resolves.toMatchObject({
+          accessToken: "access.jwt",
+        });
+        expect(lockout.assertOpen).not.toHaveBeenCalled();
+        expect(lockout.clear).not.toHaveBeenCalled();
+      });
+    });
+
     it("answers only a challenge when two-step is on: no tokens, nothing stored", async () => {
       User.first.mockResolvedValue({ ...user, totpEnabledAt: confirmedAt });
       passwords.verify.mockResolvedValue(true);
@@ -460,9 +494,11 @@ describe("AuthService", () => {
 
   describe("verifyTwoStep", () => {
     const input = { challengeToken: "challenge.jwt", code: "123456" };
+    const CHALLENGE = { userId: USER_ID, challengeId: "0f1e2d3c-4b5a-4968-8776-655443322110" };
+    const challengeKey = challengeLockKey(CHALLENGE.challengeId);
 
     it("signs in the challenge's user with a new session, as sign-in does", async () => {
-      tokens.verifyChallenge.mockResolvedValue(USER_ID);
+      tokens.verifyChallenge.mockResolvedValue(CHALLENGE);
       twoStep.verifySignIn.mockResolvedValue({ id: USER_ID, role: "customer" });
       RefreshToken.create.mockResolvedValue({});
 
@@ -501,7 +537,7 @@ describe("AuthService", () => {
     });
 
     it("issues nothing when the code is wrong, and counts it against the account", async () => {
-      tokens.verifyChallenge.mockResolvedValue(USER_ID);
+      tokens.verifyChallenge.mockResolvedValue(CHALLENGE);
       twoStep.verifySignIn.mockRejectedValue(new UnauthorizedException(WRONG_CODE));
       lockout.fail.mockResolvedValue(true);
 
@@ -511,6 +547,7 @@ describe("AuthService", () => {
       expect(tokens.signAccess).not.toHaveBeenCalled();
       expect(RefreshToken.create).not.toHaveBeenCalled();
       expect(lockout.fail).toHaveBeenCalledWith(userLockKey(USER_ID));
+      expect(lockout.fail).toHaveBeenCalledWith(challengeKey);
       expect(lockout.clear).not.toHaveBeenCalled();
       expect(recorded()).toEqual(["auth.2fa.failed", "auth.lockout"]);
       expect(audit.record).toHaveBeenCalledWith(
@@ -520,8 +557,21 @@ describe("AuthService", () => {
       );
     });
 
+    it("answers 401 'Sign in again' once the challenge has had 5 wrong codes, even for a right one", async () => {
+      tokens.verifyChallenge.mockResolvedValue(CHALLENGE);
+      lockout.isLocked.mockResolvedValue(true);
+
+      await expect(service.verifyTwoStep(input, undefined, "req-1")).rejects.toThrow(
+        new UnauthorizedException(SIGN_IN_AGAIN),
+      );
+      expect(lockout.isLocked).toHaveBeenCalledWith(challengeKey);
+      expect(lockout.assertOpen).not.toHaveBeenCalled();
+      expect(twoStep.verifySignIn).not.toHaveBeenCalled();
+      expect(RefreshToken.create).not.toHaveBeenCalled();
+    });
+
     it("answers 429 once the account's codes are locked, without checking the code", async () => {
-      tokens.verifyChallenge.mockResolvedValue(USER_ID);
+      tokens.verifyChallenge.mockResolvedValue(CHALLENGE);
       lockout.assertOpen.mockRejectedValue(new TooManyTriesException("locked", 900));
 
       await expect(service.verifyTwoStep(input, undefined, "req-1")).rejects.toThrow(
@@ -531,7 +581,7 @@ describe("AuthService", () => {
     });
 
     it("counts nothing when the code was not the problem", async () => {
-      tokens.verifyChallenge.mockResolvedValue(USER_ID);
+      tokens.verifyChallenge.mockResolvedValue(CHALLENGE);
       for (const error of [new UnauthorizedException(SIGN_IN_AGAIN), new Error("database down")]) {
         twoStep.verifySignIn.mockRejectedValueOnce(error);
 

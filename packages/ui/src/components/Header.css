@@ -1,0 +1,60 @@
+/* Colours, spacing and type come from theme.css. */
+.mb-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--mb-space-2) var(--mb-space-6);
+  padding: var(--mb-space-3) var(--mb-space-4);
+  border-bottom: 1px solid var(--mb-color-border-default);
+  background: var(--mb-color-surface-page);
+  color: var(--mb-color-text-default);
+  font-family: var(--mb-font-family-sans);
+  font-size: var(--mb-font-size-body);
+}
+
+.mb-header a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.mb-header a:focus-visible {
+  outline: 2px solid var(--mb-color-brand-primary);
+  outline-offset: 2px;
+  border-radius: var(--mb-radius-sm);
+}
+
+/* The shop name needs no underline: the logo beside it marks it as the way home. */
+.mb-header .mb-header__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mb-space-2);
+  font-size: var(--mb-font-size-heading-4);
+  font-weight: var(--mb-font-weight-semibold);
+  text-decoration: none;
+}
+
+.mb-header__nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mb-space-1) var(--mb-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Links are at least 24px tall (WCAG 2.5.8). */
+.mb-header__nav a,
+.mb-header__actions > * {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mb-space-1);
+  min-height: var(--mb-space-6);
+}
+
+.mb-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--mb-space-4);
+  margin-left: auto;
+}

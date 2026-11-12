@@ -8,6 +8,7 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import {
+  isDemoEmail,
   NEW_ACCOUNT_ROLE,
   type SignInInput,
   type SignUpInput,
@@ -17,7 +18,7 @@ import { AuditService, type AuditWho } from "../audit/audit.service.js";
 import { readMailSettings } from "../mail/mail-settings.js";
 import { MailerService } from "../mail/mailer.service.js";
 import { getDb } from "../prisma/db.js";
-import { emailLockKey, LockoutService, userLockKey } from "./lockout.service.js";
+import { challengeLockKey, emailLockKey, LockoutService, userLockKey } from "./lockout.service.js";
 import { PasswordService } from "./password.service.js";
 import { revokeFamily } from "./revoke-family.js";
 import {
@@ -77,7 +78,7 @@ export class AuthService {
     @Inject(MailerService) private readonly mailer: Pick<MailerService, "send">,
     @Inject(TwoStepService) private readonly twoStep: Pick<TwoStepService, "verifySignIn">,
     @Inject(LockoutService)
-    private readonly lockout: Pick<LockoutService, "assertOpen" | "fail" | "clear">,
+    private readonly lockout: Pick<LockoutService, "assertOpen" | "isLocked" | "fail" | "clear">,
     @Inject(AuditService) private readonly audit: Pick<AuditService, "record">,
   ) {}
 
@@ -121,7 +122,8 @@ export class AuthService {
     await this.audit.record({ userId: user.id, requestId }, "auth.sign_up", account(user.id));
     // Only a new account gets a mail: a taken email has already been refused above.
     if (mailOn) await this.sendVerification(user);
-    return user;
+    // The shop says "Check your email" only when a link is on its way.
+    return { ...user, emailConfirmed: !mailOn };
   }
 
   // Confirms the address of the account the link was sent to. The token works once; an unknown,
@@ -206,8 +208,10 @@ export class AuthService {
 
   async signIn({ email, password }: SignInInput, userAgent: string | undefined, requestId: string) {
     // A locked email answers 429 even with the right password, before the password is checked.
-    const lockKey = emailLockKey(email);
-    await this.lockout.assertOpen(lockKey);
+    // The demo logins are never locked: their password is public, so a lock would protect nothing
+    // and only shut other visitors out. The rate limit still covers them.
+    const lockKey = isDemoEmail(email) ? null : emailLockKey(email);
+    if (lockKey !== null) await this.lockout.assertOpen(lockKey);
     const db = getDb();
     const user = await db.orm.public.User.where({ email })
       .select("id", "role", "passwordHash", "emailVerifiedAt", "totpEnabledAt")
@@ -223,7 +227,7 @@ export class AuthService {
       await this.failed(lockKey, { userId: user?.id ?? null, requestId }, "auth.sign_in.failed");
       throw new UnauthorizedException(SIGN_IN_FAILED);
     }
-    await this.lockout.clear(lockKey);
+    if (lockKey !== null) await this.lockout.clear(lockKey);
     const who = { userId: user.id, requestId };
     // Only after the right password, so a wrong one never tells whether the account is confirmed.
     // With mail off no link could arrive, so an older unconfirmed account is let in.
@@ -252,15 +256,20 @@ export class AuthService {
     userAgent: string | undefined,
     requestId: string,
   ) {
-    const userId = await this.tokens.verifyChallenge(challengeToken).catch(() => null);
-    if (userId === null) throw new UnauthorizedException(SIGN_IN_AGAIN);
-    // Wrong codes count against the account, so a challenge can't be used to guess the code.
+    const challenge = await this.tokens.verifyChallenge(challengeToken).catch(() => null);
+    if (challenge === null) throw new UnauthorizedException(SIGN_IN_AGAIN);
+    // One challenge allows at most 5 wrong codes; after that it is dead, even for a right code.
+    const challengeKey = challengeLockKey(challenge.challengeId);
+    if (await this.lockout.isLocked(challengeKey)) throw new UnauthorizedException(SIGN_IN_AGAIN);
+    // Wrong codes also count against the account, so new challenges can't be used to guess on.
+    const { userId } = challenge;
     const lockKey = userLockKey(userId);
     await this.lockout.assertOpen(lockKey);
     const who = { userId, requestId };
     const user = await this.twoStep.verifySignIn(who, code).catch(async (error: unknown) => {
       if (error instanceof UnauthorizedException && error.message === WRONG_CODE) {
         await this.failed(lockKey, who, "auth.2fa.failed");
+        await this.lockout.fail(challengeKey);
       }
       throw error;
     });
@@ -365,10 +374,12 @@ export class AuthService {
     throw new UnauthorizedException(REFRESH_FAILED);
   }
 
-  // Records a wrong password or code and counts it; the try that locks the key is recorded too.
-  private async failed(lockKey: string, who: AuditWho, action: string): Promise<void> {
+  // Records a wrong password or code and counts it against the key, if there is one; the try that
+  // locks the key is recorded too.
+  private async failed(lockKey: string | null, who: AuditWho, action: string): Promise<void> {
     const target = who.userId === null ? null : account(who.userId);
     await this.audit.record(who, action, target);
+    if (lockKey === null) return;
     if (await this.lockout.fail(lockKey)) await this.audit.record(who, "auth.lockout", target);
   }
 

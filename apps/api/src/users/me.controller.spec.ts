@@ -2,6 +2,7 @@ import type { ExecutionContext } from "@nestjs/common";
 import { APP_FILTER } from "@nestjs/core";
 import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fastify";
 import { Test, type TestingModuleBuilder } from "@nestjs/testing";
+import { SignJWT, UnsecuredJWT } from "jose";
 import { AuditModule } from "../audit/audit.module.js";
 import { AuthGuard } from "../auth/auth.guard.js";
 import { ProblemDetailsFilter } from "../errors/problem-details.filter.js";
@@ -36,6 +37,36 @@ describe("MeController without a token", () => {
 
   it("GET /me answers 401", async () => {
     const response = await app.inject({ method: "GET", url: "/me" });
+
+    expect(response.statusCode).toBe(401);
+    expect(response.headers["content-type"]).toContain("application/problem+json");
+  });
+
+  // Only HS256 tokens are accepted: an unsigned one, or one signed with our secret under another
+  // algorithm, gets the same 401 as no token at all.
+  it.each([
+    [
+      "alg: none",
+      () =>
+        Promise.resolve(
+          new UnsecuredJWT({ role: "admin" }).setSubject(USER_ID).setExpirationTime("15m").encode(),
+        ),
+    ],
+    [
+      "HS512",
+      () =>
+        new SignJWT({ role: "admin" })
+          .setProtectedHeader({ alg: "HS512" })
+          .setSubject(USER_ID)
+          .setExpirationTime("15m")
+          .sign(new TextEncoder().encode(process.env["JWT_SECRET"])),
+    ],
+  ])("GET /me answers 401 to a token with %s", async (_alg, makeToken) => {
+    const response = await app.inject({
+      method: "GET",
+      url: "/me",
+      headers: { authorization: `Bearer ${await makeToken()}` },
+    });
 
     expect(response.statusCode).toBe(401);
     expect(response.headers["content-type"]).toContain("application/problem+json");

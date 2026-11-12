@@ -9,9 +9,18 @@ export default defineConfig({
     environment: "jsdom",
     include: ["src/**/*.test.{ts,tsx}"],
     setupFiles: ["./vitest.setup.ts"],
+    // next-intl imports "next/server" without a file extension, which only a bundler resolves.
+    server: { deps: { inline: ["next-intl"] } },
     coverage: {
       provider: "v8",
-      include: ["src/lib/**/*.ts", "src/components/**/*.tsx", "src/app/page.tsx"],
+      include: [
+        "src/lib/**/*.ts",
+        "src/i18n/**/*.ts",
+        "src/proxy.ts",
+        "src/components/**/*.{ts,tsx}",
+        // The brackets are literal, not a glob character class.
+        String.raw`src/app/\[locale\]/**/*.tsx`,
+      ],
       exclude: ["src/**/*.test.{ts,tsx}"],
       reporter: ["text-summary", "lcov"],
       // CI gate: coverage never drops below 60%.

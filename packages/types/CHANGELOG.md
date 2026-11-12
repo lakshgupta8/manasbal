@@ -1,5 +1,17 @@
 # @manasbal/types
 
+## 0.6.0
+
+### Minor Changes
+
+- 85a4a59: Keeps the demo logins open for everyone: wrong passwords never lock them (the rate limit still applies) and two-step set-up answers 403 for them. Their emails move to `DEMO_EMAILS` in `@manasbal/types`, with `isDemoEmail`, shared by the API and the seed.
+
+### Patch Changes
+
+- 79cce7c: The shop has a sign-in page (`/en/sign-in`, `/hi/sign-in`) with one-click demo logins, errors in words next to the right field, and an alert with the wait after too many tries. The access token stays in memory; a reload renews the session from the refresh cookie, and the header shows who is signed in with a **Sign out** button. `@manasbal/types` exports `@manasbal/types/demo-logins` on its own, `@manasbal/seed` exports `@manasbal/seed/demo-logins`, and `@manasbal/ui` and `@manasbal/icons` say which of their files have side effects, so unused components and icons stay out of the shop's bundle.
+- c4c3a1b: The shop has a sign-up page (`/en/sign-up`) with an unticked 18+ box and a "use made-up details" note, and a confirm-email page (`/en/verify-email?token=...`). With mail off sign-up goes straight to sign-in; with mail on it says "Check your email". `POST /auth/sign-up` now answers `emailConfirmed`, so the shop knows which. The shop's error page reads its words from its own small file, and the browser's auth calls use `fetch` directly, which keeps the shop's client JS under its 200 kB budget.
+- 8084d80: Every wrong two-step code counts: wrong codes on `POST /auth/2fa/enable` and `/auth/2fa/disable` now count against the account's lockout (5 lock its codes for 15 minutes, 429) and are audited as `auth.2fa.failed`, as at sign-in. Each sign-in challenge allows at most 5 wrong codes, then answers "Sign in again". The API types list the new 429 answers.
+
 ## 0.5.0
 
 ### Minor Changes

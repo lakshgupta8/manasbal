@@ -1,6 +1,6 @@
 {
   "name": "@manasbal/types",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "private": true,
   "license": "Apache-2.0",
   "type": "module",
@@ -8,6 +8,10 @@
     ".": {
       "types": "./src/index.ts",
       "default": "./dist/index.js"
+    },
+    "./demo-logins": {
+      "types": "./src/demo-logins.ts",
+      "default": "./dist/demo-logins.js"
     }
   },
   "files": [

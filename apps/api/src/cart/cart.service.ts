@@ -3,6 +3,15 @@ import type { Cart, CartItemInput } from "@manasbal/types";
 import { availableOf } from "../catalog/products.service.js";
 import { getDb } from "../prisma/db.js";
 
+// A Postgres lock on the user that lasts until the transaction ends. Two adds by the same user then
+// run one after the other: the second sees the first's cart and line, so it gets the stock
+// check's 409 instead of a duplicate cart (a 500) or a lost update.
+function lockUser(userId: string) {
+  return getDb().raw.sql`SELECT pg_advisory_xact_lock(hashtextextended(${userId}, 0))`
+    .affectedCount()
+    .build();
+}
+
 // The signed-in user's cart. Prices come from the variants, never from the request.
 @Injectable()
 export class CartService {
@@ -44,6 +53,7 @@ export class CartService {
 
   async addItem(userId: string, { variantId, quantity }: CartItemInput): Promise<Cart> {
     await getDb().transaction(async (tx) => {
+      await tx.execute(lockUser(userId));
       const db = tx.orm.public;
       const variant = await db.Variant.where({ id: variantId })
         .select("id")

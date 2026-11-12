@@ -9,8 +9,15 @@
   --color-ink: var(--mb-color-brand-ink);
   --color-lake: var(--mb-color-brand-primary);
   --color-lotus: var(--mb-color-brand-accent);
-  --font-sans: var(--font-geist-sans);
+  --color-on-brand: var(--mb-color-text-on-brand);
+  --color-muted: var(--mb-color-text-muted);
+  --font-sans: var(--font-geist-sans), var(--font-devanagari);
   --font-mono: var(--font-geist-mono);
+}
+
+:root {
+  /* The shared components (@manasbal/ui) use the same fonts, with Devanagari for Hindi. */
+  --mb-font-family-sans: var(--font-geist-sans), var(--font-devanagari), system-ui, sans-serif;
 }
 
 body {

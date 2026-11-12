@@ -1,0 +1,103 @@
+/* Colours, spacing and type come from theme.css. data-preview="focus" on the input draws the focus
+   ring without a keyboard, so Storybook can show every state side by side. */
+.mb-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--mb-space-2);
+  font-family: var(--mb-font-family-sans);
+  font-size: var(--mb-font-size-body);
+  line-height: var(--mb-font-line-height-body);
+  color: var(--mb-color-text-default);
+}
+
+/* The 20px box sits in the middle of the label's first 24px line. */
+.mb-checkbox__box {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  margin-top: 2px;
+}
+
+.mb-checkbox__input {
+  appearance: none;
+  box-sizing: border-box;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  border: 2px solid var(--mb-color-border-strong);
+  border-radius: var(--mb-radius-sm);
+  background: var(--mb-color-surface-page);
+  cursor: pointer;
+}
+
+.mb-checkbox__input:checked {
+  border-color: var(--mb-color-brand-primary);
+  background: var(--mb-color-brand-primary);
+}
+
+.mb-checkbox__input:is(:focus-visible, [data-preview="focus"]) {
+  outline: 2px solid var(--mb-color-focus-ring);
+  outline-offset: 2px;
+}
+
+.mb-checkbox__tick {
+  position: absolute;
+  inset: 0;
+  color: var(--mb-color-text-on-brand);
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.mb-checkbox__input:checked + .mb-checkbox__tick {
+  visibility: visible;
+}
+
+.mb-checkbox__text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mb-checkbox__text label {
+  cursor: pointer;
+}
+
+.mb-checkbox__error {
+  display: flex;
+  align-items: center;
+  gap: var(--mb-space-1);
+  font-size: var(--mb-font-size-small);
+  line-height: var(--mb-font-line-height-small);
+  color: var(--mb-color-feedback-error);
+}
+
+.mb-checkbox__error svg {
+  flex: none;
+}
+
+.mb-checkbox--error .mb-checkbox__input {
+  border-color: var(--mb-color-feedback-error-border);
+}
+
+/* Disabled controls are exempt from the contrast rules; these stay readable. */
+.mb-checkbox--disabled {
+  color: var(--mb-color-text-disabled);
+}
+
+.mb-checkbox--disabled .mb-checkbox__input,
+.mb-checkbox--disabled label {
+  cursor: not-allowed;
+}
+
+.mb-checkbox--disabled .mb-checkbox__input {
+  border-color: var(--mb-color-border-disabled);
+  background: var(--mb-color-surface-disabled);
+}
+
+.mb-checkbox--disabled .mb-checkbox__input:checked {
+  background: var(--mb-color-border-disabled);
+}
+
+.mb-checkbox--disabled .mb-checkbox__tick {
+  color: var(--mb-color-text-disabled);
+}

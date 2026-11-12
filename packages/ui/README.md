@@ -17,6 +17,8 @@ The tokens live in `tokens/*.json` (DTCG format). `semantic.json` is the meaning
 pnpm --filter @manasbal/ui tokens   # writes src/theme.css; a test fails while it is out of date
 ```
 
+The dark theme follows the system setting. Inside an element with `data-theme="dark"` or `data-theme="light"`, that theme applies whatever the system says; Storybook wraps every story in one (light unless the story sets `parameters: { theme: "dark" }`) and loads Geist from `@fontsource/geist`, for Storybook only.
+
 Storybook shows every token on **Foundations/Tokens**, read from the same JSON files, so the page always matches the code.
 
 Apps load it with `@import "@manasbal/ui/theme.css";` after `@import "tailwindcss";`. It gives CSS variables (`--mb-color-brand-primary`) and Tailwind classes (`bg-lake-600`, `text-text-muted`, `p-4`, `text-heading-1`, `rounded-md`).

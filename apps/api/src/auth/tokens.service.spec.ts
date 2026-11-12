@@ -1,4 +1,4 @@
-import { SignJWT } from "jose";
+import { SignJWT, UnsecuredJWT } from "jose";
 import {
   ACCESS_TOKEN_SECONDS,
   CHALLENGE_PURPOSE,
@@ -51,6 +51,25 @@ describe("TokensService", () => {
     await expect(tokens.verifyAccess(forged)).rejects.toThrow(/signature/);
   });
 
+  it("rejects an unsigned token (alg: none), whatever it claims", async () => {
+    const unsigned = new UnsecuredJWT({ role: "admin" })
+      .setSubject(USER.id)
+      .setExpirationTime("15m")
+      .encode();
+
+    await expect(tokens.verifyAccess(unsigned)).rejects.toThrow();
+  });
+
+  it("rejects a token signed with the right secret but another algorithm (HS512)", async () => {
+    const otherAlgorithm = await new SignJWT({ role: "admin" })
+      .setProtectedHeader({ alg: "HS512" })
+      .setSubject(USER.id)
+      .setExpirationTime("15m")
+      .sign(new TextEncoder().encode(process.env["JWT_SECRET"]));
+
+    await expect(tokens.verifyAccess(otherAlgorithm)).rejects.toThrow(/alg/);
+  });
+
   it("refuses to sign without JWT_SECRET", async () => {
     vi.stubEnv("JWT_SECRET", "");
 
@@ -76,19 +95,45 @@ describe("TokensService", () => {
   });
 
   describe("two-step challenges", () => {
-    it("signs a 5-minute challenge whose user id verifies", async () => {
+    it("signs a 5-minute challenge whose user and id verify", async () => {
       const challenge = await tokens.signChallenge(USER.id);
 
-      expect(await tokens.verifyChallenge(challenge)).toBe(USER.id);
       const payload = JSON.parse(Buffer.from(challenge.split(".")[1]!, "base64url").toString()) as {
         purpose: string;
         exp: number;
         iat: number;
+        jti: string;
         role?: string;
       };
+      expect(await tokens.verifyChallenge(challenge)).toEqual({
+        userId: USER.id,
+        challengeId: payload.jti,
+      });
       expect(payload.purpose).toBe(CHALLENGE_PURPOSE);
       expect(payload.exp - payload.iat).toBe(CHALLENGE_SECONDS);
       expect(payload.role).toBeUndefined();
+    });
+
+    it("gives every challenge its own id, even two for one user in the same second", async () => {
+      const [first, second] = await Promise.all([
+        tokens.signChallenge(USER.id),
+        tokens.signChallenge(USER.id),
+      ]);
+
+      const ids = await Promise.all([first, second].map((c) => tokens.verifyChallenge(c)));
+      expect(ids[0]!.challengeId).toMatch(/^[0-9a-f-]{36}$/);
+      expect(ids[0]!.challengeId).not.toBe(ids[1]!.challengeId);
+    });
+
+    it("names a challenge from before challenges had an id by the token itself", async () => {
+      const secret = new TextEncoder().encode(process.env["JWT_SECRET"]);
+      const older = await new SignJWT({ purpose: CHALLENGE_PURPOSE })
+        .setProtectedHeader({ alg: "HS256" })
+        .setSubject(USER.id)
+        .setExpirationTime("5m")
+        .sign(secret);
+
+      expect(await tokens.verifyChallenge(older)).toEqual({ userId: USER.id, challengeId: older });
     });
 
     it("rejects a challenge after 5 minutes", async () => {

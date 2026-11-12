@@ -2,7 +2,7 @@
 
 Fills a database with made-up demo data: people, a catalog, coupons, orders, payments, reviews and seller settlements. Every row is flagged `is_sample`. The data comes from a fixed seed, so every run writes exactly the same rows, except the demo logins' password hashes (argon2id uses a random salt).
 
-**Demo logins.** Every profile includes one sign-in per role, listed in the [root README](../../README.md#demo-logins). The emails and the public password live in [`src/demo-logins.ts`](src/demo-logins.ts), and nowhere else in code. The first customer and the first (biggest) seller are the demo customer and seller; seller staff, support and admin are three extra users. Their hashes are made at insert time with the API's own argon2 settings (`apps/api/src/auth/argon2-options.ts`), so the API's sign-in accepts them.
+**Demo logins.** Every profile includes one sign-in per role, listed in the [root README](../../README.md#demo-logins). The public password lives in [`src/demo-logins.ts`](src/demo-logins.ts), and the emails in [`@manasbal/types`](../types/src/demo-logins.ts) (`DEMO_EMAILS`), which the API shares to keep these logins open; neither is anywhere else in code. The first customer and the first (biggest) seller are the demo customer and seller; seller staff, support and admin are three extra users. Their hashes are made at insert time with the API's own argon2 settings (`apps/api/src/auth/argon2-options.ts`), so the API's sign-in accepts them.
 
 ## Commands
 

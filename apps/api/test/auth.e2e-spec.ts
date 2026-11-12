@@ -3,7 +3,7 @@ import { APP_FILTER } from "@nestjs/core";
 import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fastify";
 import { Test } from "@nestjs/testing";
 import { SignJWT } from "jose";
-import { sessionListSchema } from "@manasbal/types";
+import { DEMO_EMAILS, sessionListSchema } from "@manasbal/types";
 import type { Redis } from "ioredis";
 import { generate } from "otplib";
 import { AuditModule } from "../src/audit/audit.module.js";
@@ -22,6 +22,7 @@ import { LOCKED_OUT, LOCKOUT_LIMIT } from "../src/auth/lockout.service.js";
 import { ORIGIN_REFUSED } from "../src/auth/origin.guard.js";
 import { CHALLENGE_PURPOSE } from "../src/auth/tokens.service.js";
 import {
+  DEMO_TWO_STEP_OFF,
   SIGN_IN_AGAIN,
   TWO_STEP_ALREADY_ON,
   TWO_STEP_OFF,
@@ -119,7 +120,13 @@ describe("/auth (e2e)", () => {
 
     expect(created.statusCode).toBe(201);
     const { id } = created.json<{ id: string }>();
-    expect(created.json()).toEqual({ id, email: signUp.email, name: signUp.name });
+    // Mail is off here, so the account can sign in straight away.
+    expect(created.json()).toEqual({
+      id,
+      email: signUp.email,
+      name: signUp.name,
+      emailConfirmed: true,
+    });
 
     const hash = await database.sql(`select password_hash from users where id = '${id}'`);
     expect(hash).toMatch(/^\$argon2id\$/);
@@ -399,6 +406,19 @@ describe("/auth (e2e)", () => {
       expect(await auditText()).not.toContain(nobody);
     });
 
+    it("never locks a demo login: wrong passwords stay 401, and the right one still works", async () => {
+      const demo = { ...signUp, email: DEMO_EMAILS.customer };
+      expect((await post(demo)).statusCode).toBe(201);
+
+      for (let i = 1; i <= LOCKOUT_LIMIT + 1; i++) {
+        expect((await wrong(demo.email)).statusCode).toBe(401);
+      }
+
+      expect((await signIn({ email: demo.email, password: demo.password })).statusCode).toBe(200);
+      expect(await app.get<Redis>(VALKEY).keys("lockout:*")).toEqual([]);
+      expect(await auditActions()).not.toContain("auth.lockout");
+    });
+
     it("starts the count again after a right password", async () => {
       expect((await post(signUp)).statusCode).toBe(201);
 
@@ -433,7 +453,10 @@ describe("/auth (e2e)", () => {
     });
 
     it("mails a link, refuses sign-in until it is used, then lets the account in", async () => {
-      expect((await post(signUp)).statusCode).toBe(201);
+      const created = await post(signUp);
+      expect(created.statusCode).toBe(201);
+      // The shop says "Check your email".
+      expect(created.json()).toMatchObject({ emailConfirmed: false });
       expect(sent).toHaveLength(1);
       expect(sent[0]?.to).toBe(signUp.email);
       expect(sent[0]?.text).toContain("Use made-up details. This is a demo.");
@@ -654,9 +677,10 @@ describe("/auth (e2e)", () => {
         .sort();
       expect(hashes).toEqual(recoveryCodes.map(hashRecoveryCode).sort());
       for (const code of recoveryCodes) expect(hashes.join()).not.toContain(code);
+      // The wrong code above is audited too.
       expect(
         await database.sql("select string_agg(action, ',' order by action) from audit_logs"),
-      ).toBe("auth.2fa.enable,auth.2fa.setup,auth.sign_in,auth.sign_up");
+      ).toBe("auth.2fa.enable,auth.2fa.failed,auth.2fa.setup,auth.sign_in,auth.sign_up");
 
       // Once on, set-up and enable both answer 409.
       for (const again of [
@@ -725,6 +749,26 @@ describe("/auth (e2e)", () => {
       const { recoveryCodes } = enabled.json<{ recoveryCodes: string[] }>();
       return { token, secret, enableCode, recoveryCodes };
     }
+
+    it("refuses two-step set-up for a demo login, so nobody can shut the others out", async () => {
+      const demo = { ...signUp, email: DEMO_EMAILS.customer };
+      expect((await post(demo)).statusCode).toBe(201);
+      const token = (await signIn({ email: demo.email, password: demo.password })).json<{
+        accessToken: string;
+      }>().accessToken;
+
+      const setup = await app.inject({
+        method: "POST",
+        url: "/auth/2fa/setup",
+        headers: bearerHeader(token),
+      });
+
+      expect(setup.statusCode).toBe(403);
+      expect(setup.json()).toMatchObject({ status: 403, detail: DEMO_TWO_STEP_OFF });
+      expect(await database.sql("select count(*) from users where totp_secret is not null")).toBe(
+        "0",
+      );
+    });
 
     it("asks for the code after the password, and lets each code in only once", async () => {
       const { secret, enableCode, recoveryCodes } = await withTwoStep();
@@ -811,6 +855,80 @@ describe("/auth (e2e)", () => {
       expect(locked.statusCode).toBe(429);
       expect(locked.json()).toMatchObject({ detail: LOCKED_OUT });
       expect(await app.get<Redis>(VALKEY).keys("lockout:user:*")).toHaveLength(1);
+      expect(
+        await database.sql("select count(*) from audit_logs where action = 'auth.lockout'"),
+      ).toBe("1");
+    });
+
+    // A 6-digit code that is not the one the app shows now.
+    const wrongCode = async (secret: string) =>
+      (await generate({ secret })) === "000000" ? "111111" : "000000";
+    const nextCode = (secret: string) =>
+      generate({ secret, epoch: Math.floor(Date.now() / 1000) + 30 });
+    const twoStepCall = (url: string, token: string, code: string) =>
+      app.inject({ method: "POST", url, headers: bearerHeader(token), payload: { code } });
+
+    it("allows 5 wrong codes on one challenge, then refuses even a right code: sign in again", async () => {
+      const { secret } = await withTwoStep();
+      const challengeToken = await challenge();
+
+      for (let i = 1; i <= LOCKOUT_LIMIT; i++) {
+        const wrong = await verify(challengeToken, await wrongCode(secret));
+        expect(wrong.statusCode).toBe(401);
+        expect(wrong.json()).toMatchObject({ detail: WRONG_CODE });
+      }
+      const sixth = await verify(challengeToken, await nextCode(secret));
+
+      expect(sixth.statusCode).toBe(401);
+      expect(sixth.json()).toMatchObject({ detail: SIGN_IN_AGAIN });
+      expect(sixth.headers["set-cookie"]).toBeUndefined();
+      expect(await app.get<Redis>(VALKEY).keys("lockout:challenge:*")).toHaveLength(1);
+      // The account's own count also reached 5, so a new challenge is locked out too.
+      expect((await verify(await challenge(), await nextCode(secret))).statusCode).toBe(429);
+    });
+
+    it("counts wrong codes on enable against the account: 5 lock it for 15 minutes", async () => {
+      expect((await post(signUp)).statusCode).toBe(201);
+      const token = (await signIn(credentials)).json<{ accessToken: string }>().accessToken;
+      const setup = await app.inject({
+        method: "POST",
+        url: "/auth/2fa/setup",
+        headers: bearerHeader(token),
+      });
+      const { secret } = setup.json<{ secret: string }>();
+
+      for (let i = 1; i <= LOCKOUT_LIMIT; i++) {
+        const wrong = await twoStepCall("/auth/2fa/enable", token, await wrongCode(secret));
+        expect(wrong.statusCode).toBe(400);
+        expect(wrong.json()).toMatchObject({ detail: WRONG_CODE });
+      }
+      const locked = await twoStepCall("/auth/2fa/enable", token, await generate({ secret }));
+
+      expect(locked.statusCode).toBe(429);
+      expect(locked.json()).toMatchObject({ detail: LOCKED_OUT });
+      expect(Number(locked.headers["retry-after"])).toBeGreaterThan(890);
+      expect(await database.sql("select totp_enabled_at is null from users")).toBe("t");
+      expect(await actions()).toBe(
+        `auth.sign_up,auth.sign_in,auth.2fa.setup${",auth.2fa.failed".repeat(LOCKOUT_LIMIT)},auth.lockout`,
+      );
+    });
+
+    it("counts wrong codes on disable the same way, and leaves two-step on", async () => {
+      const { token, secret } = await withTwoStep();
+
+      for (let i = 1; i <= LOCKOUT_LIMIT; i++) {
+        const wrong = await twoStepCall("/auth/2fa/disable", token, await wrongCode(secret));
+        expect(wrong.statusCode).toBe(400);
+        expect(wrong.json()).toMatchObject({ detail: WRONG_CODE });
+      }
+      const locked = await twoStepCall("/auth/2fa/disable", token, await nextCode(secret));
+
+      expect(locked.statusCode).toBe(429);
+      expect(locked.json()).toMatchObject({ detail: LOCKED_OUT });
+      expect(await database.sql("select totp_enabled_at is not null from users")).toBe("t");
+      expect(
+        await database.sql("select count(*) from audit_logs where action = 'auth.2fa.failed'"),
+      ).toBe(String(LOCKOUT_LIMIT));
       expect(
         await database.sql("select count(*) from audit_logs where action = 'auth.lockout'"),
       ).toBe("1");
