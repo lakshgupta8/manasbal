@@ -12,6 +12,25 @@ function lockUser(userId: string) {
     .build();
 }
 
+type Tables = ReturnType<typeof getDb>["orm"]["public"];
+
+// The user's cart, made on the first add. Two first adds can both find no cart; a plain insert
+// would then fail on carts_user_id_key for the second and abort its transaction. So the insert
+// skips on that conflict (Postgres waits for the other insert, then does nothing), and the row
+// that won is read back.
+async function cartOf(db: Tables, userId: string): Promise<{ id: string }> {
+  const found = await db.Cart.where({ userId }).select("id").first();
+  if (found !== null) return found;
+  // Carts made through the demo are removed by the nightly reset.
+  await db.Cart.createAndCount([{ userId, createdByVisitor: true }], {
+    onConflict: "skip",
+    conflictOn: ["userId"],
+  });
+  const cart = await db.Cart.where({ userId }).select("id").first();
+  if (cart === null) throw new Error(`no cart for user ${userId} after making one`);
+  return cart;
+}
+
 // The signed-in user's cart. Prices come from the variants, never from the request.
 @Injectable()
 export class CartService {
@@ -61,10 +80,7 @@ export class CartService {
         .first();
       if (variant === null) throw new NotFoundException("No variant with this id");
 
-      // Carts made through the demo are removed by the nightly reset.
-      const cart =
-        (await db.Cart.where({ userId }).select("id").first()) ??
-        (await db.Cart.select("id").create({ userId, createdByVisitor: true }));
+      const cart = await cartOf(db, userId);
       const line = await db.CartItem.where({ cartId: cart.id, variantId })
         .select("id", "quantity")
         .first();

@@ -35,6 +35,7 @@ function fakeCollection() {
     },
     first: vi.fn<() => Promise<unknown>>(),
     create: vi.fn<(row: object) => Promise<unknown>>(),
+    createAndCount: vi.fn<(rows: object[], options: object) => Promise<number>>(),
     update: vi.fn<(patch: object) => Promise<unknown>>(),
   };
   return collection;
@@ -169,20 +170,25 @@ describe("CartService", () => {
         service.addItem(USER_ID, { variantId: VARIANT_ID, quantity: 1 }),
       ).rejects.toThrow(new NotFoundException("No variant with this id"));
       expect(Variant.filters).toEqual([{ id: VARIANT_ID }]);
-      expect(Cart.create).not.toHaveBeenCalled();
+      expect(Cart.createAndCount).not.toHaveBeenCalled();
       expect(CartItem.create).not.toHaveBeenCalled();
     });
 
     it("creates the cart and the line for a user with neither", async () => {
       Variant.first.mockResolvedValue(stocked);
-      Cart.first.mockResolvedValueOnce(null);
-      Cart.create.mockResolvedValue({ id: CART_ID });
+      Cart.first.mockResolvedValueOnce(null).mockResolvedValueOnce({ id: CART_ID });
+      Cart.createAndCount.mockResolvedValue(1);
       CartItem.first.mockResolvedValue(null);
 
       const cart = await service.addItem(USER_ID, { variantId: VARIANT_ID, quantity: 2 });
 
-      // Carts made through the demo are removed by the nightly reset.
-      expect(Cart.create).toHaveBeenCalledWith({ userId: USER_ID, createdByVisitor: true });
+      // Carts made through the demo are removed by the nightly reset. A second first add that
+      // races this one skips its insert instead of failing on carts_user_id_key.
+      expect(Cart.createAndCount).toHaveBeenCalledWith(
+        [{ userId: USER_ID, createdByVisitor: true }],
+        { onConflict: "skip", conflictOn: ["userId"] },
+      );
+      expect(Cart.filters).toEqual([{ userId: USER_ID }, { userId: USER_ID }, { userId: USER_ID }]);
       expect(CartItem.filters).toEqual([{ cartId: CART_ID, variantId: VARIANT_ID }]);
       expect(CartItem.create).toHaveBeenCalledWith({
         cartId: CART_ID,
@@ -193,6 +199,37 @@ describe("CartService", () => {
       expect(cart.items).toHaveLength(1);
     });
 
+    it("uses the cart another add made first when it loses the race to make one", async () => {
+      const WINNER = "9e8d7c6b-5a49-4382-9172-6f5e4d3c2b1a";
+      Variant.first.mockResolvedValue(stocked);
+      // No cart when it looked; by the insert the other add had made one, so the insert skipped.
+      Cart.first.mockResolvedValueOnce(null).mockResolvedValueOnce({ id: WINNER });
+      Cart.createAndCount.mockResolvedValue(0);
+      CartItem.first.mockResolvedValue(null);
+
+      await service.addItem(USER_ID, { variantId: VARIANT_ID, quantity: 1 });
+
+      expect(Cart.create).not.toHaveBeenCalled();
+      expect(CartItem.filters).toEqual([{ cartId: WINNER, variantId: VARIANT_ID }]);
+      expect(CartItem.create).toHaveBeenCalledWith({
+        cartId: WINNER,
+        variantId: VARIANT_ID,
+        quantity: 1,
+        createdByVisitor: true,
+      });
+    });
+
+    it("fails loudly if there is still no cart after making one", async () => {
+      Variant.first.mockResolvedValue(stocked);
+      Cart.first.mockResolvedValueOnce(null).mockResolvedValueOnce(null);
+      Cart.createAndCount.mockResolvedValue(0);
+
+      await expect(
+        service.addItem(USER_ID, { variantId: VARIANT_ID, quantity: 1 }),
+      ).rejects.toThrow(`no cart for user ${USER_ID} after making one`);
+      expect(CartItem.create).not.toHaveBeenCalled();
+    });
+
     it("adds a new line to the cart the user already has", async () => {
       Variant.first.mockResolvedValue(stocked);
       Cart.first.mockResolvedValueOnce({ id: CART_ID });
@@ -200,7 +237,7 @@ describe("CartService", () => {
 
       await service.addItem(USER_ID, { variantId: VARIANT_ID, quantity: 1 });
 
-      expect(Cart.create).not.toHaveBeenCalled();
+      expect(Cart.createAndCount).not.toHaveBeenCalled();
       expect(CartItem.create).toHaveBeenCalledWith({
         cartId: CART_ID,
         variantId: VARIANT_ID,
