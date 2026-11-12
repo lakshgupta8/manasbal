@@ -1,0 +1,47 @@
+/* Colours, spacing and type come from theme.css. The filled star's colour is set once, here.
+   Draws on surface.page; brand.primary on surface.card in dark is about 2.4:1, below the 3:1 icon
+   rule, so a future ProductCard must use surface.page (as in Figma) or this needs a new token. */
+.mb-rating {
+  --mb-rating-star-filled: var(--mb-color-brand-primary);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mb-space-2);
+  font-family: var(--mb-font-family-sans);
+}
+
+/* 24 px stars, 2 px apart (Figma); 8 px before the review count. */
+.mb-rating__stars {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.mb-rating__stars svg {
+  display: block;
+}
+
+.mb-rating__full {
+  color: var(--mb-rating-star-filled);
+  fill: currentColor;
+}
+
+.mb-rating__empty {
+  color: var(--mb-color-border-strong);
+}
+
+/* A half star: the half-star outline, with a full star over it cut to its left 12 of 24 px. */
+.mb-rating__half {
+  position: relative;
+  display: block;
+}
+
+.mb-rating__half > .mb-rating__full {
+  position: absolute;
+  inset: 0;
+  clip-path: inset(0 50% 0 0);
+}
+
+.mb-rating__reviews {
+  color: var(--mb-color-text-muted);
+  font-size: var(--mb-font-size-small);
+  line-height: var(--mb-font-line-height-small);
+}

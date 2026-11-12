@@ -1,12 +1,13 @@
-/* White on lake teal: 4.8:1 contrast (WCAG AA). */
+/* Colours and type come from theme.css: text.on-brand on brand.primary is 4.8:1 (WCAG AA). The
+   text is the small step of the type scale, 14/20. */
 .mb-sample-badge {
   display: inline-block;
-  padding: 0.125rem 0.5rem;
-  border-radius: 999px;
-  background: #167e86;
-  color: #fff;
-  font:
-    0.75rem/1.4 system-ui,
-    sans-serif;
+  padding: 2px var(--mb-space-2);
+  border-radius: var(--mb-radius-full);
+  background: var(--mb-color-brand-primary);
+  color: var(--mb-color-text-on-brand);
+  font-family: var(--mb-font-family-sans);
+  font-size: var(--mb-font-size-small);
+  line-height: var(--mb-font-line-height-small);
   white-space: nowrap;
 }
