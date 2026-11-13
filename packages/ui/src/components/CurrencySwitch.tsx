@@ -22,7 +22,7 @@ const CHOICES: readonly Currency[] = ["INR", "USD"];
 const ENGLISH_NAMES: Readonly<Record<Currency, string>> = { INR: "₹ INR", USD: "$ USD" };
 
 /**
- * Two buttons, rupees and dollars, in a named group. The current one is pressed (aria-pressed),
+ * Two buttons, rupees and dollars, in a fieldset named by its (visually hidden) legend. The current one is pressed (aria-pressed),
  * filled, and has a tick, so the state is in words and shape, not colour alone. Pressing the
  * other submits the form.
  */
@@ -35,7 +35,8 @@ export function CurrencySwitch({
 }: CurrencySwitchProps) {
   return (
     <form action={action} className={["mb-currency-switch", className].filter(Boolean).join(" ")}>
-      <div role="group" aria-label={label} className="mb-currency-switch__group">
+      <fieldset className="mb-currency-switch__group">
+        <legend className="mb-currency-switch__legend">{label}</legend>
         {CHOICES.map((choice) => {
           const pressed = choice === current;
           return (
@@ -52,7 +53,7 @@ export function CurrencySwitch({
             </button>
           );
         })}
-      </div>
+      </fieldset>
     </form>
   );
 }

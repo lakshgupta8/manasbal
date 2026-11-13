@@ -10,6 +10,9 @@
 
 .mb-currency-switch__group {
   display: inline-flex;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
   border: 1px solid var(--mb-color-border-strong);
   border-radius: var(--mb-radius-md);
   overflow: visible;
@@ -56,4 +59,14 @@
   position: relative;
   outline: 2px solid var(--mb-color-focus-ring);
   outline-offset: 2px;
+}
+
+/* The group's name, for screen readers only: the buttons' words say what they do. */
+.mb-currency-switch__legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
