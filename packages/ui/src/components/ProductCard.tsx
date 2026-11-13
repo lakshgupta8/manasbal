@@ -22,8 +22,9 @@ export interface ProductCardProps extends Omit<HTMLAttributes<HTMLElement>, "chi
   readonly name: string;
   /** Where the name leads. */
   readonly href: string;
-  /** The price in whole paise (see Price). */
-  readonly pricePaise: number;
+  /** The price in whole paise (see Price). With none (a product with no variants yet), no price
+   * is shown. */
+  readonly pricePaise?: number | null;
   /** The rating in halves; with none, no stars are drawn. */
   readonly rating?: number;
   /** The review count in words, e.g. "(120 reviews)"; shown only with a rating. */
@@ -89,7 +90,7 @@ export function ProductCard({
         )}
       </div>
       {rating !== undefined && <Rating value={rating} label={ratingLabel} reviews={reviews} />}
-      <Price paise={pricePaise} unit={priceUnit} />
+      {typeof pricePaise === "number" && <Price paise={pricePaise} unit={priceUnit} />}
     </article>
   );
 }

@@ -21,15 +21,16 @@
     "signedInAs": "Signed in as {name}"
   },
   "Home": {
-    "title": "Manasbal",
-    "tagline": "A demo multi-vendor marketplace, under construction.",
-    "categoriesHeading": "Categories",
-    "loadingCategories": "Loading categories…",
+    "title": "Welcome to Manasbal",
+    "tagline": "A demo marketplace of small, made-up stores. Look around as much as you like: nothing here is for sale.",
+    "categoriesHeading": "Shop by category",
+    "productsHeading": "A few products to start with",
     "noCategories": "There are no categories yet",
     "noteLead": "Note:"
   },
   "Loading": {
-    "message": "Loading…"
+    "message": "Loading…",
+    "products": "Loading products"
   },
   "NotFound": {
     "heading": "Page not found",
@@ -165,5 +166,23 @@
     "tooManyTriesMinutes": "Too many tries. Wait {minutes} minutes and try again.",
     "tooManyTries": "Too many tries. Wait a little and try again.",
     "unavailable": "We couldn't save your new password just now. Try again in a little while."
+  },
+  "Catalog": {
+    "sample": "Sample",
+    "rupees": "rupees",
+    "noProducts": "No products here yet",
+    "home": "Go to the home page"
+  },
+  "Category": {
+    "breadcrumbs": "Breadcrumbs",
+    "home": "Home",
+    "subcategories": "Browse {name}",
+    "pages": "Pages",
+    "previous": "Previous page",
+    "next": "Next page",
+    "page": "Page {number}",
+    "emptyBody": "Nothing has been listed in this category so far.",
+    "notFoundHeading": "Category not found",
+    "notFoundBody": "There is no category at this address. The link may be mistyped, or the category may have been removed."
   }
 }
