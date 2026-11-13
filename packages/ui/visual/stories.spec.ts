@@ -37,6 +37,7 @@ for (const story of stories) {
     test(`${story.title} › ${story.name}${suffix}`, async ({ page }) => {
       await page.emulateMedia({ colorScheme });
       if (story.tags?.includes("mobile")) await page.setViewportSize({ width: 375, height: 667 });
+      if (story.tags?.includes("tablet")) await page.setViewportSize({ width: 768, height: 1024 });
       if (story.tags?.includes("wide")) await page.setViewportSize({ width: 1600, height: 900 });
       await page.goto(`/iframe.html?id=${story.id}&viewMode=story`);
       const root = page.locator("#storybook-root");

@@ -1,0 +1,77 @@
+/* Colours, spacing and type come from theme.css. The card has the page's own fill in both themes,
+   so the stars sit on surface.page (the tested contrast pair). No hover state is drawn. */
+.mb-product-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--mb-space-1);
+  box-sizing: border-box;
+  min-width: 0;
+  padding: var(--mb-space-4);
+  border: 1px solid var(--mb-color-border-default);
+  border-radius: var(--mb-radius-lg);
+  background: var(--mb-color-surface-page);
+  color: var(--mb-color-text-default);
+  font-family: var(--mb-font-family-sans);
+}
+
+/* The name comes first for assistive tech; the picture is drawn above it, 12 px from the
+   details. */
+.mb-product-card__picture {
+  position: relative;
+  order: -1;
+  height: 200px;
+  margin-bottom: calc(var(--mb-space-3) - var(--mb-space-1));
+  overflow: hidden;
+  border-radius: var(--mb-radius-md);
+  background: var(--mb-color-surface-hover);
+}
+
+.mb-product-card__picture > img,
+.mb-product-card__placeholder {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mb-product-card__badge {
+  position: absolute;
+  top: var(--mb-space-2);
+  left: var(--mb-space-2);
+}
+
+.mb-product-card__name {
+  margin: 0;
+  font-size: var(--mb-font-size-body);
+  font-weight: var(--mb-font-weight-medium);
+  line-height: var(--mb-font-line-height-body);
+  overflow-wrap: anywhere;
+}
+
+.mb-product-card__link {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+/* The one link covers the whole card (border included), so a click anywhere on it follows the
+   link. */
+.mb-product-card__link::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: var(--mb-radius-lg);
+}
+
+/* The focus ring goes round the whole card: 2 px wide, 2 px away, so its outer radius is 20.
+   data-preview="focus" on the card draws it without a keyboard, so Storybook can show it. */
+.mb-product-card__link:focus-visible {
+  outline: none;
+}
+
+.mb-product-card__link:focus-visible::after,
+.mb-product-card[data-preview="focus"] .mb-product-card__link::after {
+  outline: 2px solid var(--mb-color-focus-ring);
+  outline-offset: 2px;
+}

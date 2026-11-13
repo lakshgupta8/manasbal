@@ -6,6 +6,13 @@ export { Header, type HeaderLink, type HeaderProps } from "./components/Header";
 export { LotusMark, type LotusMarkProps } from "./components/LotusMark";
 export { Notice, type NoticeProps, type NoticeTone } from "./components/Notice";
 export { formatPaise, Price, type PriceProps, type PriceSize } from "./components/Price";
+export {
+  ProductCard,
+  type ProductCardImage,
+  type ProductCardLinkProps,
+  type ProductCardProps,
+} from "./components/ProductCard";
+export { ProductGrid, type ProductGridItem, type ProductGridProps } from "./components/ProductGrid";
 export { Rating, type RatingProps } from "./components/Rating";
 export { SampleBadge, type SampleBadgeKind, type SampleBadgeProps } from "./components/SampleBadge";
 export { TextField, type TextFieldProps, type TextFieldType } from "./components/TextField";
