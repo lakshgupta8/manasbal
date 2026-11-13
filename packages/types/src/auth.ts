@@ -56,6 +56,15 @@ export const forgotPasswordInputSchema = z
 
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordInputSchema>;
 
+// Asks for a new confirmation link. Normalised like sign-in, so the same account is found.
+export const resendVerificationInputSchema = z
+  .object({
+    email,
+  })
+  .strict();
+
+export type ResendVerificationInput = z.infer<typeof resendVerificationInputSchema>;
+
 // The token from the reset link and the new password, which follows the sign-up rules.
 export const resetPasswordInputSchema = z
   .object({

@@ -1,5 +1,6 @@
 import type {
   ForgotPasswordInput,
+  ResendVerificationInput,
   ResetPasswordInput,
   SignInInput,
   SignUpInput,
@@ -229,6 +230,23 @@ export type ForgotPasswordOutcome =
 export async function forgotPassword(email: string): Promise<ForgotPasswordOutcome> {
   const body: ForgotPasswordInput = { email };
   const { response } = await reach("/auth/forgot-password", { body });
+  if (response.status === 202 || response.status === 400) return { kind: "sent" };
+  if (response.status === 429) {
+    return {
+      kind: "tooManyTries",
+      retryAfterSeconds: retryAfterSeconds(response.headers.get("retry-after")),
+    };
+  }
+  throw unexpected(response);
+}
+
+// Asks for a new confirmation link. The API answers the same whatever the email (and whether or
+// not it is confirmed), and so does the page: "sent" never says which.
+export type ResendVerificationOutcome = ForgotPasswordOutcome;
+
+export async function resendVerification(email: string): Promise<ResendVerificationOutcome> {
+  const body: ResendVerificationInput = { email };
+  const { response } = await reach("/auth/resend-verification", { body });
   if (response.status === 202 || response.status === 400) return { kind: "sent" };
   if (response.status === 429) {
     return {

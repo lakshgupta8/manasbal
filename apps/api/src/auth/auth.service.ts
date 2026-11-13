@@ -55,6 +55,7 @@ export const LINK_INVALID = "This link is not valid any more";
 
 // What is in a log when a reset mail could not be sent: never the address or the token.
 export const RESET_MAIL_FAILED = "Could not send a password reset mail";
+export const VERIFY_MAIL_FAILED = "Could not send a new confirmation mail";
 
 const FIELDS = ["id", "email", "name"] as const;
 
@@ -163,6 +164,15 @@ export class AuthService {
     this.sendReset(email, requestId).catch((error: unknown) => {
       const kind = error instanceof Error ? error.name : "unknown error";
       this.logger.error(`${RESET_MAIL_FAILED} (${kind})`);
+    });
+  }
+
+  // Answers at once, whatever the email, and does the work afterwards, like forgotPassword: the
+  // answer can't tell whether the email has an account, or whether it is confirmed.
+  resendVerification(email: string, requestId: string): void {
+    this.sendVerificationAgain(email, requestId).catch((error: unknown) => {
+      const kind = error instanceof Error ? error.name : "unknown error";
+      this.logger.error(`${VERIFY_MAIL_FAILED} (${kind})`);
     });
   }
 
@@ -328,9 +338,12 @@ export class AuthService {
   }
 
   // A one-time link, stored only as its hash; visitor rows are removed by the nightly reset.
-  private async sendVerification(user: { id: string; email: string }): Promise<void> {
+  private async sendVerification(
+    user: { id: string; email: string },
+    tables: Pick<ReturnType<typeof getDb>["orm"]["public"], "EmailToken"> = getDb().orm.public,
+  ): Promise<void> {
     const { token, hash } = this.tokens.newEmailToken();
-    await getDb().orm.public.EmailToken.create({
+    await tables.EmailToken.create({
       userId: user.id,
       purpose: VERIFY_EMAIL,
       tokenHash: hash,
@@ -338,6 +351,31 @@ export class AuthService {
       createdByVisitor: true,
     });
     await this.mailer.send(verificationMail(user.email, token));
+  }
+
+  // Only an unconfirmed account gets a new link, and only with mail on; anything else ends here,
+  // unseen by the caller. The older links stop working in the same transaction that makes the new
+  // one, so only the newest link confirms the address.
+  private async sendVerificationAgain(email: string, requestId: string): Promise<void> {
+    if (readMailSettings().mode !== "smtp") return;
+    const user = await getDb()
+      .orm.public.User.where({ email })
+      .select("id", "email", "emailVerifiedAt")
+      .first();
+    if (user === null || user.emailVerifiedAt !== null) return;
+    await getDb().transaction(async (tx) => {
+      await tx.orm.public.EmailToken.where({
+        userId: user.id,
+        purpose: VERIFY_EMAIL,
+        usedAt: null,
+      }).updateAndCount({ usedAt: Temporal.Now.instant() });
+      await this.sendVerification(user, tx.orm.public);
+    });
+    await this.audit.record(
+      { userId: user.id, requestId },
+      "auth.verify_email.resend",
+      account(user.id),
+    );
   }
 
   // Only an existing account gets a link; an unknown email ends here, unseen by the caller.

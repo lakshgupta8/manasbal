@@ -13,6 +13,7 @@ describe("AuthController", () => {
     signOut: vi.fn(),
     verifyEmail: vi.fn(),
     forgotPassword: vi.fn(),
+    resendVerification: vi.fn(),
     resetPassword: vi.fn(),
     verifyTwoStep: vi.fn(),
   };
@@ -94,6 +95,13 @@ describe("AuthController", () => {
       controller.forgotPassword({ email: "test.buyer@example.test" }, REQUEST),
     ).toBeUndefined();
     expect(service.forgotPassword).toHaveBeenCalledWith("test.buyer@example.test", "req-1");
+  });
+
+  it("asks the service for a new confirmation link and answers nothing, whatever the email", () => {
+    expect(
+      controller.resendVerification({ email: "test.buyer@example.test" }, REQUEST),
+    ).toBeUndefined();
+    expect(service.resendVerification).toHaveBeenCalledWith("test.buyer@example.test", "req-1");
   });
 
   it("passes the reset token and the new password to the service", async () => {

@@ -124,6 +124,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/auth/resend-verification": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Ask for a new email confirmation link
+     * @description Always answers 202 with no body, whatever the email: only an unconfirmed account gets the mail, and only when mail is on. The new link works once, for 24 hours; older links stop working.
+     */
+    post: operations["AuthController_resendVerification"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/auth/reset-password": {
     parameters: {
       query?: never;
@@ -1066,6 +1086,37 @@ export interface operations {
     };
     responses: {
       /** @description If the email has an account, a reset link is on its way */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not an email address */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AuthController_resendVerification: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          email: string;
+        };
+      };
+    };
+    responses: {
+      /** @description If the email has an unconfirmed account, a new link is on its way */
       202: {
         headers: {
           [name: string]: unknown;

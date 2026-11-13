@@ -11,6 +11,7 @@ import {
   MIN_PASSWORD_LENGTH,
   type TooManyTriesWords,
 } from "./auth-form-parts";
+import { ResendLink } from "./resend-link";
 import { useFormAlert } from "./use-form-alert";
 
 // Every word on the form, translated on the server so no translation code reaches the browser.
@@ -38,6 +39,8 @@ export interface SignUpWords extends TooManyTriesWords {
   readonly checkEmailTitle: string;
   // Holds an {email} placeholder, filled in the browser.
   readonly checkEmailBody: string;
+  readonly resend: string;
+  readonly resendSent: string;
   readonly backToSignIn: string;
 }
 
@@ -143,6 +146,7 @@ export function SignUpForm({ words, signInHref }: SignUpFormProps) {
           {words.checkEmailTitle}
         </h1>
         <p>{words.checkEmailBody.replace("{email}", mailedTo)}</p>
+        <ResendLink email={mailedTo} words={words} />
         <CardLink href={signInHref}>{words.backToSignIn}</CardLink>
       </>
     );

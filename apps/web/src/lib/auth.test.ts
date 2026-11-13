@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { API_TIMEOUT_MS, ApiResponseError, ApiUnavailableError } from "./api-errors";
 import {
   forgotPassword,
+  resendVerification,
   me,
   refresh,
   resetPassword,
@@ -339,6 +340,35 @@ describe("forgotPassword", () => {
     api(502, { title: "Bad gateway" });
 
     await expect(forgotPassword("a@example.test")).rejects.toBeInstanceOf(ApiResponseError);
+  });
+});
+
+describe("resendVerification", () => {
+  it.each([202, 400])(
+    "says the same thing whatever the API answers about the email (%i)",
+    async (status) => {
+      const fetchMock = api(status, status === 400 ? { title: "Bad Request" } : undefined);
+
+      await expect(resendVerification("anyone@example.test")).resolves.toEqual({ kind: "sent" });
+      const [request] = fetchMock.mock.calls[0]!;
+      expect(request.url).toBe(`${window.location.origin}/auth/resend-verification`);
+      expect(await request.json()).toEqual({ email: "anyone@example.test" });
+    },
+  );
+
+  it("says how long to wait after too many tries", async () => {
+    api(429, { title: "Too many" }, { "retry-after": "45" });
+
+    await expect(resendVerification("a@example.test")).resolves.toEqual({
+      kind: "tooManyTries",
+      retryAfterSeconds: 45,
+    });
+  });
+
+  it("throws on any other answer", async () => {
+    api(502, { title: "Bad gateway" });
+
+    await expect(resendVerification("a@example.test")).rejects.toBeInstanceOf(ApiResponseError);
   });
 });
 

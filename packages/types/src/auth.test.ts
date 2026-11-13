@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   forgotPasswordInputSchema,
+  resendVerificationInputSchema,
   resetPasswordInputSchema,
   signInInputSchema,
   signUpInputSchema,
@@ -141,6 +142,21 @@ describe("resetPasswordInputSchema", () => {
 
   it("refuses a missing token", () => {
     expect(resetPasswordInputSchema.safeParse({ password: "a long passphrase" }).success).toBe(
+      false,
+    );
+  });
+});
+
+describe("resendVerificationInputSchema", () => {
+  it("normalises the email like sign-in", () => {
+    expect(resendVerificationInputSchema.parse({ email: " A@Example.COM " })).toEqual({
+      email: "a@example.com",
+    });
+  });
+
+  it("refuses a non-email and anything extra", () => {
+    expect(resendVerificationInputSchema.safeParse({ email: "nope" }).success).toBe(false);
+    expect(resendVerificationInputSchema.safeParse({ email: "a@example.com", x: 1 }).success).toBe(
       false,
     );
   });
