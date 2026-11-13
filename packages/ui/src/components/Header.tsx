@@ -12,6 +12,8 @@ export interface HeaderProps {
   readonly links: readonly HeaderLink[];
   /** Where the logo leads. */
   readonly homeHref?: string;
+  /** Slot for the currency switch. */
+  readonly currency?: ReactNode;
   /** Slot for the language switch. */
   readonly languageSwitch?: ReactNode;
   /** Slot for the account link. */
@@ -22,10 +24,12 @@ export interface HeaderProps {
   readonly navLabel?: string;
 }
 
-/** The top of every page: the logo, the main links and the language, account and cart slots. */
+/** The top of every page: the logo, the main links and the currency, language, account and cart
+ * slots. */
 export function Header({
   links,
   homeHref = "/",
+  currency,
   languageSwitch,
   account,
   cart,
@@ -49,6 +53,7 @@ export function Header({
         </nav>
       )}
       <div className="mb-header__actions">
+        {currency}
         {languageSwitch}
         {account}
         {cart}

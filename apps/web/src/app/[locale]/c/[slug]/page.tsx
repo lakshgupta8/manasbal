@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { CategoryLinks, Products } from "@/components/catalog-parts";
+import { CategoryLinks, productWords, Products } from "@/components/catalog-parts";
 import {
   CATEGORY_PAGE_SIZE,
   findCategory,
@@ -15,6 +15,7 @@ import {
   readTrail,
 } from "@/lib/catalog";
 import { getCategoryTree } from "@/lib/categories";
+import { getCurrency } from "@/lib/currency";
 import { PAGE_FRAME } from "@/lib/page-frame";
 
 type Props = PageProps<"/[locale]/c/[slug]">;
@@ -38,11 +39,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 // page (see readTrail). A stopped API throws, and error.tsx shows the error state.
 export default async function CategoryPage({ params, searchParams }: Props) {
   const { locale, slug } = await params;
-  const [{ category, ancestors }, search, t, catalog] = await Promise.all([
+  const [{ category, ancestors }, search, t, catalog, currency] = await Promise.all([
     categoryOf(slug),
     searchParams,
     getTranslations({ locale, namespace: "Category" }),
     getTranslations({ locale, namespace: "Catalog" }),
+    getCurrency(),
   ]);
   const trail = readTrail(search);
 
@@ -91,11 +93,8 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           locale={locale}
           products={page.items}
           headingLevel={2}
-          words={{
-            sample: catalog("sample"),
-            rupees: catalog("rupees"),
-            empty: catalog("noProducts"),
-          }}
+          words={productWords(catalog)}
+          currency={currency}
         />
       )}
       {!hasProducts && !hasSubcategories && (

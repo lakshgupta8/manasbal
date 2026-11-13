@@ -19,7 +19,10 @@
     "draftNote": "",
     "signIn": "साइन इन करें",
     "signOut": "साइन आउट करें",
-    "signedInAs": "{name} के रूप में साइन इन"
+    "signedInAs": "{name} के रूप में साइन इन",
+    "currencyLabel": "कीमतें",
+    "currencyInr": "₹ रुपये",
+    "currencyUsd": "$ डॉलर"
   },
   "Home": {
     "title": "Manasbal में आपका स्वागत है",
@@ -172,7 +175,10 @@
     "sample": "नमूना",
     "rupees": "रुपये",
     "noProducts": "यहाँ अभी कोई सामान नहीं है",
-    "home": "होम पेज पर जाएँ"
+    "home": "होम पेज पर जाएँ",
+    "about": "लगभग",
+    "dollars": "डॉलर",
+    "cents": "सेंट"
   },
   "Category": {
     "breadcrumbs": "आप यहाँ हैं",

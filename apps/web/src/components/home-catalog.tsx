@@ -3,18 +3,20 @@ import { getTranslations } from "next-intl/server";
 import { connection } from "next/server";
 import { getProducts, HOME_PAGE_SIZE } from "@/lib/catalog";
 import { getCategoryTree } from "@/lib/categories";
-import { CategoryLinks, Products } from "./catalog-parts";
+import { getCurrency } from "@/lib/currency";
+import { CategoryLinks, productWords, Products } from "./catalog-parts";
 
 // The home page's categories and first products. Rendered on each request (connection()), never
 // at build time, so a build needs no API. If the API is down, a call throws and the page's
 // error.tsx takes over.
 export async function HomeCatalog({ locale }: { readonly locale: string }) {
   await connection();
-  const [t, catalog, categories, page] = await Promise.all([
+  const [t, catalog, categories, page, currency] = await Promise.all([
     getTranslations({ locale, namespace: "Home" }),
     getTranslations({ locale, namespace: "Catalog" }),
     getCategoryTree(),
     getProducts({ limit: HOME_PAGE_SIZE }),
+    getCurrency(),
   ]);
 
   return (
@@ -38,11 +40,8 @@ export async function HomeCatalog({ locale }: { readonly locale: string }) {
         <Products
           locale={locale}
           products={page.items}
-          words={{
-            sample: catalog("sample"),
-            rupees: catalog("rupees"),
-            empty: catalog("noProducts"),
-          }}
+          words={productWords(catalog)}
+          currency={currency}
         />
       </section>
     </>

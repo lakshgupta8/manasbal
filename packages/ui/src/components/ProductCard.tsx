@@ -1,5 +1,5 @@
 import type { ElementType, HTMLAttributes, ReactNode } from "react";
-import { Price } from "./Price";
+import { Price, type Currency, type DollarWords } from "./Price";
 import { Rating } from "./Rating";
 import { SampleBadge } from "./SampleBadge";
 import "./ProductCard.css";
@@ -39,6 +39,10 @@ export interface ProductCardProps extends Omit<HTMLAttributes<HTMLElement>, "chi
   readonly sampleLabel?: string;
   /** The word screen readers say after the price (see Price). */
   readonly priceUnit?: string;
+  /** INR (the default) or USD, for display only (see Price). */
+  readonly currency?: Currency;
+  /** The words screen readers say for a dollar price (see Price). */
+  readonly dollarWords?: DollarWords;
   /** The heading level of the name, to fit the page's outline. Defaults to 3. */
   readonly headingLevel?: 2 | 3 | 4;
   /** The element or component that draws the link. Defaults to a plain <a>. */
@@ -65,6 +69,8 @@ export function ProductCard({
   sample = false,
   sampleLabel,
   priceUnit,
+  currency,
+  dollarWords,
   headingLevel = 3,
   linkAs: Link = "a",
   className,
@@ -90,7 +96,9 @@ export function ProductCard({
         )}
       </div>
       {rating !== undefined && <Rating value={rating} label={ratingLabel} reviews={reviews} />}
-      {typeof pricePaise === "number" && <Price paise={pricePaise} unit={priceUnit} />}
+      {typeof pricePaise === "number" && (
+        <Price paise={pricePaise} unit={priceUnit} currency={currency} dollarWords={dollarWords} />
+      )}
     </article>
   );
 }

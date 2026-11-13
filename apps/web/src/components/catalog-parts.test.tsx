@@ -2,7 +2,14 @@ import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { CategoryLinks, Products } from "./catalog-parts";
 
-const WORDS = { sample: "Sample", rupees: "rupees", empty: "No products here yet" };
+const WORDS = {
+  sample: "Sample",
+  rupees: "rupees",
+  empty: "No products here yet",
+  about: "about",
+  dollars: "dollars",
+  cents: "cents",
+};
 const product = (slug: string, pricePaise: number | null) => ({
   id: `1a2b3c4d-0000-4000-8000-${slug.length.toString().padStart(12, "0")}`,
   slug,
