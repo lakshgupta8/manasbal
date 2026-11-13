@@ -1,0 +1,29 @@
+/* Colours, spacing and type come from theme.css. Two secondary buttons (44 px tall, radius 8,
+   1 px border.strong, body medium) with the page status between them in text.muted, 16 px apart,
+   centred. A link with nowhere to go takes the disabled button look. */
+.mb-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--mb-space-4);
+  font-family: var(--mb-font-family-sans);
+}
+
+.mb-pagination__link {
+  text-decoration: none;
+}
+
+/* Strong enough to win over the secondary button's hover. */
+.mb-pagination .mb-button.mb-button--secondary.mb-pagination__link--off {
+  border-color: var(--mb-color-border-disabled);
+  background: var(--mb-color-surface-disabled);
+  color: var(--mb-color-text-disabled);
+  cursor: not-allowed;
+}
+
+.mb-pagination__status {
+  color: var(--mb-color-text-muted);
+  font-size: var(--mb-font-size-body);
+  line-height: var(--mb-font-line-height-body);
+}

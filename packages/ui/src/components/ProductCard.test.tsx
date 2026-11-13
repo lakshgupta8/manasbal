@@ -119,6 +119,12 @@ describe("ProductCard", () => {
     expect(screen.getByText("349 रुपये")).toBeDefined();
   });
 
+  it.each([null, undefined])("leaves the price out when there is none (%s)", (pricePaise) => {
+    const { container } = render(<ProductCard name="Tee" href="#" pricePaise={pricePaise} />);
+
+    expect(container.querySelector("data")).toBeNull();
+  });
+
   it("refuses a price that is not whole paise", () => {
     expect(() => render(<ProductCard name="Tee" href="#" pricePaise={499.5} />)).toThrow(TypeError);
   });

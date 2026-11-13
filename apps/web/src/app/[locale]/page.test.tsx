@@ -4,11 +4,9 @@ import { MESSAGES, type TestLocale } from "@/test/intl";
 import Home from "./page";
 
 vi.mock("next-intl/server", () => import("@/test/intl"));
-// The list has its own test; here it shows the words the page passes it.
-vi.mock("@/components/categories", () => ({
-  Categories: ({ emptyText, noteLead }: { emptyText: string; noteLead: string }) => (
-    <p>{`${noteLead} ${emptyText}`}</p>
-  ),
+// The catalogue has its own test; here it shows the language the page passes it.
+vi.mock("@/components/home-catalog", () => ({
+  HomeCatalog: ({ locale }: { locale: string }) => <p>{`catalogue in ${locale}`}</p>,
 }));
 
 async function home(locale: TestLocale) {
@@ -18,22 +16,20 @@ async function home(locale: TestLocale) {
 }
 
 describe("Home", () => {
-  it("shows the shop name and the categories section in English", async () => {
+  it("welcomes the visitor in English, then shows the catalogue", async () => {
     await home("en");
 
-    expect(screen.getByRole("heading", { level: 1, name: "Manasbal" })).toBeDefined();
-    expect(screen.getByText("A demo multi-vendor marketplace, under construction.")).toBeDefined();
-    expect(screen.getByRole("region", { name: "Categories" })).toBeDefined();
-    expect(screen.getByText("Note: There are no categories yet")).toBeDefined();
+    expect(screen.getByRole("heading", { level: 1, name: "Welcome to Manasbal" })).toBeDefined();
+    expect(screen.getByText(/nothing here is for sale/)).toBeDefined();
+    expect(screen.getByText("catalogue in en")).toBeDefined();
   });
 
-  it("shows the same page in Hindi, keeping the shop's name", async () => {
+  it("shows the same page in Hindi", async () => {
     await home("hi");
 
     const words = MESSAGES.hi.Home;
-    expect(screen.getByRole("heading", { level: 1, name: "Manasbal" })).toBeDefined();
+    expect(screen.getByRole("heading", { level: 1, name: words.title })).toBeDefined();
     expect(screen.getByText(words.tagline)).toBeDefined();
-    expect(screen.getByRole("region", { name: words.categoriesHeading })).toBeDefined();
-    expect(screen.getByText(`${words.noteLead} ${words.noCategories}`)).toBeDefined();
+    expect(screen.getByText("catalogue in hi")).toBeDefined();
   });
 });

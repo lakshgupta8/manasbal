@@ -1,0 +1,43 @@
+/* Colours, spacing and type come from theme.css. Tiles at least 220 px wide, 16 px apart; each
+   is 64 px tall at least, padding 16, radius 16, 1 px border.default on surface.page, the name in
+   body medium (16/24, text.default) and a 20 px chevron in text.muted. No hover state, like the
+   product cards; the focus ring is 2 px focus.ring, 2 px away. */
+.mb-category-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+  gap: var(--mb-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mb-category-tiles__tile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mb-space-2);
+  box-sizing: border-box;
+  min-height: 64px;
+  height: 100%;
+  padding: var(--mb-space-4);
+  border: 1px solid var(--mb-color-border-default);
+  border-radius: var(--mb-radius-lg);
+  background: var(--mb-color-surface-page);
+  color: var(--mb-color-text-default);
+  font-family: var(--mb-font-family-sans);
+  font-size: var(--mb-font-size-body);
+  font-weight: var(--mb-font-weight-medium);
+  line-height: var(--mb-font-line-height-body);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.mb-category-tiles__tile > svg {
+  flex: none;
+  color: var(--mb-color-text-muted);
+}
+
+.mb-category-tiles__tile:is(:focus-visible, [data-preview="focus"]) {
+  outline: 2px solid var(--mb-color-focus-ring);
+  outline-offset: 2px;
+}
