@@ -255,6 +255,40 @@
         "tags": ["Auth"]
       }
     },
+    "/auth/resend-verification": {
+      "post": {
+        "description": "Always answers 202 with no body, whatever the email: only an unconfirmed account gets the mail, and only when mail is on. The new link works once, for 24 hours; older links stop working.",
+        "operationId": "AuthController_resendVerification",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  }
+                },
+                "required": ["email"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "If the email has an unconfirmed account, a new link is on its way"
+          },
+          "400": {
+            "description": "Not an email address"
+          }
+        },
+        "summary": "Ask for a new email confirmation link",
+        "tags": ["Auth"]
+      }
+    },
     "/auth/reset-password": {
       "post": {
         "description": "Takes the token from the reset link and a new password. Each link works once, and every session of the account ends.",

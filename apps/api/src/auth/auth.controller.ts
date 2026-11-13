@@ -30,12 +30,14 @@ import { Throttle } from "@nestjs/throttler";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import {
   forgotPasswordInputSchema,
+  resendVerificationInputSchema,
   resetPasswordInputSchema,
   signInInputSchema,
   signUpInputSchema,
   twoStepVerifyInputSchema,
   verifyEmailInputSchema,
   type ForgotPasswordInput,
+  type ResendVerificationInput,
   type ResetPasswordInput,
   type SignInInput,
   type SignUpInput,
@@ -118,6 +120,7 @@ export class AuthController {
       | "signOut"
       | "verifyEmail"
       | "forgotPassword"
+      | "resendVerification"
       | "resetPassword"
       | "verifyTwoStep"
     >,
@@ -227,6 +230,25 @@ export class AuthController {
     @Req() request: Pick<FastifyRequest, "id">,
   ): void {
     this.auth.forgotPassword(input.email, String(request.id));
+  }
+
+  @Post("resend-verification")
+  @HttpCode(HttpStatus.ACCEPTED)
+  @ApiOperation({
+    summary: "Ask for a new email confirmation link",
+    description:
+      "Always answers 202 with no body, whatever the email: only an unconfirmed account gets the mail, and only when mail is on. The new link works once, for 24 hours; older links stop working.",
+  })
+  @ApiZodBody(resendVerificationInputSchema)
+  @ApiAcceptedResponse({
+    description: "If the email has an unconfirmed account, a new link is on its way",
+  })
+  @ApiBadRequestResponse({ description: "Not an email address" })
+  resendVerification(
+    @Body(new ZodValidationPipe(resendVerificationInputSchema)) input: ResendVerificationInput,
+    @Req() request: Pick<FastifyRequest, "id">,
+  ): void {
+    this.auth.resendVerification(input.email, String(request.id));
   }
 
   @Post("reset-password")

@@ -98,7 +98,9 @@
     "tooManyTries": "Too many tries. Wait a little and try again.",
     "checkEmailTitle": "Check your email",
     "checkEmailBody": "We sent a link to {email}. Open it to confirm your account, then sign in.",
-    "backToSignIn": "Back to sign in"
+    "backToSignIn": "Back to sign in",
+    "resend": "Send the link again",
+    "resendSent": "If this email has an unconfirmed account, a new link is on its way."
   },
   "VerifyEmail": {
     "pageTitle": "Confirm your email — Manasbal",

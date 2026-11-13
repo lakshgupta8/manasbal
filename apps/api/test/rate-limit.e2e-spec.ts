@@ -1,6 +1,7 @@
 import { Controller, Get, Module } from "@nestjs/common";
 import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fastify";
 import { Test } from "@nestjs/testing";
+import { DEMO_EMAILS } from "@manasbal/types";
 import { AUTH_RATE_LIMIT, RATE_LIMIT } from "../src/rate-limit/rate-limit.module.js";
 import { AppModule } from "../src/app.module.js";
 import { startTestValkey, type TestValkey } from "./support/test-valkey.js";
@@ -78,6 +79,24 @@ describe("rate limiting (e2e)", () => {
     for (let i = 1; i <= AUTH_RATE_LIMIT; i++) expect((await setup()).statusCode).toBe(401);
 
     expect((await setup()).statusCode).toBe(429);
+  });
+
+  it("limits asking for a new confirmation link to 10 a minute, even for a demo login", async () => {
+    // Mail is off in these tests, so each answer is the plain 202 and no database is needed. The
+    // demo logins skip only the per-account lockout, never this per-visitor limit.
+    const resend = () =>
+      app.inject({
+        method: "POST",
+        url: "/auth/resend-verification",
+        remoteAddress: "10.0.0.6",
+        payload: { email: DEMO_EMAILS.customer },
+      });
+
+    for (let i = 1; i <= AUTH_RATE_LIMIT; i++) expect((await resend()).statusCode).toBe(202);
+    const eleventh = await resend();
+
+    expect(eleventh.statusCode).toBe(429);
+    expect(Number(eleventh.headers["retry-after"])).toBeGreaterThan(0);
   });
 
   it("never limits /health", async () => {

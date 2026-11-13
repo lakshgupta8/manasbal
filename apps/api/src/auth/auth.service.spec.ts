@@ -10,6 +10,7 @@ import {
   LINK_INVALID,
   REFRESH_FAILED,
   RESET_MAIL_FAILED,
+  VERIFY_MAIL_FAILED,
   SIGN_IN_FAILED,
   SIGN_UP_FAILED,
 } from "./auth.service.js";
@@ -646,6 +647,106 @@ describe("AuthService", () => {
 
       await expect(service.verifyEmail("link-token", REQ)).rejects.toThrow(refused);
       expect(User.updateAndCount).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("resendVerification", () => {
+    const logged = () => vi.spyOn(Logger.prototype, "error").mockImplementation(() => undefined);
+    const unconfirmed = { id: USER_ID, email: input.email, emailVerifiedAt: null };
+
+    beforeEach(() => {
+      vi.stubEnv("MAIL_MODE", "smtp");
+    });
+    afterEach(() => {
+      vi.restoreAllMocks();
+      vi.unstubAllEnvs();
+    });
+
+    it("ends the older links and mails a new 24-hour one to an unconfirmed account", async () => {
+      User.first.mockResolvedValue(unconfirmed);
+      EmailToken.updateAndCount.mockResolvedValue(2);
+      const before = Temporal.Now.instant();
+
+      expect(service.resendVerification(input.email, REQ)).toBeUndefined();
+
+      await vi.waitFor(() => expect(audit.record).toHaveBeenCalled());
+      expect(User.filters).toEqual([{ email: input.email }]);
+      expect(EmailToken.filters).toEqual([
+        { userId: USER_ID, purpose: "verify-email", usedAt: null },
+      ]);
+      const ended = EmailToken.updateAndCount.mock.calls[0]?.[0] as { usedAt: Temporal.Instant };
+      expect(Temporal.Instant.compare(ended.usedAt, before)).toBeGreaterThanOrEqual(0);
+      const row = EmailToken.create.mock.calls[0]?.[0] as Record<string, unknown>;
+      expect(row).toMatchObject({
+        userId: USER_ID,
+        purpose: "verify-email",
+        tokenHash: "link-hash",
+        createdByVisitor: true,
+      });
+      const hours = before.until(row["expiresAt"] as Temporal.Instant).total({ unit: "hours" });
+      expect(hours).toBeCloseTo(24, 2);
+      const mail = mailer.send.mock.calls[0]?.[0];
+      expect(mail?.to).toBe(input.email);
+      expect(mail?.text).toContain("/verify-email?token=link-token");
+      expect(audit.record).toHaveBeenCalledWith(
+        { userId: USER_ID, requestId: REQ },
+        "auth.verify_email.resend",
+        ACCOUNT,
+      );
+      expect(everything()).not.toContain(input.email);
+    });
+
+    it.each([
+      ["an unknown email", null],
+      ["a confirmed account", { ...unconfirmed, emailVerifiedAt: Temporal.Now.instant() }],
+    ])("does nothing for %s", async (_case, user) => {
+      User.first.mockResolvedValue(user);
+
+      expect(service.resendVerification(input.email, REQ)).toBeUndefined();
+
+      await vi.waitFor(() => expect(User.first).toHaveBeenCalled());
+      await Promise.resolve();
+      expect(EmailToken.updateAndCount).not.toHaveBeenCalled();
+      expect(EmailToken.create).not.toHaveBeenCalled();
+      expect(mailer.send).not.toHaveBeenCalled();
+      expect(audit.record).not.toHaveBeenCalled();
+    });
+
+    it("does nothing at all with mail off: nothing could confirm the address", async () => {
+      vi.stubEnv("MAIL_MODE", "off");
+
+      expect(service.resendVerification(input.email, REQ)).toBeUndefined();
+
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(User.first).not.toHaveBeenCalled();
+      expect(mailer.send).not.toHaveBeenCalled();
+    });
+
+    it("logs a failed send without the address or the token", async () => {
+      const error = logged();
+      User.first.mockResolvedValue(unconfirmed);
+      EmailToken.updateAndCount.mockResolvedValue(0);
+      mailer.send.mockRejectedValue(new TypeError(`could not reach ${input.email}`));
+
+      service.resendVerification(input.email, REQ);
+
+      await vi.waitFor(() => expect(error).toHaveBeenCalled());
+      expect(error).toHaveBeenCalledWith(`${VERIFY_MAIL_FAILED} (TypeError)`);
+      expect(JSON.stringify(error.mock.calls)).not.toContain(input.email);
+      expect(JSON.stringify(error.mock.calls)).not.toContain("link-token");
+      expect(audit.record).not.toHaveBeenCalled();
+    });
+
+    it("logs a failure that is not an Error too", async () => {
+      const error = logged();
+      User.first.mockRejectedValue("connection lost");
+
+      service.resendVerification(input.email, REQ);
+
+      await vi.waitFor(() =>
+        expect(error).toHaveBeenCalledWith(`${VERIFY_MAIL_FAILED} (unknown error)`),
+      );
     });
   });
 

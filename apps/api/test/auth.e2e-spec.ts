@@ -519,6 +519,77 @@ describe("/auth (e2e)", () => {
       expect(sent).toHaveLength(1);
     });
 
+    describe("a new confirmation link", () => {
+      const resend = (email: string) =>
+        app.inject({ method: "POST", url: "/auth/resend-verification", payload: { email } });
+
+      it("mails a second link, and the first one stops working", async () => {
+        expect((await post(signUp)).statusCode).toBe(201);
+        const first = linkToken(sent[0]);
+
+        const answer = await resend(signUp.email);
+
+        expect(answer.statusCode).toBe(202);
+        expect(answer.body).toBe("");
+        // The mail goes out after the answer.
+        await vi.waitFor(() => expect(sent).toHaveLength(2));
+        expect(sent[1]?.to).toBe(signUp.email);
+        const second = linkToken(sent[1]);
+        expect(second).toMatch(/^[\w-]{43}$/);
+        expect(second).not.toBe(first);
+        await vi.waitFor(async () =>
+          expect(
+            await database.sql("select action from audit_logs where action like 'auth.verify%'"),
+          ).toBe("auth.verify_email.resend"),
+        );
+
+        const old = await verify(first);
+        expect(old.statusCode).toBe(400);
+        expect(old.json()).toMatchObject({ detail: LINK_INVALID });
+        expect((await verify(second)).statusCode).toBe(204);
+        expect(await database.sql("select email_verified_at is not null from users")).toBe("t");
+      });
+
+      it("answers an unknown, a confirmed and a real email alike, and mails only the real one", async () => {
+        expect((await post(signUp)).statusCode).toBe(201);
+        const confirmed = { ...signUp, email: "confirmed.buyer@example.test" };
+        expect((await post(confirmed)).statusCode).toBe(201);
+        expect((await verify(linkToken(sent[1]))).statusCode).toBe(204);
+
+        const answers = [
+          await resend("nobody@example.test"),
+          await resend(confirmed.email),
+          await resend(signUp.email),
+        ];
+
+        for (const answer of answers) {
+          expect(answer.statusCode).toBe(202);
+          expect(answer.body).toBe("");
+          expect(answer.headers["content-type"]).toBeUndefined();
+        }
+        await vi.waitFor(() => expect(sent).toHaveLength(3));
+        // Give the other two time to (not) send.
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        expect(sent.slice(2).map((mail) => mail.to)).toEqual([signUp.email]);
+      });
+
+      it("answers the same 202 with mail off, and sends nothing", async () => {
+        vi.stubEnv("MAIL_MODE", "off");
+        expect((await post(signUp)).statusCode).toBe(201);
+
+        const answer = await resend(signUp.email);
+
+        expect(answer.statusCode).toBe(202);
+        expect(answer.body).toBe("");
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        expect(sent).toEqual([]);
+      });
+
+      it("refuses something that is not an email", async () => {
+        expect((await resend("not an email")).statusCode).toBe(400);
+      });
+    });
+
     describe("password reset", () => {
       const newPassword = "a brand new passphrase";
       const forgot = (email: string) =>

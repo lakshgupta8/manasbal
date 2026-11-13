@@ -7,7 +7,7 @@ import { SignUpForm, type SignUpWords } from "./sign-up-form";
 
 const push = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
-vi.mock("@/lib/auth", () => ({ signUp: vi.fn() }));
+vi.mock("@/lib/auth", () => ({ signUp: vi.fn(), resendVerification: vi.fn() }));
 
 const signUp = vi.mocked(auth.signUp);
 const WORDS: SignUpWords = MESSAGES.en.SignUp;
@@ -111,6 +111,23 @@ describe("SignUpForm", () => {
     );
     expect(screen.queryByRole("textbox")).toBeNull();
     expect(push).not.toHaveBeenCalled();
+  });
+
+  it("offers to send the link again, to the same email", async () => {
+    signUp.mockResolvedValue({ kind: "created", emailConfirmed: false });
+    vi.mocked(auth.resendVerification).mockResolvedValue({ kind: "sent" });
+    form();
+    fill();
+    await screen.findByRole("heading", { level: 1, name: "Check your email" });
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Send the link again" }));
+    });
+
+    expect(auth.resendVerification).toHaveBeenCalledWith("asha@example.test");
+    expect(
+      screen.getByText("If this email has an unconfirmed account, a new link is on its way."),
+    ).toBeDefined();
   });
 
   it.each([
