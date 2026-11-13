@@ -2,12 +2,14 @@ import { render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getProducts } from "@/lib/catalog";
 import { getCategoryTree } from "@/lib/categories";
+import { getCurrency } from "@/lib/currency";
 import { MESSAGES } from "@/test/intl";
 import { HomeCatalog } from "./home-catalog";
 
 vi.mock("next-intl/server", () => import("@/test/intl"));
 vi.mock("next/server", () => ({ connection: async () => undefined }));
 vi.mock("@/lib/categories", () => ({ getCategoryTree: vi.fn() }));
+vi.mock("@/lib/currency", () => ({ getCurrency: vi.fn() }));
 vi.mock("@/lib/catalog", async (original) => ({
   ...(await original<typeof import("@/lib/catalog")>()),
   getProducts: vi.fn(),
@@ -29,6 +31,7 @@ const TEE = {
 
 describe("HomeCatalog", () => {
   beforeEach(() => {
+    vi.mocked(getCurrency).mockResolvedValue("INR");
     vi.mocked(getCategoryTree).mockResolvedValue([CLOTHING]);
     vi.mocked(getProducts).mockResolvedValue({ items: [TEE], nextCursor: "next" });
   });
@@ -61,6 +64,21 @@ describe("HomeCatalog", () => {
     expect(screen.getByRole("link", { name: "Striped tee" }).getAttribute("href")).toBe(
       "/hi/p/striped-tee",
     );
+  });
+
+  it("shows the prices in dollars when the visitor chose them, in either language", async () => {
+    vi.mocked(getCurrency).mockResolvedValue("USD");
+
+    const { unmount } = render(await HomeCatalog({ locale: "en" }));
+    // 49900 paise at 88 paise to the cent is 567.05 cents: $5.67.
+    expect(screen.getByText("≈ $5.67")).toBeDefined();
+    expect(screen.getByText("about 5 dollars 67 cents")).toBeDefined();
+    unmount();
+
+    render(await HomeCatalog({ locale: "hi" }));
+    const words = MESSAGES.hi.Catalog;
+    expect(screen.getByText("≈ $5.67")).toBeDefined();
+    expect(screen.getByText(`${words.about} 5 ${words.dollars} 67 ${words.cents}`)).toBeDefined();
   });
 
   it("says so when there are no categories or products yet", async () => {

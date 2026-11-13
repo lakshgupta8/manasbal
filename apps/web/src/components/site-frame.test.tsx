@@ -19,6 +19,13 @@ vi.mock("./account-menu", () => ({
   ),
 }));
 
+// The switch has its own tests; here it shows where the frame puts it.
+vi.mock("./currency-control", () => ({
+  CurrencyControl: ({ locale }: { locale: string }) => (
+    <span>{`currency switch in ${locale}`}</span>
+  ),
+}));
+
 // What Tab reaches, in order: nothing in the frame sets a positive tabindex.
 const FOCUSABLE = 'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
@@ -27,6 +34,13 @@ async function frame(locale: TestLocale) {
 }
 
 describe("SiteFrame", () => {
+  it("puts the currency switch in the header, before the language switch", async () => {
+    const { container } = await frame("hi");
+
+    const actions = container.querySelector(".mb-header__actions")!;
+    expect(actions.firstElementChild!.textContent).toBe("currency switch in hi");
+  });
+
   it("puts the skip link first, then the banner, header, page and footer", async () => {
     const { container } = await frame("en");
 

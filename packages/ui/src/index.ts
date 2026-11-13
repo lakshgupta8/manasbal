@@ -12,6 +12,7 @@ export {
   type CategoryTilesProps,
 } from "./components/CategoryTiles";
 export { Checkbox, type CheckboxProps } from "./components/Checkbox";
+export { CurrencySwitch, type CurrencySwitchProps } from "./components/CurrencySwitch";
 export { DemoBanner, type DemoBannerProps } from "./components/DemoBanner";
 export { Footer, type FooterLink, type FooterProps } from "./components/Footer";
 export { Header, type HeaderLink, type HeaderProps } from "./components/Header";
@@ -23,7 +24,17 @@ export {
   type PaginationLinkProps,
   type PaginationProps,
 } from "./components/Pagination";
-export { formatPaise, Price, type PriceProps, type PriceSize } from "./components/Price";
+export {
+  DEMO_USD_RATE,
+  formatPaise,
+  formatPaiseInDollars,
+  paiseToCents,
+  Price,
+  type Currency,
+  type DollarWords,
+  type PriceProps,
+  type PriceSize,
+} from "./components/Price";
 export {
   ProductCard,
   type ProductCardImage,

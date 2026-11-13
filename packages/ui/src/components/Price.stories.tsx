@@ -51,3 +51,24 @@ export const AllDark: Story = {
   parameters: { theme: "dark" },
   render: () => <Sheet />,
 };
+
+/** The same price shown approximately in dollars at DEMO_USD_RATE, for display only. */
+export const Dollars: Story = { args: { size: "large", currency: "USD" } };
+
+export const DollarsSmall: Story = { name: "Dollars, small", args: { currency: "USD" } };
+
+/** Dollars on a Hindi page: Latin digits, Hindi words for screen readers. */
+export const DollarsHindi: Story = {
+  name: "Dollars, Hindi",
+  args: {
+    size: "large",
+    currency: "USD",
+    dollarWords: { about: "लगभग", dollars: "डॉलर", cents: "सेंट" },
+  },
+};
+
+export const DollarsDark: Story = {
+  name: "Dollars, dark",
+  parameters: { theme: "dark" },
+  args: { size: "large", currency: "USD" },
+};

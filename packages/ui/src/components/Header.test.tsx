@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { Header } from "./Header";
 import * as stories from "./Header.stories";
 
-const { Default, LogoOnly } = composeStories(stories);
+const { Default, LogoOnly, WithCurrencySwitch } = composeStories(stories);
 
 describe("Header", () => {
   it("is the banner landmark, with the logo linking home", () => {
@@ -67,5 +67,15 @@ describe("Header", () => {
     render(<Header links={[{ href: "/hi", label: "होम" }]} navLabel="मुख्य" />);
 
     expect(screen.getByRole("navigation", { name: "मुख्य" })).toBeDefined();
+  });
+});
+
+describe("Header with a currency switch", () => {
+  it("puts the currency slot before the language switch", () => {
+    const { container } = render(<WithCurrencySwitch />);
+
+    const actions = container.querySelector(".mb-header__actions")!;
+    expect(actions.firstElementChild!.className).toBe("mb-currency-switch");
+    expect(screen.getByRole("group", { name: "Prices in" })).toBeDefined();
   });
 });

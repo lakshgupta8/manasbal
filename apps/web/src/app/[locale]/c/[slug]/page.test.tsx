@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiResponseError } from "@/lib/api";
 import { getProducts } from "@/lib/catalog";
 import { getCategoryTree } from "@/lib/categories";
+import { getCurrency } from "@/lib/currency";
 import { MESSAGES } from "@/test/intl";
 import CategoryPage, { generateMetadata } from "./page";
 
@@ -13,6 +14,7 @@ vi.mock("next/navigation", () => ({
   },
 }));
 vi.mock("@/lib/categories", () => ({ getCategoryTree: vi.fn() }));
+vi.mock("@/lib/currency", () => ({ getCurrency: vi.fn() }));
 vi.mock("@/lib/catalog", async (original) => ({
   ...(await original<typeof import("@/lib/catalog")>()),
   getProducts: vi.fn(),
@@ -42,6 +44,7 @@ const args = (slug: string, search: Record<string, string> = {}, locale = "en") 
 
 describe("CategoryPage", () => {
   beforeEach(() => {
+    vi.mocked(getCurrency).mockResolvedValue("INR");
     vi.mocked(getCategoryTree).mockResolvedValue(TREE as never);
     vi.mocked(getProducts).mockReset();
     vi.mocked(getProducts).mockResolvedValue({
@@ -157,6 +160,17 @@ describe("CategoryPage", () => {
     vi.mocked(getProducts).mockRejectedValue(new Error("down"));
 
     await expect(CategoryPage(args(SHIRTS.slug))).rejects.toThrow("down");
+  });
+
+  it("shows the prices in dollars when the visitor chose them", async () => {
+    vi.mocked(getCurrency).mockResolvedValue("USD");
+
+    render(await CategoryPage(args(SHIRTS.slug)));
+
+    const first = screen.getAllByRole("article")[0]!;
+    // 99901 paise at 88 paise to the cent is 1135.24 cents: $11.35.
+    expect(within(first).getByText("≈ $11.35")).toBeDefined();
+    expect(within(first).getByText("about 11 dollars 35 cents")).toBeDefined();
   });
 
   it("speaks Hindi on a Hindi page", async () => {

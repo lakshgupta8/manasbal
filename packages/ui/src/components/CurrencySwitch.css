@@ -1,0 +1,59 @@
+/* Colours, spacing and type come from theme.css. A segmented control: two buttons side by side
+   inside a 1 px border.strong outline, radius 8. Each button is at least 32 tall (24 px target
+   rule with room to spare), padding 0 12, small medium type (14/20). The pressed one is filled
+   brand.primary with text.on-brand and a 16 px tick; the other is surface.page with text.default,
+   surface.hover on hover. Focus: 2 px focus.ring, 2 px away. */
+.mb-currency-switch {
+  display: inline-flex;
+  margin: 0;
+}
+
+.mb-currency-switch__group {
+  display: inline-flex;
+  border: 1px solid var(--mb-color-border-strong);
+  border-radius: var(--mb-radius-md);
+  overflow: visible;
+}
+
+.mb-currency-switch__choice {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mb-space-1);
+  box-sizing: border-box;
+  min-height: 32px;
+  margin: 0;
+  padding: 0 var(--mb-space-3);
+  border: 0;
+  background: var(--mb-color-surface-page);
+  color: var(--mb-color-text-default);
+  font-family: var(--mb-font-family-sans);
+  font-size: var(--mb-font-size-small);
+  font-weight: var(--mb-font-weight-medium);
+  line-height: var(--mb-font-line-height-small);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.mb-currency-switch__choice:first-child {
+  border-radius: calc(var(--mb-radius-md) - 1px) 0 0 calc(var(--mb-radius-md) - 1px);
+}
+
+.mb-currency-switch__choice:last-child {
+  border-radius: 0 calc(var(--mb-radius-md) - 1px) calc(var(--mb-radius-md) - 1px) 0;
+}
+
+.mb-currency-switch__choice:is(:hover, [data-preview="hover"]):not([aria-pressed="true"]) {
+  background: var(--mb-color-surface-hover);
+}
+
+.mb-currency-switch__choice[aria-pressed="true"] {
+  background: var(--mb-color-brand-primary);
+  color: var(--mb-color-text-on-brand);
+  cursor: default;
+}
+
+.mb-currency-switch__choice:is(:focus-visible, [data-preview="focus"]) {
+  position: relative;
+  outline: 2px solid var(--mb-color-focus-ring);
+  outline-offset: 2px;
+}

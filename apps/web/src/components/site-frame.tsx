@@ -1,8 +1,9 @@
 import { DemoBanner, Footer, Header } from "@manasbal/ui";
 import { getTranslations } from "next-intl/server";
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 import { LANGUAGE_NAMES, otherLocale, type Locale } from "@/i18n/routing";
 import { AccountMenu } from "./account-menu";
+import { CurrencyControl } from "./currency-control";
 import { LanguageSwitch } from "./language-switch";
 
 export const MAIN_ID = "main-content";
@@ -39,6 +40,12 @@ export async function SiteFrame({ locale, children }: SiteFrameProps) {
           { href: home, label: t("home") },
           { href: `${home}#categories`, label: t("categories") },
         ]}
+        currency={
+          // The current choice is in a cookie, only known per request: the switch streams in.
+          <Suspense fallback={null}>
+            <CurrencyControl locale={locale} />
+          </Suspense>
+        }
         languageSwitch={
           // The other language's own name carries its lang.
           <LanguageSwitch target={target}>

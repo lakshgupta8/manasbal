@@ -1,5 +1,6 @@
 import { CartIcon, UserIcon } from "@manasbal/icons";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { CurrencySwitch } from "./CurrencySwitch";
 import { Header } from "./Header";
 
 const meta = {
@@ -49,4 +50,10 @@ export const Mobile: Story = {
   // The "mobile" tag makes the visual test render this story at phone width too.
   tags: ["mobile"],
   globals: { viewport: { value: "mobile1", isRotated: false } },
+};
+
+/** With the currency switch in its slot, before the language switch. */
+export const WithCurrencySwitch: Story = {
+  name: "With currency switch",
+  args: { currency: <CurrencySwitch current="INR" action="#" /> },
 };

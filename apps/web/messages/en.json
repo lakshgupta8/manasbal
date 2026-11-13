@@ -18,7 +18,10 @@
     "draftNote": "",
     "signIn": "Sign in",
     "signOut": "Sign out",
-    "signedInAs": "Signed in as {name}"
+    "signedInAs": "Signed in as {name}",
+    "currencyLabel": "Prices in",
+    "currencyInr": "₹ INR",
+    "currencyUsd": "$ USD"
   },
   "Home": {
     "title": "Welcome to Manasbal",
@@ -171,7 +174,10 @@
     "sample": "Sample",
     "rupees": "rupees",
     "noProducts": "No products here yet",
-    "home": "Go to the home page"
+    "home": "Go to the home page",
+    "about": "about",
+    "dollars": "dollars",
+    "cents": "cents"
   },
   "Category": {
     "breadcrumbs": "Breadcrumbs",
