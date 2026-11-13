@@ -221,13 +221,14 @@ export async function verifyTwoStep(challengeToken: string, code: string): Promi
   }
 }
 
-// Asks for a reset link. The API answers the same whether or not the email has an account, and
-// so does the page: "sent" never says which.
-export type ForgotPasswordOutcome =
+// What asking for a mailed link (reset or confirmation) can end in. The API answers the same
+// whatever the email, and so does the page: "sent" never says whether it has an account.
+export type MailedLinkOutcome =
   | { readonly kind: "sent" }
   | { readonly kind: "tooManyTries"; readonly retryAfterSeconds?: number };
 
-export async function forgotPassword(email: string): Promise<ForgotPasswordOutcome> {
+// Asks for a reset link.
+export async function forgotPassword(email: string): Promise<MailedLinkOutcome> {
   const body: ForgotPasswordInput = { email };
   const { response } = await reach("/auth/forgot-password", { body });
   if (response.status === 202 || response.status === 400) return { kind: "sent" };
@@ -240,11 +241,8 @@ export async function forgotPassword(email: string): Promise<ForgotPasswordOutco
   throw unexpected(response);
 }
 
-// Asks for a new confirmation link. The API answers the same whatever the email (and whether or
-// not it is confirmed), and so does the page: "sent" never says which.
-export type ResendVerificationOutcome = ForgotPasswordOutcome;
-
-export async function resendVerification(email: string): Promise<ResendVerificationOutcome> {
+// Asks for a new confirmation link; "sent" also never says whether the email is confirmed.
+export async function resendVerification(email: string): Promise<MailedLinkOutcome> {
   const body: ResendVerificationInput = { email };
   const { response } = await reach("/auth/resend-verification", { body });
   if (response.status === 202 || response.status === 400) return { kind: "sent" };
