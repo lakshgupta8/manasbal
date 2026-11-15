@@ -33,7 +33,8 @@
   },
   "Loading": {
     "message": "Loading…",
-    "products": "Loading products"
+    "products": "Loading products",
+    "product": "Loading the product"
   },
   "NotFound": {
     "heading": "Page not found",
@@ -192,5 +193,20 @@
     "emptyBody": "Nothing has been listed in this category so far.",
     "notFoundHeading": "Category not found",
     "notFoundBody": "There is no category at this address. The link may be mistyped, or the category may have been removed."
+  },
+  "Product": {
+    "breadcrumbs": "Breadcrumbs",
+    "home": "Home",
+    "soldBy": "Sold by {store}",
+    "choose": "Choose an option",
+    "size": "Size",
+    "colour": "Colour",
+    "notAvailable": "(not available)",
+    "inStock": "In stock",
+    "outOfStock": "Out of stock",
+    "show": "Show",
+    "description": "About this product",
+    "notFoundHeading": "Product not found",
+    "notFoundBody": "There is no product at this address. The link may be mistyped, or the product may have been removed."
   }
 }

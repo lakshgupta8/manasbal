@@ -1,0 +1,110 @@
+/* Colours, spacing and type come from theme.css. Built from the tokens before its Figma frame
+   (MAN-118). Each option is a chip at least 40 tall (24 px target rule with room to spare),
+   padding 0 16, radius 8, body type: surface.page with a 1 px border.strong outline and
+   text.default, surface.hover on hover. The chosen one is filled brand.primary with text.on-brand
+   and a 16 px tick. One that can't be chosen has a dashed border.disabled outline, text.disabled,
+   its name crossed through and the words "(not available)". Focus: 2 px focus.ring, 2 px away.
+   Every pair is in the contrast lists, on surface.page only. */
+.mb-variant-picker {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-family: var(--mb-font-family-sans);
+}
+
+.mb-variant-picker__legend {
+  margin-bottom: var(--mb-space-2);
+  padding: 0;
+  color: var(--mb-color-text-default);
+  font-size: var(--mb-font-size-small);
+  font-weight: var(--mb-font-weight-medium);
+  line-height: var(--mb-font-line-height-small);
+}
+
+.mb-variant-picker__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mb-space-2);
+}
+
+.mb-variant-picker__option {
+  position: relative;
+  display: inline-flex;
+  cursor: pointer;
+}
+
+/* The real radio covers its chip, unseen, so a click anywhere on the chip chooses it. */
+.mb-variant-picker__input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: inherit;
+}
+
+.mb-variant-picker__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mb-space-1);
+  box-sizing: border-box;
+  min-height: 40px;
+  padding: 0 var(--mb-space-4);
+  border: 1px solid var(--mb-color-border-strong);
+  border-radius: var(--mb-radius-md);
+  background: var(--mb-color-surface-page);
+  color: var(--mb-color-text-default);
+  font-size: var(--mb-font-size-body);
+  line-height: var(--mb-font-line-height-body);
+  white-space: nowrap;
+}
+
+.mb-variant-picker__tick {
+  display: none;
+  flex: none;
+}
+
+.mb-variant-picker__option:is(:hover, [data-preview="hover"])
+  > .mb-variant-picker__input:not(:checked, :disabled)
+  + .mb-variant-picker__chip {
+  background: var(--mb-color-surface-hover);
+}
+
+.mb-variant-picker__input:checked + .mb-variant-picker__chip {
+  border-color: var(--mb-color-brand-primary);
+  background: var(--mb-color-brand-primary);
+  color: var(--mb-color-text-on-brand);
+}
+
+.mb-variant-picker__input:checked + .mb-variant-picker__chip .mb-variant-picker__tick {
+  display: block;
+}
+
+.mb-variant-picker__input:is(:focus-visible, [data-preview="focus"]) + .mb-variant-picker__chip {
+  outline: 2px solid var(--mb-color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Disabled controls are exempt from the contrast rules; these stay readable, and say why in
+   words as well as the crossing-through. */
+.mb-variant-picker__input:disabled {
+  cursor: not-allowed;
+}
+
+.mb-variant-picker__input:disabled + .mb-variant-picker__chip {
+  border-style: dashed;
+  border-color: var(--mb-color-border-disabled);
+  background: var(--mb-color-surface-disabled);
+  color: var(--mb-color-text-disabled);
+}
+
+.mb-variant-picker__input:disabled + .mb-variant-picker__chip .mb-variant-picker__value {
+  text-decoration: line-through;
+}
+
+.mb-variant-picker__unavailable {
+  font-size: var(--mb-font-size-small);
+  line-height: var(--mb-font-line-height-small);
+}

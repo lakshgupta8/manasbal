@@ -45,3 +45,8 @@ export { ProductGrid, type ProductGridItem, type ProductGridProps } from "./comp
 export { Rating, type RatingProps } from "./components/Rating";
 export { SampleBadge, type SampleBadgeKind, type SampleBadgeProps } from "./components/SampleBadge";
 export { TextField, type TextFieldProps, type TextFieldType } from "./components/TextField";
+export {
+  VariantPicker,
+  type VariantPickerOption,
+  type VariantPickerProps,
+} from "./components/VariantPicker";
