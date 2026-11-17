@@ -9,7 +9,7 @@
   publish = "dist"
 
 [build.environment]
-  NODE_VERSION = "24.22.1"
+  NODE_VERSION = "24.22.3"
 
 [context.production]
   # "exit 0" tells Netlify to skip this build.
