@@ -14,8 +14,8 @@ vi.mock("@/components/auth-forms", () => ({
   },
 }));
 
-const args = (locale: TestLocale) =>
-  ({ params: Promise.resolve({ locale }), searchParams: Promise.resolve({}) }) as never;
+const args = (locale: TestLocale, search: Record<string, string> = {}) =>
+  ({ params: Promise.resolve({ locale }), searchParams: Promise.resolve(search) }) as never;
 
 describe("SignInPage", () => {
   it.each(["en", "hi"] as const)("titles the %s page in its language", async (locale) => {
@@ -43,4 +43,18 @@ describe("SignInPage", () => {
       ).toBeDefined();
     },
   );
+
+  it("sends the visitor back to the page that asked them to sign in", async () => {
+    passed.length = 0;
+    render(await SignInPage(args("en", { next: "/en/account/addresses" })));
+
+    expect(passed[0]!.homeHref).toBe("/en/account/addresses");
+  });
+
+  it("goes home instead of to another site", async () => {
+    passed.length = 0;
+    render(await SignInPage(args("en", { next: "https://evil.example/en" })));
+
+    expect(passed[0]!.homeHref).toBe("/en");
+  });
 });

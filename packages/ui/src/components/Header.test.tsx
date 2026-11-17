@@ -1,7 +1,7 @@
 import { composeStories } from "@storybook/react-vite";
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { Header } from "./Header";
+import { Header, type HeaderLinkProps } from "./Header";
 import * as stories from "./Header.stories";
 
 const { Default, LogoOnly, WithCurrencySwitch } = composeStories(stories);
@@ -77,5 +77,28 @@ describe("Header with a currency switch", () => {
     const actions = container.querySelector(".mb-header__actions")!;
     expect(actions.firstElementChild!.className).toBe("mb-currency-switch");
     expect(screen.getByRole("group", { name: "Prices in" })).toBeDefined();
+  });
+});
+
+describe("Header with the caller's link component", () => {
+  it("draws the logo and the main links with it", () => {
+    const drawn: string[] = [];
+    function ShopLink({ href, className, children }: HeaderLinkProps) {
+      drawn.push(href);
+      return (
+        <a href={href} className={className} data-shop-link="">
+          {children}
+        </a>
+      );
+    }
+    render(
+      <Header homeHref="/en" links={[{ href: "/en/c", label: "Categories" }]} linkAs={ShopLink} />,
+    );
+
+    expect(drawn).toEqual(["/en", "/en/c"]);
+    expect(screen.getByRole("link", { name: "Manasbal" }).className).toBe("mb-header__brand");
+    for (const link of screen.getAllByRole("link")) {
+      expect(link.hasAttribute("data-shop-link")).toBe(true);
+    }
   });
 });

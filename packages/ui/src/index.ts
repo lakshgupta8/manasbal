@@ -12,10 +12,16 @@ export {
   type CategoryTilesProps,
 } from "./components/CategoryTiles";
 export { Checkbox, type CheckboxProps } from "./components/Checkbox";
+export { ConfirmDialog, type ConfirmDialogProps } from "./components/ConfirmDialog";
 export { CurrencySwitch, type CurrencySwitchProps } from "./components/CurrencySwitch";
 export { DemoBanner, type DemoBannerProps } from "./components/DemoBanner";
 export { Footer, type FooterLink, type FooterProps } from "./components/Footer";
-export { Header, type HeaderLink, type HeaderProps } from "./components/Header";
+export {
+  Header,
+  type HeaderLink,
+  type HeaderLinkProps,
+  type HeaderProps,
+} from "./components/Header";
 export { LotusMark, type LotusMarkProps } from "./components/LotusMark";
 export { Notice, type NoticeProps, type NoticeTone } from "./components/Notice";
 export { PageState, type PageStateKind, type PageStateProps } from "./components/PageState";
