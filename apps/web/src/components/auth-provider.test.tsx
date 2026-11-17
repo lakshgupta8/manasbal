@@ -17,7 +17,13 @@ const me = vi.mocked(auth.me);
 const signOut = vi.mocked(auth.signOut);
 
 const SESSION = { accessToken: "first", expiresIn: 900 };
-const USER = { id: "u1", email: "customer@example.com", name: "Demo Customer", role: "customer" };
+const USER = {
+  id: "u1",
+  email: "customer@example.com",
+  name: "Demo Customer",
+  role: "customer",
+  twoStep: false,
+};
 
 function Status() {
   const { state } = useAuth();
@@ -162,6 +168,68 @@ describe("AuthProvider", () => {
     await act(() => result.current.signOut());
 
     expect(signOut).toHaveBeenCalledOnce();
+    expect(result.current.state).toEqual({ status: "signedOut" });
+  });
+
+  it("reads who is signed in again, after a change such as two-step sign-in", async () => {
+    refresh.mockResolvedValue(SESSION);
+    const { result } = renderHook(() => useAuth(), { wrapper });
+    await waitFor(() => expect(result.current.state.status).toBe("signedIn"));
+    me.mockResolvedValue({ ...USER, twoStep: true });
+
+    await act(() => result.current.refreshUser());
+
+    expect(me).toHaveBeenLastCalledWith("first");
+    expect(result.current.state).toEqual({
+      status: "signedIn",
+      accessToken: "first",
+      expiresIn: 900,
+      user: { ...USER, twoStep: true },
+    });
+  });
+
+  it("asks nothing when signed out, and keeps the user when the API can't be reached", async () => {
+    refresh.mockResolvedValue(null);
+    const { result } = renderHook(() => useAuth(), { wrapper });
+    await waitFor(() => expect(result.current.state.status).toBe("signedOut"));
+    await act(() => result.current.refreshUser());
+    expect(me).not.toHaveBeenCalled();
+
+    await act(() => result.current.signedIn(SESSION));
+    me.mockRejectedValue(new Error("offline"));
+    await act(() => result.current.refreshUser());
+
+    expect(result.current.state).toEqual({ status: "signedIn", ...SESSION, user: USER });
+  });
+
+  it("drops an answer that arrives after the session changed", async () => {
+    refresh.mockResolvedValue(SESSION);
+    const { result } = renderHook(() => useAuth(), { wrapper });
+    await waitFor(() => expect(result.current.state.status).toBe("signedIn"));
+    const late = (): [Promise<void>, () => void] => {
+      let answer!: (user: typeof USER) => void;
+      me.mockReturnValueOnce(new Promise((resolve) => (answer = resolve)));
+      const asked = result.current.refreshUser();
+      return [asked, () => answer({ ...USER, name: "Late Answer" })];
+    };
+
+    // A new token meanwhile.
+    const [first, answerFirst] = late();
+    await act(() => result.current.signedIn({ accessToken: "fresh", expiresIn: 900 }));
+    answerFirst();
+    await act(() => first);
+    expect(result.current.state).toEqual({
+      status: "signedIn",
+      accessToken: "fresh",
+      expiresIn: 900,
+      user: USER,
+    });
+
+    // Signed out meanwhile.
+    const [second, answerSecond] = late();
+    await act(() => result.current.signOut());
+    answerSecond();
+    await act(() => second);
     expect(result.current.state).toEqual({ status: "signedOut" });
   });
 

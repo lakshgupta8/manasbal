@@ -1039,6 +1039,12 @@ describe("/auth (e2e)", () => {
 
     it("switches off with a code, after which sign-in needs only the password", async () => {
       const { token, recoveryCodes } = await withTwoStep();
+      // GET /me says whether two-step is on, and nothing more about it.
+      const twoStep = async () =>
+        (await app.inject({ method: "GET", url: "/me", headers: bearerHeader(token) })).json<{
+          twoStep: boolean;
+        }>().twoStep;
+      expect(await twoStep()).toBe(true);
       const disable = (code: string) =>
         app.inject({
           method: "POST",
@@ -1052,6 +1058,7 @@ describe("/auth (e2e)", () => {
       expect(wrong.json()).toMatchObject({ detail: WRONG_CODE });
 
       expect((await disable(recoveryCodes[0]!)).statusCode).toBe(204);
+      expect(await twoStep()).toBe(false);
       expect(
         await database.sql(
           "select (totp_secret is null and totp_enabled_at is null and totp_last_step is null)::text from users",
@@ -1207,6 +1214,7 @@ describe("/auth (e2e)", () => {
         name: signUp.name,
         email: signUp.email,
         role: "customer",
+        twoStep: false,
       });
     });
 

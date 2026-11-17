@@ -17,7 +17,13 @@ vi.mock("@/lib/addresses", () => ({
 const WORDS = MESSAGES.en.Account;
 const SIGN_IN = "/en/sign-in?next=%2Fen%2Faccount";
 // Made up: no real person or place.
-const USER = { id: "u1", email: "test.buyer@example.test", name: "Test Buyer", role: "customer" };
+const USER = {
+  id: "u1",
+  email: "test.buyer@example.test",
+  name: "Test Buyer",
+  role: "customer",
+  twoStep: false,
+};
 const HOME: Address = {
   id: "1a2b3c4d-0000-4000-8000-000000000001",
   name: "Test Buyer",
@@ -38,7 +44,12 @@ const WORK: Address = {
 };
 
 function auth(state: AuthContextValue["state"]) {
-  vi.mocked(useAuth).mockReturnValue({ state, signedIn: vi.fn(), signOut: vi.fn() });
+  vi.mocked(useAuth).mockReturnValue({
+    state,
+    signedIn: vi.fn(),
+    signOut: vi.fn(),
+    refreshUser: vi.fn(),
+  });
 }
 const signedIn = (user = USER) =>
   auth({ status: "signedIn", accessToken: "t1", expiresIn: 900, user });
@@ -63,13 +74,19 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
+const LINKS = {
+  addresses: "/en/account/addresses",
+  sessions: "/en/account/sessions",
+  twoStep: "/en/account/two-step",
+};
+
 describe("AccountProfile", () => {
   const profile = (words = WORDS) => (
     <AccountProfile
       words={words}
       loading={<p>Loading the account</p>}
       signInHref={SIGN_IN}
-      addressesHref="/en/account/addresses"
+      links={LINKS}
     />
   );
 
@@ -106,6 +123,22 @@ describe("AccountProfile", () => {
     expect(screen.getByRole("link", { name: "Your addresses" }).getAttribute("href")).toBe(
       "/en/account/addresses",
     );
+    expect(screen.getByRole("link", { name: WORDS.sessionsLink }).getAttribute("href")).toBe(
+      "/en/account/sessions",
+    );
+    const twoStep = screen.getByRole("link", { name: WORDS.twoStepLink });
+    expect(twoStep.getAttribute("href")).toBe("/en/account/two-step");
+    expect(twoStep.closest("li")!.textContent).toBe(
+      `${WORDS.twoStepLink} ${WORDS.twoStepStateOff}`,
+    );
+  });
+
+  it("says when two-step sign-in is on", () => {
+    signedIn({ ...USER, twoStep: true });
+    render(profile());
+
+    const twoStep = screen.getByRole("link", { name: WORDS.twoStepLink });
+    expect(twoStep.closest("li")!.textContent).toBe(`${WORDS.twoStepLink} ${WORDS.twoStepStateOn}`);
   });
 
   it("shows a role it has no words for as it is", () => {
@@ -137,7 +170,7 @@ function book(words = WORDS) {
 // Shows the book with this list, and lets it arrive.
 async function bookWith(addresses: Address[]) {
   signedIn();
-  vi.mocked(listAddresses).mockResolvedValue({ kind: "listed", addresses });
+  vi.mocked(listAddresses).mockResolvedValue({ kind: "listed", items: addresses });
   const view = book();
   await act(async () => {});
   return view;
@@ -311,7 +344,7 @@ describe("AddressBook: adding and changing", () => {
     fill(FILLED);
     fireEvent.click(screen.getByRole("checkbox"));
     vi.mocked(saveAddress).mockResolvedValue({ kind: "saved", address: HOME });
-    vi.mocked(listAddresses).mockResolvedValue({ kind: "listed", addresses: [HOME] });
+    vi.mocked(listAddresses).mockResolvedValue({ kind: "listed", items: [HOME] });
     await submit();
 
     expect(saveAddress).toHaveBeenCalledWith(
@@ -522,7 +555,7 @@ describe("readAddress", () => {
 describe("AddressBook in Hindi", () => {
   beforeEach(() => {
     signedIn();
-    vi.mocked(listAddresses).mockResolvedValue({ kind: "listed", addresses: [] });
+    vi.mocked(listAddresses).mockResolvedValue({ kind: "listed", items: [] });
   });
 
   it("speaks Hindi on a Hindi page", async () => {

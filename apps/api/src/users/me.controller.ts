@@ -26,6 +26,9 @@ export class Me {
 
   @ApiProperty({ enum: [...ROLES], example: "customer" })
   role: string;
+
+  @ApiProperty({ description: "Whether two-step sign-in with an authenticator app is on" })
+  twoStep: boolean;
 }
 
 @ApiTags("Me")
@@ -38,7 +41,10 @@ export class MeController {
   // runs. @Inject still names the provider.
   constructor(@Inject(MeService) private readonly me: Pick<MeService, "get">) {}
 
-  @ApiOperation({ summary: "Who am I", description: "The signed-in user's name, email and role." })
+  @ApiOperation({
+    summary: "Who am I",
+    description: "The signed-in user's name, email and role, and whether two-step sign-in is on.",
+  })
   @Get()
   @ApiOkResponse({ type: Me })
   get(@CurrentUserId() userId: string): Promise<Me> {

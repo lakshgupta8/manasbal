@@ -9,8 +9,8 @@ import {
   saveAddress,
   type Address,
   type AddressInput,
-  type Refusal,
 } from "@/lib/addresses";
+import type { Listed, Refusal } from "@/lib/auth";
 import type en from "../../messages/en.json";
 import { FormAlert } from "./auth-form-parts";
 import { useAuth } from "./auth-provider";
@@ -26,7 +26,7 @@ export type AccountWords = typeof en.Account;
 
 // The signed-in state, or null while it isn't known or the visitor is being sent to sign in
 // (and back to this page afterwards).
-function useSignedIn(signInHref: string) {
+export function useSignedIn(signInHref: string) {
   const { state } = useAuth();
   const router = useRouter();
   useEffect(() => {
@@ -35,17 +35,102 @@ function useSignedIn(signInHref: string) {
   return state.status === "signedIn" ? state : null;
 }
 
+// What every account page does around the API: who is signed in, the list it shows (when it
+// loads one), a call's busy state, its result in the status line with focus on the heading, and
+// a problem in the alert: "sign in again", a wait after too many tries, or the API out of reach.
+export function useAccountPage<T>(
+  words: AccountWords,
+  signInHref: string,
+  load?: (accessToken: string) => Promise<Listed<T> | Refusal>,
+) {
+  const signedIn = useSignedIn(signInHref);
+  const router = useRouter();
+  const accessToken = signedIn?.accessToken;
+  const heading = useRef<HTMLHeadingElement>(null);
+  const [items, setItems] = useState<T[] | null>(null);
+  const [failed, setFailed] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [status, setStatus] = useState("");
+  // Counts the results that move focus to the heading. The move waits for the render: while a
+  // dialog is open the rest of the page is inert and can't take focus, and the dialog only
+  // closes as the render finishes.
+  const [results, setResults] = useState(0);
+  const formAlert = useFormAlert(words);
+
+  useEffect(() => {
+    if (results > 0) heading.current!.focus();
+  }, [results]);
+
+  useEffect(() => {
+    if (accessToken === undefined || load === undefined) return;
+    let current = true;
+    load(accessToken).then(
+      (outcome) => {
+        if (!current) return;
+        if (outcome.kind === "listed") setItems(outcome.items);
+        else if (outcome.kind === "signedOut") router.replace(signInHref);
+        else setFailed(true);
+      },
+      () => {
+        if (current) setFailed(true);
+      },
+    );
+    return () => {
+      current = false;
+    };
+  }, [accessToken, load, router, signInHref]);
+
+  return {
+    ...formAlert,
+    signedIn,
+    heading,
+    items,
+    setItems,
+    failed,
+    busy,
+    status,
+    // A result: said in the status line, with focus on the heading.
+    done(message: string) {
+      setStatus(message);
+      setResults((count) => count + 1);
+    },
+    // A refused call: sign in again, or wait.
+    refused(outcome: Refusal) {
+      if (outcome.kind === "signedOut") router.replace(signInHref);
+      else formAlert.tooManyTries(outcome.retryAfterSeconds);
+    },
+    // Runs one call; the API being out of reach is said in the alert.
+    async run(call: () => Promise<unknown>) {
+      setBusy(true);
+      formAlert.show(null);
+      setStatus("");
+      try {
+        await call();
+      } catch {
+        formAlert.show(words.unavailable);
+      } finally {
+        setBusy(false);
+      }
+    },
+  };
+}
+
 export interface AccountProfileProps {
   readonly words: AccountWords;
   // Shown until the session is known, and while a signed-out visitor is sent to sign in.
   readonly loading: ReactNode;
   readonly signInHref: string;
-  readonly addressesHref: string;
+  // The account's other pages.
+  readonly links: {
+    readonly addresses: string;
+    readonly sessions: string;
+    readonly twoStep: string;
+  };
 }
 
 // Who is signed in: name, email and role (from GET /me, which the auth context asked on sign-in),
-// and the account's other pages.
-export function AccountProfile({ words, loading, signInHref, addressesHref }: AccountProfileProps) {
+// and the account's other pages, with whether two-step sign-in is on.
+export function AccountProfile({ words, loading, signInHref, links }: AccountProfileProps) {
   const signedIn = useSignedIn(signInHref);
   if (signedIn === null) return loading;
   const { user } = signedIn;
@@ -62,11 +147,22 @@ export function AccountProfile({ words, loading, signInHref, addressesHref }: Ac
         <dt className="text-text-muted">{words.role}</dt>
         <dd>{roles[user.role] ?? user.role}</dd>
       </dl>
-      <ul className="flex flex-col gap-2">
+      <ul className="flex flex-col gap-2 text-body">
         <li>
-          <a href={addressesHref} className="text-text-action underline">
+          <a href={links.addresses} className="text-text-action underline">
             {words.addressesLink}
           </a>
+        </li>
+        <li>
+          <a href={links.sessions} className="text-text-action underline">
+            {words.sessionsLink}
+          </a>
+        </li>
+        <li>
+          <a href={links.twoStep} className="text-text-action underline">
+            {words.twoStepLink}
+          </a>{" "}
+          {user.twoStep ? words.twoStepStateOn : words.twoStepStateOff}
         </li>
       </ul>
     </>
@@ -222,81 +318,26 @@ type Editing = "new" | Address | null;
 // The signed-in visitor's addresses: the list, then a form to add or change one, and a dialog
 // that asks before deleting one. A result is said in a status line; a problem in an alert.
 export function AddressBook({ words, signInHref, states }: AddressBookProps) {
-  const signedIn = useSignedIn(signInHref);
-  const router = useRouter();
-  const accessToken = signedIn?.accessToken;
-  const heading = useRef<HTMLHeadingElement>(null);
-  const [addresses, setAddresses] = useState<Address[] | null>(null);
-  const [loadFailed, setLoadFailed] = useState(false);
+  const page = useAccountPage(words, signInHref, listAddresses);
+  const { signedIn, heading, items: addresses, busy, waiting, show, run, refused } = page;
   const [editing, setEditing] = useState<Editing>(null);
   const [deleting, setDeleting] = useState<Address | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [status, setStatus] = useState("");
-  // Counts the results that move focus to the heading. The move waits for the render: while the
-  // delete dialog is open the rest of the page is inert and can't take focus, and the dialog only
-  // closes as the render finishes.
-  const [results, setResults] = useState(0);
-  const { alert, waiting, show, tooManyTries } = useFormAlert(words);
-
-  useEffect(() => {
-    if (results > 0) heading.current!.focus();
-  }, [results]);
-
-  useEffect(() => {
-    if (accessToken === undefined) return;
-    let current = true;
-    listAddresses(accessToken).then(
-      (outcome) => {
-        if (!current) return;
-        if (outcome.kind === "listed") setAddresses(outcome.addresses);
-        else if (outcome.kind === "signedOut") router.replace(signInHref);
-        else setLoadFailed(true);
-      },
-      () => {
-        if (current) setLoadFailed(true);
-      },
-    );
-    return () => {
-      current = false;
-    };
-  }, [accessToken, router, signInHref]);
-
-  // A refused call: sign in again, or wait.
-  function refused(outcome: Refusal) {
-    if (outcome.kind === "signedOut") router.replace(signInHref);
-    else tooManyTries(outcome.retryAfterSeconds);
-  }
 
   // Back to the list, focus on its heading, with the result said in the status line.
   function done(message: string, list: Address[]) {
-    setAddresses(list);
+    page.setItems(list);
     setEditing(null);
-    setStatus(message);
-    setResults((count) => count + 1);
-  }
-
-  // Runs one change; the API being out of reach is said in the alert.
-  async function run(change: () => Promise<void>) {
-    setBusy(true);
-    show(null);
-    setStatus("");
-    try {
-      await change();
-    } catch {
-      show(words.unavailable);
-    } finally {
-      setBusy(false);
-    }
+    page.done(message);
   }
 
   const save = (input: AddressInput) =>
     run(async () => {
       const id = editing === "new" ? undefined : editing!.id;
-      const outcome = await saveAddress(accessToken!, input, id);
+      const outcome = await saveAddress(signedIn!.accessToken, input, id);
       if (outcome.kind === "saved") {
         // The API keeps one default and sorts the list, so read it again.
-        const listed = await listAddresses(accessToken!);
-        return done(words.saved, listed.kind === "listed" ? listed.addresses : addresses!);
+        const listed = await listAddresses(signedIn!.accessToken);
+        return done(words.saved, listed.kind === "listed" ? listed.items : addresses!);
       }
       if (outcome.kind === "invalid") return show(words.invalid);
       if (outcome.kind === "gone") return show(words.gone);
@@ -305,7 +346,7 @@ export function AddressBook({ words, signInHref, states }: AddressBookProps) {
 
   const remove = (address: Address) =>
     run(async () => {
-      const outcome = await deleteAddress(accessToken!, address.id);
+      const outcome = await deleteAddress(signedIn!.accessToken, address.id);
       setDeleting(null);
       if (outcome.kind === "deleted") {
         return done(
@@ -336,7 +377,7 @@ export function AddressBook({ words, signInHref, states }: AddressBookProps) {
         }}
       />
     );
-  } else if (loadFailed) main = states.loadFailed;
+  } else if (page.failed) main = states.loadFailed;
   else if (addresses === null) main = states.listLoading;
   else {
     main = (
@@ -355,8 +396,8 @@ export function AddressBook({ words, signInHref, states }: AddressBookProps) {
       <h1 ref={heading} tabIndex={-1} className="font-semibold text-heading-2 focus:outline-none">
         {words.addressesTitle}
       </h1>
-      {alert !== null && <FormAlert>{alert}</FormAlert>}
-      <output className="text-body empty:hidden">{status}</output>
+      {page.alert !== null && <FormAlert>{page.alert}</FormAlert>}
+      <output className="text-body empty:hidden">{page.status}</output>
       {main}
       <ConfirmDialog
         open={deleting !== null}

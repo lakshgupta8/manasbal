@@ -1,35 +1,19 @@
 import type { Address, AddressInput } from "@manasbal/types";
-import { reach, retryAfterSeconds, unexpected } from "./auth";
+import { reach, refusal, unexpected, type Listed, type Refusal } from "./auth";
 
 // The signed-in visitor's delivery addresses (/me/addresses), from the browser with the access
 // token the auth context keeps in memory. Like lib/auth.ts, plain fetch rather than the typed
 // client, which keeps that client out of the browser's bundle.
 
 export type { Address, AddressInput } from "@manasbal/types";
+export type { Refusal } from "./auth";
 
-// What a call came to besides its answer. "signedOut": the token was refused, so the page sends
-// the visitor to sign in again. Anything else unexpected throws.
-export type Refusal =
-  | { readonly kind: "signedOut" }
-  | { readonly kind: "tooManyTries"; readonly retryAfterSeconds?: number };
-
-function refusal(response: Response): Refusal | undefined {
-  if (response.status === 401) return { kind: "signedOut" };
-  if (response.status === 429) {
-    return {
-      kind: "tooManyTries",
-      retryAfterSeconds: retryAfterSeconds(response.headers.get("retry-after")),
-    };
-  }
-  return undefined;
-}
-
-export type ListOutcome = { readonly kind: "listed"; readonly addresses: Address[] } | Refusal;
+export type ListOutcome = Listed<Address> | Refusal;
 
 // Every address, the default one first (as the API sorts them).
 export async function listAddresses(accessToken: string): Promise<ListOutcome> {
   const { data, response } = await reach("/me/addresses", { method: "GET", accessToken });
-  if (response.ok) return { kind: "listed", addresses: data as Address[] };
+  if (response.ok) return { kind: "listed", items: data as Address[] };
   const refused = refusal(response);
   if (refused) return refused;
   throw unexpected(response);

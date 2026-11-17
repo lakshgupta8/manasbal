@@ -30,7 +30,11 @@ export default async function AccountPage({ params }: PageProps<"/[locale]/accou
         words={words}
         loading={<PageState kind="loading" title={words.loading} />}
         signInHref={signInFor(locale, `${home}/account`)}
-        addressesHref={`${home}/account/addresses`}
+        links={{
+          addresses: `${home}/account/addresses`,
+          sessions: `${home}/account/sessions`,
+          twoStep: `${home}/account/two-step`,
+        }}
       />
     </div>
   );

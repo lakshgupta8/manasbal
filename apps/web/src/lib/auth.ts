@@ -26,6 +26,8 @@ export interface Me {
   readonly email: string;
   readonly name: string;
   readonly role: string;
+  // Whether two-step sign-in is on.
+  readonly twoStep: boolean;
 }
 
 // What signing in came to. Each failure is one the page explains in words next to the right
@@ -95,6 +97,29 @@ export function retryAfterSeconds(value: string | null, now: number = Date.now()
   // Otherwise only an HTTP date counts, and it has letters (the day and month names).
   const at = /[a-z]/i.test(text) ? Date.parse(text) : Number.NaN;
   return Number.isNaN(at) ? undefined : Math.max(0, Math.ceil((at - now) / 1000));
+}
+
+// What an account call came to besides its answer. "signedOut": the token was refused, so the
+// page sends the visitor to sign in again. Anything else unexpected throws.
+export type Refusal =
+  | { readonly kind: "signedOut" }
+  | { readonly kind: "tooManyTries"; readonly retryAfterSeconds?: number };
+
+// A list the API answered.
+export interface Listed<T> {
+  readonly kind: "listed";
+  readonly items: T[];
+}
+
+export function refusal(response: Response): Refusal | undefined {
+  if (response.status === 401) return { kind: "signedOut" };
+  if (response.status === 429) {
+    return {
+      kind: "tooManyTries",
+      retryAfterSeconds: retryAfterSeconds(response.headers.get("retry-after")),
+    };
+  }
+  return undefined;
 }
 
 export async function signIn(email: string, password: string): Promise<SignInOutcome> {

@@ -50,6 +50,7 @@ beforeEach(() => {
     state: { status: "signedOut" },
     signedIn,
     signOut: vi.fn(),
+    refreshUser: vi.fn(),
   });
 });
 

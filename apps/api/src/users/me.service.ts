@@ -4,12 +4,14 @@ import { getDb } from "../prisma/db.js";
 @Injectable()
 export class MeService {
   async get(userId: string) {
-    const me = await getDb()
+    const user = await getDb()
       .orm.public.User.where({ id: userId })
-      .select("id", "name", "email", "role")
+      .select("id", "name", "email", "role", "totpEnabledAt")
       .first();
     // A token can outlive its account: the nightly reset deletes every user.
-    if (me === null) throw new UnauthorizedException("Sign in again");
-    return me;
+    if (user === null) throw new UnauthorizedException("Sign in again");
+    const { totpEnabledAt, ...me } = user;
+    // Only whether two-step sign-in is on: never the secret or when it was switched on.
+    return { ...me, twoStep: totpEnabledAt !== null };
   }
 }

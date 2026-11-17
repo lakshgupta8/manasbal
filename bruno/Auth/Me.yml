@@ -19,6 +19,8 @@ runtime:
     - expression: res.body.role
       operator: eq
       value: customer
+    - expression: res.body.twoStep
+      operator: isBoolean
 
 settings:
   encodeUrl: true
