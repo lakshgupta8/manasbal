@@ -102,6 +102,7 @@ describe("MeController", () => {
       name: "Test Buyer",
       email: "test.buyer@example.test",
       role: "customer",
+      twoStep: false,
     };
     service.get.mockResolvedValue(me);
 

@@ -273,7 +273,7 @@ export interface paths {
     };
     /**
      * Who am I
-     * @description The signed-in user's name, email and role.
+     * @description The signed-in user's name, email and role, and whether two-step sign-in is on.
      */
     get: operations["MeController_get"];
     put?: never;
@@ -677,6 +677,8 @@ export interface components {
        * @enum {string}
        */
       role: "customer" | "seller" | "seller_staff" | "support" | "admin";
+      /** @description Whether two-step sign-in with an authenticator app is on */
+      twoStep: boolean;
     };
     Address: {
       /** Format: uuid */

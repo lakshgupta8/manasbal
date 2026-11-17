@@ -524,7 +524,7 @@
     },
     "/me": {
       "get": {
-        "description": "The signed-in user's name, email and role.",
+        "description": "The signed-in user's name, email and role, and whether two-step sign-in is on.",
         "operationId": "MeController_get",
         "parameters": [],
         "responses": {
@@ -1557,9 +1557,13 @@
             "type": "string",
             "enum": ["customer", "seller", "seller_staff", "support", "admin"],
             "example": "customer"
+          },
+          "twoStep": {
+            "type": "boolean",
+            "description": "Whether two-step sign-in with an authenticator app is on"
           }
         },
-        "required": ["id", "name", "email", "role"]
+        "required": ["id", "name", "email", "role", "twoStep"]
       },
       "Address": {
         "type": "object",
