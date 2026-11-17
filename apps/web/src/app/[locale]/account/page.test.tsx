@@ -37,7 +37,11 @@ describe("AccountPage", () => {
     const [props] = passed;
     expect(props!.words).toEqual(MESSAGES.en.Account);
     expect(props!.signInHref).toBe("/en/sign-in?next=%2Fen%2Faccount");
-    expect(props!.addressesHref).toBe("/en/account/addresses");
+    expect(props!.links).toEqual({
+      addresses: "/en/account/addresses",
+      sessions: "/en/account/sessions",
+      twoStep: "/en/account/two-step",
+    });
     expect(screen.getByRole("status").textContent).toBe("Loading your account");
   });
 });

@@ -8,7 +8,7 @@ vi.mock("./auth-provider", () => ({ useAuth: vi.fn() }));
 const signOut = vi.fn(async () => undefined);
 
 function signed(state: AuthContextValue["state"]) {
-  vi.mocked(useAuth).mockReturnValue({ state, signOut, signedIn: vi.fn() });
+  vi.mocked(useAuth).mockReturnValue({ state, signOut, signedIn: vi.fn(), refreshUser: vi.fn() });
 }
 
 const menu = (
@@ -39,7 +39,13 @@ describe("AccountMenu", () => {
       status: "signedIn",
       accessToken: "t",
       expiresIn: 900,
-      user: { id: "u1", email: "seller@example.com", name: "Demo Seller", role: "seller" },
+      user: {
+        id: "u1",
+        email: "seller@example.com",
+        name: "Demo Seller",
+        role: "seller",
+        twoStep: false,
+      },
     });
 
     render(menu);

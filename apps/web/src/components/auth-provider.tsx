@@ -28,6 +28,8 @@ export interface AuthContextValue {
   // After sign-in answered a session: looks up who it is and keeps the token in memory.
   readonly signedIn: (session: Session) => Promise<void>;
   readonly signOut: () => Promise<void>;
+  // Asks GET /me again, after something it answers has changed (two-step switched on or off).
+  readonly refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -111,7 +113,21 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
     setState(SIGNED_OUT);
   }, []);
 
-  const value = useMemo(() => ({ state, signedIn, signOut }), [state, signedIn, signOut]);
+  const accessToken = state.status === "signedIn" ? state.accessToken : null;
+  const refreshUser = useCallback(async () => {
+    if (accessToken === null) return;
+    // Kept as it was if the API can't be reached; the page says the change itself.
+    const user = await auth.me(accessToken).catch(() => null);
+    if (user === null) return;
+    setState((now) =>
+      now.status === "signedIn" && now.accessToken === accessToken ? { ...now, user } : now,
+    );
+  }, [accessToken]);
+
+  const value = useMemo(
+    () => ({ state, signedIn, signOut, refreshUser }),
+    [state, signedIn, signOut, refreshUser],
+  );
   return <AuthContext value={value}>{children}</AuthContext>;
 }
 

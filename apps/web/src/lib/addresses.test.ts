@@ -39,7 +39,7 @@ describe("listAddresses", () => {
   it("asks for the visitor's addresses with their token", async () => {
     const fetchMock = api(200, [HOME]);
 
-    await expect(listAddresses("t1")).resolves.toEqual({ kind: "listed", addresses: [HOME] });
+    await expect(listAddresses("t1")).resolves.toEqual({ kind: "listed", items: [HOME] });
     const [request] = fetchMock.mock.calls[0]!;
     expect(request.method).toBe("GET");
     expect(new URL(request.url).pathname).toBe("/api/me/addresses");

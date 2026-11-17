@@ -17,6 +17,7 @@
     "@manasbal/seed": "workspace:*",
     "@manasbal/types": "workspace:*",
     "@manasbal/ui": "workspace:*",
+    "lean-qr": "^2.7.4",
     "next": "16.4.6",
     "next-intl": "4.14.9",
     "react": "19.3.1",

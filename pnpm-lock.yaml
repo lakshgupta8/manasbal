@@ -414,6 +414,9 @@ importers:
       '@manasbal/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      lean-qr:
+        specifier: ^2.7.4
+        version: 2.7.4
       next:
         specifier: 16.4.6
         version: 16.4.6(@babel/core@7.29.13(supports-color@10.2.2))(@playwright/test@1.65.1)(@types/node@24.19.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
@@ -6412,6 +6415,10 @@ packages:
   lazystream@1.0.1:
     resolution: {integrity: sha512-b94GiNHQNy6JNTrt5w6zNyffMrNkXZb3KTkCZJb2V1xaEGCk093vkZ2jk3tpaeP33/OiXC+WvK9AxUebnf5nbw==}
     engines: {node: '>= 0.6.3'}
+
+  lean-qr@2.7.4:
+    resolution: {integrity: sha512-tlMPFfqhAAZN7+j/djRSvl/2+AYT2+7RRuyq8bvcbV8gMiENiscquQ9WTfCSyeEdxsVaEB+tU7e9nFZC63BFnQ==}
+    hasBin: true
 
   leven@3.1.0:
     resolution: {integrity: sha512-qsda+H8jTaUaN/x5vzW2rzc+8Rw4TAQ/4KjB46IwK5VH+IlVeeeje/EoZRpiXvIqjFgK84QffqPztGI3VBLG1A==}
@@ -14283,6 +14290,8 @@ snapshots:
   lazystream@1.0.1:
     dependencies:
       readable-stream: 2.3.8
+
+  lean-qr@2.7.4: {}
 
   leven@3.1.0: {}
 
