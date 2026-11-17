@@ -42,9 +42,7 @@ describe("Footer", () => {
   });
 
   it("names the navigation in the page's language", () => {
-    render(
-      <Footer links={[{ href: "/hi", label: "होम" }]} smallPrint="छोटी बात" navLabel="फ़ुटर" />,
-    );
+    render(<Footer links={[{ href: "/hi", label: "होम" }]} smallPrint="छोटी बात" navLabel="फ़ुटर" />);
 
     expect(screen.getByRole("navigation", { name: "फ़ुटर" })).toBeDefined();
   });
