@@ -1,0 +1,56 @@
+/* Colours, spacing and type come from theme.css. Built from the tokens before its Figma frame: a
+   card on surface.page with a 1 px border.default outline, radius 16, padding 24, at most 400 wide
+   and 16 from each side on a phone. The question is heading-3 text.default, the words under it
+   body text.default; the buttons sit at the end, cancel (secondary) before confirm (primary), and
+   stack full width on a phone. The page behind is dimmed. */
+.mb-confirm-dialog {
+  box-sizing: border-box;
+  width: min(400px, calc(100% - 2 * var(--mb-space-4)));
+  max-width: none;
+  margin: auto;
+  padding: var(--mb-space-6);
+  border: 1px solid var(--mb-color-border-default);
+  border-radius: var(--mb-radius-lg);
+  background: var(--mb-color-surface-page);
+  color: var(--mb-color-text-default);
+  font-family: var(--mb-font-family-sans);
+}
+
+.mb-confirm-dialog::backdrop {
+  background: color-mix(in srgb, var(--mb-color-grey-900) 60%, transparent);
+}
+
+.mb-confirm-dialog__title {
+  margin: 0;
+  font-size: var(--mb-font-size-heading-3);
+  font-weight: var(--mb-font-weight-semibold);
+  line-height: var(--mb-font-line-height-heading-3);
+}
+
+.mb-confirm-dialog__body {
+  margin-top: var(--mb-space-2);
+  font-size: var(--mb-font-size-body);
+  line-height: var(--mb-font-line-height-body);
+}
+
+.mb-confirm-dialog__body > p {
+  margin: 0;
+}
+
+.mb-confirm-dialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--mb-space-3);
+  margin-top: var(--mb-space-6);
+}
+
+@media (max-width: 479px) {
+  .mb-confirm-dialog__actions {
+    flex-direction: column-reverse;
+  }
+
+  .mb-confirm-dialog__actions > .mb-button {
+    width: 100%;
+  }
+}

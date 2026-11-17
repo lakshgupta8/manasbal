@@ -45,3 +45,34 @@ test("VariantPicker: the arrows move and choose, skip what can't be chosen, and 
   await page.keyboard.press("Shift+Tab");
   await expect(size("XL")).toBeFocused();
 });
+
+test("ConfirmDialog: focus starts on the safe choice, stays inside, and Esc cancels", async ({
+  page,
+}) => {
+  await page.goto("/iframe.html?id=feedback-confirmdialog--from-a-button&viewMode=story");
+  const root = page.locator("#storybook-root");
+  // The page's own Delete button; the dialog (also inside the root) has one too.
+  const opener = root.getByRole("button", { name: "Delete" }).first();
+  await opener.click();
+
+  const dialog = page.getByRole("dialog", { name: "Delete this address?" });
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByRole("button", { name: "Keep it" })).toBeFocused();
+
+  // Tab moves between the two buttons and never reaches the page behind.
+  for (let i = 0; i < 4; i += 1) {
+    await page.keyboard.press("Tab");
+    await expect(opener).not.toBeFocused();
+  }
+
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+  await expect(root.getByText("Kept")).toBeVisible();
+  await expect(opener).toBeFocused();
+
+  // Enter on the focused cancel button cancels too.
+  await opener.press("Enter");
+  await expect(dialog.getByRole("button", { name: "Keep it" })).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(dialog).toBeHidden();
+});

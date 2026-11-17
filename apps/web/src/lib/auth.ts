@@ -43,8 +43,8 @@ interface Answer {
   readonly response: Response;
 }
 
-interface CallOptions {
-  readonly method?: "GET" | "POST";
+export interface CallOptions {
+  readonly method?: "GET" | "POST" | "PATCH" | "DELETE";
   readonly body?: object;
   readonly accessToken?: string;
 }
@@ -59,8 +59,11 @@ async function bodyOf(response: Response): Promise<unknown> {
 }
 
 // One call from the browser to the API path `path`; a network failure or timeout becomes
-// ApiUnavailableError.
-async function reach(path: string, { method = "POST", body, accessToken }: CallOptions = {}) {
+// ApiUnavailableError. The account pages' calls (lib/addresses.ts) use it too.
+export async function reach(
+  path: string,
+  { method = "POST", body, accessToken }: CallOptions = {},
+) {
   const headers = new Headers();
   if (body !== undefined) headers.set("content-type", "application/json");
   if (accessToken !== undefined) headers.set("authorization", `Bearer ${accessToken}`);
@@ -80,7 +83,7 @@ async function reach(path: string, { method = "POST", body, accessToken }: CallO
   return { data: await bodyOf(response), response } satisfies Answer;
 }
 
-function unexpected(response: Response): ApiResponseError {
+export function unexpected(response: Response): ApiResponseError {
   return new ApiResponseError(response.status, response.statusText);
 }
 

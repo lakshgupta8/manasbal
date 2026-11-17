@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
+import { AccountProfile as profile, AddressBook as book } from "./account-pages";
 import {
+  AccountProfile,
+  AddressBook,
   ForgotPasswordForm,
   ResetPasswordForm,
   SignInForm,
@@ -13,7 +16,8 @@ import { SignUpForm as signUp } from "./sign-up-form";
 import { VerifyEmail as verify } from "./verify-email";
 
 describe("auth-forms", () => {
-  it("is the sign-in forms, as one module the pages share", () => {
+  it("is the sign-in forms and the account pages, as one module the pages share", () => {
+    expect([AccountProfile, AddressBook]).toEqual([profile, book]);
     expect([SignInForm, SignUpForm, VerifyEmail, ForgotPasswordForm, ResetPasswordForm]).toEqual([
       signIn,
       signUp,

@@ -1,4 +1,5 @@
 import { DemoBanner, Footer, Header } from "@manasbal/ui";
+import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { Suspense, type ReactNode } from "react";
 import { LANGUAGE_NAMES, otherLocale, type Locale } from "@/i18n/routing";
@@ -34,6 +35,9 @@ export async function SiteFrame({ locale, children }: SiteFrameProps) {
       </a>
       <DemoBanner label={t("demoLabel")} heading={t("demoHeading")} detail={t("demoDetail")} />
       <Header
+        // The shop's Link, in the frame every page shares: its code then loads once, with the
+        // frame, instead of being copied into each page that links with it.
+        linkAs={Link}
         homeHref={home}
         navLabel={t("mainNav")}
         links={[
